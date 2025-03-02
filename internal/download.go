@@ -1,4 +1,4 @@
-package download
+package internal
 
 type Status int
 
@@ -12,8 +12,8 @@ const (
 
 type Download struct {
 	URL            string
-	QueueName      string
 	Destination    string
 	OutputFileName string
+	Queue
 	Status
 }
