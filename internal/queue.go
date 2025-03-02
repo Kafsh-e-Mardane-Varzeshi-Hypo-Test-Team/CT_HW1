@@ -10,3 +10,11 @@ type Queue struct {
 	maxRetries      int
 	activeHours     string
 }
+
+func (queue *Queue) AddDownload(download *Download) {
+	queue.downloads = append(queue.downloads, download)
+	if queue.activeDownloads < queue.maxConcurrent {
+		queue.activeDownloads++
+		// Start download
+	}
+}
