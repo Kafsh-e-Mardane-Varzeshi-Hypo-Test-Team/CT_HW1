@@ -1,7 +1,5 @@
 package download
 
-import "github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal/queue"
-
 type Status int
 
 const (
@@ -14,8 +12,8 @@ const (
 
 type Download struct {
 	URL            string
+	QueueName      string
 	Destination    string
 	OutputFileName string
-	Queue          *queue.Queue
 	Status
 }
