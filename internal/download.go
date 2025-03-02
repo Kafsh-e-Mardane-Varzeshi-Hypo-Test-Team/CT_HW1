@@ -14,6 +14,6 @@ type Download struct {
 	URL            string
 	Destination    string
 	OutputFileName string
-	Queue
+	Queue          *Queue
 	Status
 }
