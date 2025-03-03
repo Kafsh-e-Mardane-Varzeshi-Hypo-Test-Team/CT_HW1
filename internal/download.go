@@ -1,3 +1,4 @@
+// PERSONAL NOTE: Don't forget to update download status
 package internal
 
 import (
@@ -65,10 +66,11 @@ func (d *Download) supportsPartialDownload() bool {
 	return true
 }
 
-func (d *Download) downloadThisPart(startIndex, endIndex int) {
+func (d *Download) downloadThisPart(startIndex, endIndex int) (bool, error) {
 	req, err := http.NewRequest("GET", d.URL, nil)
 	if err != nil {
 		log.Fatal(err)
+		return false, err
 	}
 
 	rangeOfDownload := strconv.Itoa(startIndex) + "-" + strconv.Itoa(endIndex)
@@ -82,6 +84,7 @@ func (d *Download) downloadThisPart(startIndex, endIndex int) {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Fatal(err)
+		return false, err
 	}
 	defer resp.Body.Close()
 
@@ -89,15 +92,18 @@ func (d *Download) downloadThisPart(startIndex, endIndex int) {
 	file, err := os.Create(d.Destination + "/" + d.OutputFileName + rangeOfDownload + ".part")
 	if err != nil {
 		log.Fatal(err)
+		return false, err
 	}
 	defer file.Close()
 
 	_, err = io.Copy(file, resp.Body)
 	if err != nil {
 		log.Fatal(err)
-	} else {
-		log.Println("Downloaded ", rangeOfDownload)
+		return false, err
 	}
+
+	log.Println("Downloaded ", rangeOfDownload)
+	return true, nil
 }
 
 func (d *Download) downloadInParts() {
@@ -110,12 +116,25 @@ func (d *Download) downloadInParts() {
 		if (i == numberOfParts - 1) {
 			endIndex = d.contentLength - 1
 		}
-		d.downloadThisPart(startIndex, endIndex)
+		ok, err := d.downloadThisPart(startIndex, endIndex)
+		if !ok {
+			d.Status = Cancelled
+			log.Fatal(err)
+			return
+		}
 	}
+
+	d.Status = Completed
 }
 
 func (d *Download) downloadInOneGo() {
-	d.downloadThisPart(0, d.contentLength - 1)
+	ok, err := d.downloadThisPart(0, d.contentLength - 1)
+	if !ok {
+		d.Status = Cancelled
+		log.Fatal(err)
+		return
+	}
+	d.Status = Completed
 }
 
 func (d *Download) Start() {
@@ -123,6 +142,7 @@ func (d *Download) Start() {
 	d.setContentLength()
 
 	if d.contentLength == 0 {
+		d.Status = Cancelled
 		log.Fatal("Content length is invalid")
 	} else {
 		d.Status = InProgress
