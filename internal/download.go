@@ -7,8 +7,6 @@ import (
 	"os"
 	"strconv"
 	"time"
-
-	"github.com/docker/docker/volume/service/opts"
 )
 
 type Status int
