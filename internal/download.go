@@ -1,9 +1,14 @@
 package internal
 
 import (
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 	"time"
+
+	"github.com/docker/docker/volume/service/opts"
 )
 
 type Status int
@@ -22,10 +27,11 @@ type Download struct {
 	OutputFileName string
 	Queue          *Queue
 	Status
-	contentLength int64
+	headResp *http.Response
+	contentLength int
 }
 
-func (d *Download) SupportsPartialDownload() bool {
+func (d *Download) setHttpResponse() {
 	req, err := http.NewRequest("HEAD", d.URL, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -42,11 +48,18 @@ func (d *Download) SupportsPartialDownload() bool {
 
 	if resp.StatusCode != http.StatusOK {
 		log.Fatal("Failed to get response from server")
-		return false
+		return
 	}
+	
+	d.headResp = resp
+}
 
-	d.contentLength = resp.ContentLength
-	if resp.Header.Get("Accept-Ranges") == "" || resp.Header.Get("Accept-Ranges") == "none" {
+func (d *Download) setContentLength() {
+	d.contentLength = int(d.headResp.ContentLength)
+}
+
+func (d *Download) supportsPartialDownload() bool {
+	if d.headResp.Header.Get("Accept-Ranges") == "" || d.headResp.Header.Get("Accept-Ranges") == "none" {
 		log.Fatal("Server does not support partial download")
 		return false
 	}
