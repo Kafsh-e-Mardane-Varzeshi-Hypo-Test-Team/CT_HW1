@@ -26,8 +26,10 @@ type Download struct {
 	OutputFileName string
 	Queue          *Queue
 	Status
-	headResp *http.Response
+	headResp      *http.Response
 	contentLength int
+	// TODO: Add array of size 'numberOfParts' for storing number of downloaded btyes from this part
+	// TODO: Calculate download percentage using this array
 }
 
 func (d *Download) setHttpResponse() {
@@ -49,7 +51,7 @@ func (d *Download) setHttpResponse() {
 		log.Fatal("Failed to get response from server")
 		return
 	}
-	
+
 	d.headResp = resp
 }
 
@@ -66,11 +68,11 @@ func (d *Download) supportsPartialDownload() bool {
 	return true
 }
 
-func (d *Download) downloadThisPart(startIndex, endIndex int) (bool, error) {
+func (d *Download) downloadThisPart(startIndex, endIndex int) bool {
 	req, err := http.NewRequest("GET", d.URL, nil)
 	if err != nil {
 		log.Fatal(err)
-		return false, err
+		return false
 	}
 
 	rangeOfDownload := strconv.Itoa(startIndex) + "-" + strconv.Itoa(endIndex)
@@ -84,7 +86,7 @@ func (d *Download) downloadThisPart(startIndex, endIndex int) (bool, error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Fatal(err)
-		return false, err
+		return false
 	}
 	defer resp.Body.Close()
 
@@ -92,18 +94,18 @@ func (d *Download) downloadThisPart(startIndex, endIndex int) (bool, error) {
 	file, err := os.Create(d.Destination + "/" + d.OutputFileName + rangeOfDownload + ".part")
 	if err != nil {
 		log.Fatal(err)
-		return false, err
+		return false
 	}
 	defer file.Close()
 
 	_, err = io.Copy(file, resp.Body)
 	if err != nil {
 		log.Fatal(err)
-		return false, err
+		return false
 	}
 
 	log.Println("Downloaded ", rangeOfDownload)
-	return true, nil
+	return true
 }
 
 func (d *Download) downloadInParts() {
@@ -113,13 +115,12 @@ func (d *Download) downloadInParts() {
 	for i := 0; i < numberOfParts; i++ {
 		startIndex := i * partSize
 		endIndex := (i + 1) * partSize
-		if (i == numberOfParts - 1) {
+		if i == numberOfParts-1 {
 			endIndex = d.contentLength - 1
 		}
-		ok, err := d.downloadThisPart(startIndex, endIndex)
+		ok := d.downloadThisPart(startIndex, endIndex)
 		if !ok {
 			d.Status = Cancelled
-			log.Fatal(err)
 			return
 		}
 	}
@@ -128,10 +129,9 @@ func (d *Download) downloadInParts() {
 }
 
 func (d *Download) downloadInOneGo() {
-	ok, err := d.downloadThisPart(0, d.contentLength - 1)
+	ok := d.downloadThisPart(0, d.contentLength-1)
 	if !ok {
 		d.Status = Cancelled
-		log.Fatal(err)
 		return
 	}
 	d.Status = Completed
