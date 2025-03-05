@@ -68,3 +68,12 @@ func (q *Queue) RemoveDownload(d *Download) error {
 
 	return errors.New("download not found")
 }
+
+func (q *Queue) StopAllDownloads() {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
+	for _, d := range q.downloads {
+		d.Stop()
+	}
+}
