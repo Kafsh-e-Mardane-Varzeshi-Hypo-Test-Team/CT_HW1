@@ -41,3 +41,21 @@ func (q *Queue) AddDownload(d *Download) error {
 
 	return nil
 }
+
+func (q *Queue) RemoveDownload(d *Download) error {
+	if d == nil {
+		return errors.New("invalid download (nil)")
+	}
+
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
+	for i, dl := range q.downloads {
+		if dl == d {
+			q.downloads = append(q.downloads[:i], q.downloads[i+1:]...)
+			return nil
+		}
+	}
+
+	return errors.New("download not found")
+}
