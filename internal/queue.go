@@ -29,6 +29,14 @@ func NewQueue(name string, savePath string, maxConcurrent int, maxBandwidth int,
 	}
 }
 
+func (q *Queue) EditQueue(savePath string, maxConcurrent int, maxBandwidth int, maxRetries int, activeHours string) {
+	q.SavePath = savePath
+	q.MaxConcurrent = maxConcurrent
+	q.MaxBandwidth = maxBandwidth
+	q.MaxRetries = maxRetries
+	q.ActiveHours = activeHours
+}
+
 func (q *Queue) AddDownload(d *Download) error {
 	if d == nil {
 		return errors.New("invalid download (nil)")
