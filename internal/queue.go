@@ -1,6 +1,9 @@
 package internal
 
-import "sync"
+import (
+	"errors"
+	"sync"
+)
 
 type Queue struct {
 	Name            string
@@ -24,4 +27,17 @@ func NewQueue(name string, savePath string, maxConcurrent int, maxBandwidth int,
 		MaxRetries:    maxRetries,
 		ActiveHours:   activeHours,
 	}
+}
+
+func (q *Queue) AddDownload(d *Download) error {
+	if d == nil {
+		return errors.New("invalid download (nil)")
+	}
+
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
+	q.downloads = append(q.downloads, d)
+
+	return nil
 }
