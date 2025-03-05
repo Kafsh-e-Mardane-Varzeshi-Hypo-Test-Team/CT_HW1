@@ -60,6 +60,7 @@ func (q *Queue) RemoveDownload(d *Download) error {
 
 	for i, dl := range q.downloads {
 		if dl == d {
+			d.Stop()
 			q.downloads = append(q.downloads[:i], q.downloads[i+1:]...)
 			return nil
 		}
