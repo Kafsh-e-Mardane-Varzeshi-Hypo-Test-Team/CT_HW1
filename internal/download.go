@@ -28,7 +28,7 @@ type Download struct {
 	Status
 	headResp      *http.Response
 	contentLength int
-	// TODO: Add array of size 'numberOfParts' for storing number of downloaded btyes from this part
+	// TODO: Add array of size 'numberOfParts' for storing number of downloaded bytes from this part
 	// TODO: Calculate download percentage using this array
 }
 
@@ -153,4 +153,8 @@ func (d *Download) Start() {
 			d.downloadInOneGo()
 		}
 	}
+}
+
+func (d *Download) Stop() {
+
 }
