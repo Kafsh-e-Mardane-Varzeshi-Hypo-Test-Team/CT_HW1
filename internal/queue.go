@@ -7,7 +7,6 @@ import (
 
 type Queue struct {
 	Name            string
-	downloads       []*Download
 	SavePath        string
 	MaxConcurrent   int
 	activeDownloads int
@@ -15,7 +14,9 @@ type Queue struct {
 	MaxRetries      int
 	ActiveHours     string
 	downloadChan    chan *Download
-	mu              sync.Mutex
+
+	mu        sync.Mutex
+	downloads []*Download
 }
 
 func NewQueue(name string, savePath string, maxConcurrent int, maxBandwidth int, maxRetries int, activeHours string) *Queue {
@@ -26,11 +27,11 @@ func NewQueue(name string, savePath string, maxConcurrent int, maxBandwidth int,
 		MaxBandwidth:  maxBandwidth,
 		MaxRetries:    maxRetries,
 		ActiveHours:   activeHours,
-		downloadChan:  make(chan *Download, 100),
+		downloadChan:  make(chan *Download, 100), // This may cause waiting for the channel to have capacity, check if there is a better way
 	}
 }
 
-func (q *Queue) EditQueue(savePath string, maxConcurrent int, maxBandwidth int, maxRetries int, activeHours string) {
+func (q *Queue) UpdateConfig(savePath string, maxConcurrent int, maxBandwidth int, maxRetries int, activeHours string) {
 	q.SavePath = savePath
 	q.MaxConcurrent = maxConcurrent
 	q.MaxBandwidth = maxBandwidth
@@ -52,7 +53,7 @@ func (q *Queue) AddDownload(d *Download) error {
 	return nil
 }
 
-func (q *Queue) RemoveDownload(d *Download) error {
+func (q *Queue) CancelDownload(d *Download) error {
 	if d == nil {
 		return errors.New("invalid download (nil)")
 	}
@@ -62,7 +63,9 @@ func (q *Queue) RemoveDownload(d *Download) error {
 
 	for i, dl := range q.downloads {
 		if dl == d {
-			d.Stop()
+			if d.Status == InProgress || d.Status == Pending {
+				d.Stop()
+			}
 			q.downloads = append(q.downloads[:i], q.downloads[i+1:]...)
 			return nil
 		}
@@ -71,12 +74,14 @@ func (q *Queue) RemoveDownload(d *Download) error {
 	return errors.New("download not found")
 }
 
-func (q *Queue) StopAllDownloads() {
+func (q *Queue) CancelAll() {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
 	for _, d := range q.downloads {
-		d.Stop()
+		if d.Status == InProgress || d.Status == Pending {
+			d.Stop()
+		}
 	}
 }
 
