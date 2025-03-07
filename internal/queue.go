@@ -14,8 +14,8 @@ type Queue struct {
 	MaxBandwidth    int
 	MaxRetries      int
 	ActiveHours     string
-	// ch              chan int
-	mu sync.Mutex
+	downloadChan    chan *Download
+	mu              sync.Mutex
 }
 
 func NewQueue(name string, savePath string, maxConcurrent int, maxBandwidth int, maxRetries int, activeHours string) *Queue {
@@ -26,6 +26,7 @@ func NewQueue(name string, savePath string, maxConcurrent int, maxBandwidth int,
 		MaxBandwidth:  maxBandwidth,
 		MaxRetries:    maxRetries,
 		ActiveHours:   activeHours,
+		downloadChan:  make(chan *Download, 100),
 	}
 }
 
@@ -46,6 +47,7 @@ func (q *Queue) AddDownload(d *Download) error {
 	defer q.mu.Unlock()
 
 	q.downloads = append(q.downloads, d)
+	q.downloadChan <- d
 
 	return nil
 }
@@ -75,5 +77,26 @@ func (q *Queue) StopAllDownloads() {
 
 	for _, d := range q.downloads {
 		d.Stop()
+	}
+}
+
+func (q *Queue) Start() {
+	for i := 0; i < q.MaxConcurrent; i++ {
+		go func() {
+			for d := range q.downloadChan {
+				if d.Status == Pending {
+					q.processDownload(d)
+				}
+			}
+		}()
+	}
+}
+
+func (q *Queue) processDownload(d *Download) {
+	for i := 0; i < q.MaxRetries; i++ {
+		err := d.Start()
+		if err == nil {
+			break
+		}
 	}
 }
