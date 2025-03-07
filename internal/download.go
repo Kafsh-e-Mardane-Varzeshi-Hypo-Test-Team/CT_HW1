@@ -3,14 +3,12 @@ package internal
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"sync"
-	"time"
 )
 
 const numberOfParts int = 5
@@ -37,7 +35,6 @@ type Download struct {
 	numberOfParts          int
 	indexOfDownloadedBytes [numberOfParts]int64
 	wg                     sync.WaitGroup
-	// channel                chan error
 	// TODO: Add array of size 'numberOfParts' for storing number of downloaded bytes from this part
 	// TODO: Calculate download percentage using this array
 }
@@ -49,9 +46,7 @@ func (d *Download) setHttpResponse() error {
 		return err
 	}
 
-	client := &http.Client{
-		Timeout: 5 * time.Second,
-	}
+	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Fatal(err)
@@ -93,9 +88,7 @@ func (d *Download) downloadThisPart(index, startIndex, endIndex int) {
 	req.Header.Set("Range", rangeHeader)
 
 	// TODO: Ask if it's better to save this client as a field in Download struct
-	client := &http.Client{
-		Timeout: 5 * time.Second,
-	}
+	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Fatal(err)
@@ -122,12 +115,63 @@ func (d *Download) downloadThisPart(index, startIndex, endIndex int) {
 	d.wg.Done()
 }
 
+func (d *Download) downloadParts() error {
+	partSize := d.contentLength / d.numberOfParts
+	for i := range d.numberOfParts {
+		startIndex := i * partSize
+		endIndex := (i + 1) * partSize
+		if i == d.numberOfParts-1 {
+			endIndex = d.contentLength - 1
+		}
+		d.wg.Add(1)
+		go d.downloadThisPart(i, startIndex, endIndex)
+	}
+	
+	return nil
+}
+
+func (d *Download) mergeParts() error {
+	file, err := os.Create(d.Destination + "/" + d.OutputFileName)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	defer file.Close()
+
+	partSize := d.contentLength / d.numberOfParts
+	for i := range d.numberOfParts {
+		startIndex := i * partSize
+		endIndex := (i + 1) * partSize
+		if i == d.numberOfParts-1 {
+			endIndex = d.contentLength - 1
+		}
+
+		filePath := d.Destination + "/" + d.OutputFileName + strconv.Itoa(startIndex) + "-" + strconv.Itoa(endIndex) + ".part"
+		resp, err := os.Open(filePath)
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+
+		_, err = io.Copy(file, resp)
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+		err = os.Remove(filePath)
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+	}
+	return nil
+}
+
 func (d *Download) Start() error {
 	err := d.setHttpResponse()
 	if err != nil {
 		return err
 	}
-
 	d.setContentLength()
 
 	if d.contentLength == 0 {
@@ -144,43 +188,16 @@ func (d *Download) Start() error {
 		d.numberOfParts = 1
 	}
 
-	file, err := os.Create(d.Destination + "/" + d.OutputFileName)
+	err = d.downloadParts()
 	if err != nil {
 		log.Fatal(err)
 		return err
 	}
-	defer file.Close()
-
-	partSize := d.contentLength / d.numberOfParts
-	for i := range d.numberOfParts {
-		startIndex := i * partSize
-		endIndex := (i + 1) * partSize
-		if i == d.numberOfParts-1 {
-			endIndex = d.contentLength - 1
-		}
-		d.wg.Add(1)
-		go d.downloadThisPart(i, startIndex, endIndex)
-	}
-
 	d.wg.Wait()
-	for i := range d.numberOfParts {
-		startIndex := i * partSize
-		endIndex := (i + 1) * partSize
-		if i == d.numberOfParts-1 {
-			endIndex = d.contentLength - 1
-		}
-
-		resp, err := os.Open(d.Destination + "/" + d.OutputFileName + strconv.Itoa(startIndex) + "-" + strconv.Itoa(endIndex) + ".part")
-		if err != nil {
-			log.Fatal(err)
-			return err
-		}
-
-		_, err = io.Copy(file, resp)
-		if err != nil {
-			log.Fatal(err)
-			return err
-		}
+	err = d.mergeParts()
+	if err != nil {
+		log.Fatal(err)
+		return err
 	}
 
 	d.Status = Completed
