@@ -3,15 +3,17 @@ package internal
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 )
 
-const numberOfParts int = 2
+const numberOfParts int = 5
 
 type Status int
 
@@ -32,7 +34,10 @@ type Download struct {
 	Status
 	headResp               *http.Response
 	contentLength          int
+	numberOfParts          int
 	indexOfDownloadedBytes [numberOfParts]int64
+	wg                     sync.WaitGroup
+	// channel                chan error
 	// TODO: Add array of size 'numberOfParts' for storing number of downloaded bytes from this part
 	// TODO: Calculate download percentage using this array
 }
@@ -76,11 +81,11 @@ func (d *Download) supportsPartialDownload() bool {
 	return true
 }
 
-func (d *Download) downloadThisPart(index, startIndex, endIndex int) error {
+func (d *Download) downloadThisPart(index, startIndex, endIndex int) {
 	req, err := http.NewRequest("GET", d.URL, nil)
 	if err != nil {
 		log.Fatal(err)
-		return err
+		return
 	}
 
 	rangeOfDownload := strconv.Itoa(startIndex) + "-" + strconv.Itoa(endIndex)
@@ -94,7 +99,7 @@ func (d *Download) downloadThisPart(index, startIndex, endIndex int) error {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Fatal(err)
-		return err
+		return
 	}
 	defer resp.Body.Close()
 
@@ -102,22 +107,43 @@ func (d *Download) downloadThisPart(index, startIndex, endIndex int) error {
 	file, err := os.Create(d.Destination + "/" + d.OutputFileName + rangeOfDownload + ".part")
 	if err != nil {
 		log.Fatal(err)
-		return err
+		return
 	}
 	defer file.Close()
 
 	written, err := io.Copy(file, resp.Body)
 	if err != nil {
 		log.Fatal(err)
-		return err
+		return
 	}
 	d.indexOfDownloadedBytes[index] = written
 
 	log.Println("Downloaded ", rangeOfDownload)
-	return nil
+	d.wg.Done()
 }
 
-func (d *Download) downloadInParts() error {
+func (d *Download) Start() error {
+	err := d.setHttpResponse()
+	if err != nil {
+		return err
+	}
+
+	d.setContentLength()
+
+	if d.contentLength == 0 {
+		d.Status = Cancelled
+		log.Fatal("Content length is invalid")
+		return errors.New("Content length is invalid")
+	}
+
+	d.Status = InProgress
+	log.Println("Content length is", d.contentLength)
+	if d.supportsPartialDownload() {
+		d.numberOfParts = numberOfParts
+	} else {
+		d.numberOfParts = 1
+	}
+
 	file, err := os.Create(d.Destination + "/" + d.OutputFileName)
 	if err != nil {
 		log.Fatal(err)
@@ -125,17 +151,23 @@ func (d *Download) downloadInParts() error {
 	}
 	defer file.Close()
 
-	partSize := d.contentLength / numberOfParts
-	for i := 0; i < numberOfParts; i++ {
+	partSize := d.contentLength / d.numberOfParts
+	for i := range d.numberOfParts {
 		startIndex := i * partSize
 		endIndex := (i + 1) * partSize
-		if i == numberOfParts-1 {
+		if i == d.numberOfParts-1 {
 			endIndex = d.contentLength - 1
 		}
-		err := d.downloadThisPart(i, startIndex, endIndex)
-		if err != nil {
-			d.Status = Failed
-			return err
+		d.wg.Add(1)
+		go d.downloadThisPart(i, startIndex, endIndex)
+	}
+
+	d.wg.Wait()
+	for i := range d.numberOfParts {
+		startIndex := i * partSize
+		endIndex := (i + 1) * partSize
+		if i == d.numberOfParts-1 {
+			endIndex = d.contentLength - 1
 		}
 
 		resp, err := os.Open(d.Destination + "/" + d.OutputFileName + strconv.Itoa(startIndex) + "-" + strconv.Itoa(endIndex) + ".part")
@@ -153,41 +185,6 @@ func (d *Download) downloadInParts() error {
 
 	d.Status = Completed
 	return nil
-}
-
-func (d *Download) downloadInOneGo() error {
-	err := d.downloadThisPart(0, 0, d.contentLength-1)
-	if err != nil {
-		d.Status = Failed
-		return err
-	}
-
-	d.Status = Completed
-	return nil
-}
-
-func (d *Download) Start() error {
-	err := d.setHttpResponse()
-	if err != nil {
-		return err
-	}
-
-	d.setContentLength()
-
-	if d.contentLength == 0 {
-		d.Status = Cancelled
-		log.Fatal("Content length is invalid")
-		return errors.New("Content length is invalid")
-	} else {
-		d.Status = InProgress
-		log.Println("Content length is", d.contentLength)
-		if d.supportsPartialDownload() {
-			err = d.downloadInParts()
-		} else {
-			err = d.downloadInOneGo()
-		}
-	}
-	return err
 }
 
 func (d *Download) Stop() {
