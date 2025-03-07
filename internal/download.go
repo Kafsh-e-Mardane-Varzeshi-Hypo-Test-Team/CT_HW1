@@ -33,7 +33,6 @@ type Download struct {
 	headResp               *http.Response
 	contentLength          int
 	indexOfDownloadedBytes [numberOfParts]int64
-	bodyResp               [numberOfParts]io.ReadCloser
 	// TODO: Add array of size 'numberOfParts' for storing number of downloaded bytes from this part
 	// TODO: Calculate download percentage using this array
 }
@@ -113,7 +112,6 @@ func (d *Download) downloadThisPart(index, startIndex, endIndex int) error {
 		return err
 	}
 	d.indexOfDownloadedBytes[index] = written
-	// d.bodyResp[index] = resp.Body
 
 	log.Println("Downloaded ", rangeOfDownload)
 	return nil
