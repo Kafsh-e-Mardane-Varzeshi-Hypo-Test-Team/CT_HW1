@@ -4,7 +4,6 @@ package internal
 import (
 	"errors"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -13,6 +12,7 @@ import (
 )
 
 const numberOfParts int = 2
+
 type Status int
 
 const (
@@ -30,8 +30,10 @@ type Download struct {
 	OutputFileName string
 	Queue          *Queue
 	Status
-	headResp      *http.Response
-	contentLength int
+	headResp               *http.Response
+	contentLength          int
+	indexOfDownloadedBytes [numberOfParts]int64
+	bodyResp               [numberOfParts]io.ReadCloser
 	// TODO: Add array of size 'numberOfParts' for storing number of downloaded bytes from this part
 	// TODO: Calculate download percentage using this array
 }
@@ -75,7 +77,7 @@ func (d *Download) supportsPartialDownload() bool {
 	return true
 }
 
-func (d *Download) downloadThisPart(startIndex, endIndex int) error {
+func (d *Download) downloadThisPart(index, startIndex, endIndex int) error {
 	req, err := http.NewRequest("GET", d.URL, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -105,28 +107,48 @@ func (d *Download) downloadThisPart(startIndex, endIndex int) error {
 	}
 	defer file.Close()
 
-	_, err = io.Copy(file, resp.Body)
+	written, err := io.Copy(file, resp.Body)
 	if err != nil {
 		log.Fatal(err)
 		return err
 	}
+	d.indexOfDownloadedBytes[index] = written
+	// d.bodyResp[index] = resp.Body
 
 	log.Println("Downloaded ", rangeOfDownload)
 	return nil
 }
 
 func (d *Download) downloadInParts() error {
-	partSize := d.contentLength / numberOfParts
+	file, err := os.Create(d.Destination + "/" + d.OutputFileName)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	defer file.Close()
 
+	partSize := d.contentLength / numberOfParts
 	for i := 0; i < numberOfParts; i++ {
 		startIndex := i * partSize
 		endIndex := (i + 1) * partSize
 		if i == numberOfParts-1 {
 			endIndex = d.contentLength - 1
 		}
-		err := d.downloadThisPart(startIndex, endIndex)
+		err := d.downloadThisPart(i, startIndex, endIndex)
 		if err != nil {
 			d.Status = Failed
+			return err
+		}
+
+		resp, err := os.Open(d.Destination + "/" + d.OutputFileName + strconv.Itoa(startIndex) + "-" + strconv.Itoa(endIndex) + ".part")
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+
+		_, err = io.Copy(file, resp)
+		if err != nil {
+			log.Fatal(err)
 			return err
 		}
 	}
@@ -136,7 +158,7 @@ func (d *Download) downloadInParts() error {
 }
 
 func (d *Download) downloadInOneGo() error {
-	err := d.downloadThisPart(0, d.contentLength-1)
+	err := d.downloadThisPart(0, 0, d.contentLength-1)
 	if err != nil {
 		d.Status = Failed
 		return err
@@ -148,7 +170,7 @@ func (d *Download) downloadInOneGo() error {
 
 func (d *Download) Start() error {
 	err := d.setHttpResponse()
-	if (err != nil) {
+	if err != nil {
 		return err
 	}
 
