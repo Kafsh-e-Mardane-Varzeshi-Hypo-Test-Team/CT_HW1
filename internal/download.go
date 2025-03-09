@@ -1,4 +1,3 @@
-// PERSONAL NOTE: Don't forget to update download status
 package internal
 
 import (
@@ -8,10 +7,9 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"sync"
 )
 
-const numberOfParts int = 5
+const NUMBER_OF_PARTS int = 5
 
 type Status int
 
@@ -29,14 +27,15 @@ type Download struct {
 	Destination    string
 	OutputFileName string
 	Queue          *Queue
+	headResp       *http.Response
+	contentLength  int
+	numberOfParts  int
+	channel        chan error
+	parts          []*Part
 	Status
-	headResp               *http.Response
-	contentLength          int
-	numberOfParts          int
-	indexOfDownloadedBytes [numberOfParts]int64
-	wg                     sync.WaitGroup
 	// TODO: Add array of size 'numberOfParts' for storing number of downloaded bytes from this part
 	// TODO: Calculate download percentage using this array
+	// TODO: Don't forget to update download status
 }
 
 func (d *Download) setHttpResponse() error {
@@ -56,7 +55,7 @@ func (d *Download) setHttpResponse() error {
 
 	if resp.StatusCode != http.StatusOK {
 		log.Fatal("Failed to get response from server")
-		return errors.New("Response status code is not OK!")
+		return errors.New("response status code is not OK")
 	}
 
 	d.headResp = resp
@@ -76,57 +75,35 @@ func (d *Download) supportsPartialDownload() bool {
 	return true
 }
 
-func (d *Download) downloadThisPart(index, startIndex, endIndex int) {
-	req, err := http.NewRequest("GET", d.URL, nil)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-
-	rangeOfDownload := strconv.Itoa(startIndex) + "-" + strconv.Itoa(endIndex)
-	rangeHeader := "bytes=" + rangeOfDownload
-	req.Header.Set("Range", rangeHeader)
-
-	// TODO: Ask if it's better to save this client as a field in Download struct
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	defer resp.Body.Close()
-
-	// Write the response to file
-	file, err := os.Create(d.Destination + "/" + d.OutputFileName + rangeOfDownload + ".part")
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	defer file.Close()
-
-	written, err := io.Copy(file, resp.Body)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	d.indexOfDownloadedBytes[index] = written
-
-	log.Println("Downloaded ", rangeOfDownload)
-	d.wg.Done()
-}
-
-func (d *Download) downloadParts() error {
+func (d *Download) downloadParts(req *http.Request) error {
 	partSize := d.contentLength / d.numberOfParts
 	for i := range d.numberOfParts {
-		startIndex := i * partSize
-		endIndex := (i + 1) * partSize
-		if i == d.numberOfParts-1 {
-			endIndex = d.contentLength - 1
+		p := Part{
+			partIndex:       i,
+			startIndex:      i * partSize,
+			endIndex:        (i + 1) * partSize,
+			downloadedBytes: 0,
+			Status:          InProgress,
 		}
-		d.wg.Add(1)
-		go d.downloadThisPart(i, startIndex, endIndex)
+		p.rangeOfDownload = strconv.Itoa(p.startIndex) + "-" + strconv.Itoa(p.endIndex)
+		p.path = d.Destination + "/" + d.OutputFileName + p.rangeOfDownload + ".part"
+		if i == d.numberOfParts-1 {
+			p.endIndex = d.contentLength - 1
+		}
+
+		d.parts[i] = &p
+		go d.parts[i].start(req, d.channel)
 	}
-	
+
+	for range d.numberOfParts {
+		select {
+		case err := <-d.channel:
+			if err != nil {
+				d.Status = Failed
+				return err
+			}
+		}
+	}
 	return nil
 }
 
@@ -138,16 +115,8 @@ func (d *Download) mergeParts() error {
 	}
 	defer file.Close()
 
-	partSize := d.contentLength / d.numberOfParts
-	for i := range d.numberOfParts {
-		startIndex := i * partSize
-		endIndex := (i + 1) * partSize
-		if i == d.numberOfParts-1 {
-			endIndex = d.contentLength - 1
-		}
-
-		filePath := d.Destination + "/" + d.OutputFileName + strconv.Itoa(startIndex) + "-" + strconv.Itoa(endIndex) + ".part"
-		resp, err := os.Open(filePath)
+	for _, part := range d.parts {
+		resp, err := os.Open(part.path)
 		if err != nil {
 			log.Fatal(err)
 			return err
@@ -158,7 +127,7 @@ func (d *Download) mergeParts() error {
 			log.Fatal(err)
 			return err
 		}
-		err = os.Remove(filePath)
+		err = os.Remove(part.path)
 		if err != nil {
 			log.Fatal(err)
 			return err
@@ -175,25 +144,30 @@ func (d *Download) Start() error {
 	d.setContentLength()
 
 	if d.contentLength == 0 {
-		d.Status = Cancelled
+		d.Status = Failed
 		log.Fatal("Content length is invalid")
-		return errors.New("Content length is invalid")
+		return errors.New("content length is invalid")
 	}
 
 	d.Status = InProgress
 	log.Println("Content length is", d.contentLength)
 	if d.supportsPartialDownload() {
-		d.numberOfParts = numberOfParts
+		d.numberOfParts = NUMBER_OF_PARTS
 	} else {
 		d.numberOfParts = 1
 	}
+	d.channel = make(chan error, d.numberOfParts)
 
-	err = d.downloadParts()
+	req, err := http.NewRequest("GET", d.URL, nil)
 	if err != nil {
 		log.Fatal(err)
 		return err
 	}
-	d.wg.Wait()
+	err = d.downloadParts(req)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
 	err = d.mergeParts()
 	if err != nil {
 		log.Fatal(err)
