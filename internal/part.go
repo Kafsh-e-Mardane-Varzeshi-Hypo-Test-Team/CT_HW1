@@ -14,15 +14,16 @@ type Part struct {
 	downloadedBytes int64
 	rangeOfDownload string
 	path            string
+	req             *http.Request
 	Status
 }
 
-func (p *Part) start(req *http.Request, channel chan error) {
-	req.Header.Set("Range", "bytes="+p.rangeOfDownload)
+func (p *Part) start(channel chan error) {
+	p.req.Header.Set("Range", "bytes="+p.rangeOfDownload)
 
 	// TODO: Ask if it's better to save this client as a field in Download struct
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := client.Do(p.req)
 	if err != nil {
 		log.Fatal(err)
 		channel <- err
@@ -50,4 +51,9 @@ func (p *Part) start(req *http.Request, channel chan error) {
 	channel <- nil
 	p.Status = Completed
 	log.Println("Downloaded ", p.rangeOfDownload)
+}
+
+func (p *Part) stop() {
+	p.req.Close = true
+	p.Status = Paused
 }

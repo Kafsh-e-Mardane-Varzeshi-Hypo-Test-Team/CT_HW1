@@ -2,6 +2,7 @@ package internal
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -84,6 +85,7 @@ func (d *Download) downloadParts(req *http.Request) error {
 			endIndex:        (i + 1) * partSize,
 			downloadedBytes: 0,
 			Status:          InProgress,
+			req:             req,
 		}
 		p.rangeOfDownload = strconv.Itoa(p.startIndex) + "-" + strconv.Itoa(p.endIndex)
 		p.path = d.Destination + "/" + d.OutputFileName + p.rangeOfDownload + ".part"
@@ -92,7 +94,7 @@ func (d *Download) downloadParts(req *http.Request) error {
 		}
 
 		d.parts[i] = &p
-		go d.parts[i].start(req, d.channel)
+		go d.parts[i].start(d.channel)
 	}
 
 	for range d.numberOfParts {
@@ -127,6 +129,7 @@ func (d *Download) mergeParts() error {
 			log.Fatal(err)
 			return err
 		}
+		fmt.Println(part.path)
 		err = os.Remove(part.path)
 		if err != nil {
 			log.Fatal(err)
@@ -156,6 +159,7 @@ func (d *Download) Start() error {
 	} else {
 		d.numberOfParts = 1
 	}
+	d.parts = make([]*Part, d.numberOfParts)
 	d.channel = make(chan error, d.numberOfParts)
 
 	req, err := http.NewRequest("GET", d.URL, nil)
@@ -179,5 +183,8 @@ func (d *Download) Start() error {
 }
 
 func (d *Download) Stop() {
-
+	for _, part := range d.parts {
+		part.stop()
+	}
+	d.Status = Paused
 }
