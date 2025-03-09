@@ -2,7 +2,6 @@ package internal
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -76,9 +75,15 @@ func (d *Download) supportsPartialDownload() bool {
 	return true
 }
 
-func (d *Download) downloadParts(req *http.Request) error {
+func (d *Download) downloadParts() error {
 	partSize := d.contentLength / d.numberOfParts
 	for i := range d.numberOfParts {
+		req, err := http.NewRequest("GET", d.URL, nil)
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+
 		p := Part{
 			partIndex:       i,
 			startIndex:      i * partSize,
@@ -87,11 +92,11 @@ func (d *Download) downloadParts(req *http.Request) error {
 			Status:          InProgress,
 			req:             req,
 		}
-		p.rangeOfDownload = strconv.Itoa(p.startIndex) + "-" + strconv.Itoa(p.endIndex)
-		p.path = d.Destination + "/" + d.OutputFileName + p.rangeOfDownload + ".part"
 		if i == d.numberOfParts-1 {
 			p.endIndex = d.contentLength - 1
 		}
+		p.rangeOfDownload = strconv.Itoa(p.startIndex) + "-" + strconv.Itoa(p.endIndex)
+		p.path = d.Destination + "/" + d.OutputFileName + p.rangeOfDownload + ".part"
 
 		d.parts[i] = &p
 		go d.parts[i].start(d.channel)
@@ -129,7 +134,6 @@ func (d *Download) mergeParts() error {
 			log.Fatal(err)
 			return err
 		}
-		fmt.Println(part.path)
 		err = os.Remove(part.path)
 		if err != nil {
 			log.Fatal(err)
@@ -162,12 +166,7 @@ func (d *Download) Start() error {
 	d.parts = make([]*Part, d.numberOfParts)
 	d.channel = make(chan error, d.numberOfParts)
 
-	req, err := http.NewRequest("GET", d.URL, nil)
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-	err = d.downloadParts(req)
+	err = d.downloadParts()
 	if err != nil {
 		log.Fatal(err)
 		return err
