@@ -6,12 +6,12 @@ import (
 )
 
 type Model struct {
-	tabView tui.TabView
+	tabView tui.MainView
 }
 
 func New() Model {
 	return Model{
-		tabView: tui.NewTabView(),
+		tabView: tui.NewMainView(),
 	}
 }
 
@@ -22,7 +22,11 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// assert type before assigning to m.tabView
 	returnValue, cmd := m.tabView.Update(msg)
-	m.tabView = returnValue.(tui.TabView)
+	castValue, ok := returnValue.(tui.MainView)
+	if !ok {
+		panic("type assertion to tui.TabView failed")
+	}
+	m.tabView = castValue
 	return m, cmd
 }
 
