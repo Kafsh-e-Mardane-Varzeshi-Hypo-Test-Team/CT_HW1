@@ -1,7 +1,10 @@
 package tui
 
 import (
+	"strings"
+
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type tab int
@@ -9,9 +12,26 @@ type tab int
 const tabCount = 3
 
 const (
-	downloads tab = iota
+	addDownload tab = iota
+	downloads
 	queues
-	addDownload
+)
+
+var (
+	tabBorder        = lipgloss.RoundedBorder()
+	docStyle         = lipgloss.NewStyle().Padding(1, 2, 1, 2)
+	highlightColor   = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
+	inactiveTabStyle = lipgloss.NewStyle().
+				Border(tabBorder, true).
+				BorderForeground(highlightColor).
+				Padding(0, 2).
+				AlignHorizontal(lipgloss.Center)
+	activeTabStyle = inactiveTabStyle.
+			Foreground(highlightColor).
+			Padding(0, 2).
+			AlignHorizontal(lipgloss.Center)
+	// Background(highlightColor).
+	// BorderBackground(highlightColor).
 )
 
 type MainView struct {
@@ -35,6 +55,22 @@ func (m MainView) Init() tea.Cmd {
 }
 
 func (m MainView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+
+	// Send keypress to the active tab first
+	switch m.currentTab {
+	case downloads:
+		m.downloadTab, cmd = m.downloadTab.Update(msg)
+	case queues:
+		m.queueTab, cmd = m.queueTab.Update(msg)
+	case addDownload:
+		m.addDownloadTab, cmd = m.addDownloadTab.Update(msg)
+	}
+
+	if cmd != nil {
+		return m, cmd
+	}
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -53,37 +89,41 @@ func (m MainView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	switch m.currentTab {
-	case downloads:
-		downloadTab, cmd := m.downloadTab.Update(msg)
-		m.downloadTab = downloadTab
-		return m, cmd
-	case queues:
-		queueTab, cmd := m.queueTab.Update(msg)
-		m.queueTab = queueTab
-		return m, cmd
-	case addDownload:
-		addDownloadTab, cmd := m.addDownloadTab.Update(msg)
-		m.addDownloadTab = addDownloadTab
-		return m, cmd
-	}
-
 	return m, nil
 }
 
 func (m MainView) View() string {
-	// TODO: add tab name to the view
+	builder := strings.Builder{}
 
-	switch m.currentTab {
-	case downloads:
-		return m.downloadTab.View()
-	case queues:
-		return m.queueTab.View()
-	case addDownload:
-		return m.addDownloadTab.View()
+	// Render tabs
+	tabs := []string{"Add Download", "Downloads List", "Queues List"}
+	var renderedTabs []string
+
+	for i, t := range tabs {
+		if m.currentTab == tab(i) {
+			renderedTabs = append(renderedTabs, activeTabStyle.Render(t))
+		} else {
+			renderedTabs = append(renderedTabs, inactiveTabStyle.Render(t))
+		}
 	}
 
-	return ""
+	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
+
+	var content string
+	switch m.currentTab {
+	case downloads:
+		content = m.downloadTab.View()
+	case queues:
+		content = m.queueTab.View()
+	case addDownload:
+		content = m.addDownloadTab.View()
+	}
+
+	builder.WriteString(row)
+	builder.WriteString("\n")
+	builder.WriteString(content)
+
+	return docStyle.Render(builder.String())
 }
 
 // // cmd
