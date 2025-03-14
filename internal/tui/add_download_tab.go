@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal/models"
+	"github.com/charmbracelet/bubbles/help"
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -27,6 +29,56 @@ var (
 	focusedCancel  = focusedStyle.Render("[ Cancel ]")
 	blurredCancel  = blurredStyle.Render("[ Cancel ]")
 )
+
+// Key Bindings
+type keyMap struct {
+	Next       key.Binding
+	Prev       key.Binding
+	Select     key.Binding
+	Submit     key.Binding
+	Cancel     key.Binding
+	ToggleHelp key.Binding
+	Quit       key.Binding
+}
+
+func (k keyMap) ShortHelp() []key.Binding {
+	return []key.Binding{k.ToggleHelp, k.Quit}
+}
+
+func (k keyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		{k.Next, k.Prev},               // Navigation keys
+		{k.Select, k.Submit, k.Cancel}, // Actions
+		{k.ToggleHelp, k.Quit},         // Help and quit
+	}
+}
+
+var keys = keyMap{
+	Next: key.NewBinding(
+		key.WithKeys("tab", "down"),
+		key.WithHelp("tab/↓", "next field"),
+	),
+	Prev: key.NewBinding(
+		key.WithKeys("shift+tab", "up"),
+		key.WithHelp("shift+tab/↑", "previous field"),
+	),
+	Select: key.NewBinding(
+		key.WithKeys("enter"),
+		key.WithHelp("enter", "select"),
+	),
+	Submit: key.NewBinding(
+		key.WithKeys("enter"),
+		key.WithHelp("enter", "confirm download"),
+	),
+	Cancel: key.NewBinding(
+		key.WithKeys("esc"),
+		key.WithHelp("esc", "cancel"),
+	),
+	Quit: key.NewBinding(
+		key.WithKeys("ctrl+c"),
+		key.WithHelp("ctrl+c", "quit"),
+	),
+}
 
 // List Item Delegate
 type item string
@@ -56,15 +108,29 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 	fmt.Fprint(w, fn(str))
 }
 
+// fields
+type AddDownloadTabField int
+
+const (
+	urlField AddDownloadTabField = iota
+	filenameField
+	queueField
+	confirmField
+	cancelField
+)
+
 // AddDownloadTab Model
 type AddDownloadTab struct {
-	focusIndex    int
+	focusIndex    AddDownloadTabField
 	urlInput      textinput.Model
 	filenameInput textinput.Model
 	queues        list.Model
 	choices       []string
 	selectedQueue int
 	listExpanded  bool
+	help          help.Model
+	keys          keyMap
+	showHelp      bool
 }
 
 func NewAddDownloadTab() AddDownloadTab {
@@ -97,6 +163,9 @@ func NewAddDownloadTab() AddDownloadTab {
 	queueList.SetFilteringEnabled(false)
 	queueList.SetHeight(8)
 
+	help := help.New()
+	help.ShowAll = true
+
 	return AddDownloadTab{
 		urlInput:      urlInput,
 		filenameInput: filenameInput,
@@ -104,6 +173,9 @@ func NewAddDownloadTab() AddDownloadTab {
 		choices:       availableQueues,
 		selectedQueue: 0,
 		focusIndex:    0,
+		help:          help,
+		keys:          keys,
+		showHelp:      true,
 	}
 }
 
@@ -113,8 +185,15 @@ func (m AddDownloadTab) Init() tea.Cmd {
 
 func (m AddDownloadTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, m.keys.ToggleHelp):
+			m.showHelp = !m.showHelp
+		}
+	}
 	switch m.focusIndex {
-	case 0:
+	case urlField:
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
@@ -128,7 +207,7 @@ func (m AddDownloadTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.urlInput, cmd = m.urlInput.Update(msg)
 			}
 		}
-	case 1:
+	case filenameField:
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
@@ -142,7 +221,7 @@ func (m AddDownloadTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.filenameInput, cmd = m.filenameInput.Update(msg)
 			}
 		}
-	case 2:
+	case queueField:
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			if m.listExpanded {
@@ -171,11 +250,35 @@ func (m AddDownloadTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		}
-	case 3, 4:
+	case confirmField:
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
-			case "tab", "enter", "down":
+			case "enter":
+				url := m.urlInput.Value()
+				filename := m.filenameInput.Value()
+				queue := m.choices[m.selectedQueue]
+				id, err := models.AddDownload(url, filename, queue)
+				if err == nil {
+					fmt.Println("Download added with ID:", id)
+				} else {
+					fmt.Println("Error adding download:", err)
+				}
+			case "tab", "down":
+				m.focusIndex = min(m.focusIndex+1, 4)
+			case "up", "shift+tab":
+				m.focusIndex = max(m.focusIndex-1, 0)
+			case "ctrl+c":
+				return m, tea.Quit
+			}
+		}
+	case cancelField:
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "enter":
+				return NewMainView(), nil
+			case "tab", "down":
 				m.focusIndex = min(m.focusIndex+1, 4)
 			case "up", "shift+tab":
 				m.focusIndex = max(m.focusIndex-1, 0)
@@ -198,16 +301,14 @@ func (m *AddDownloadTab) updateFocus() {
 	m.filenameInput.TextStyle = noStyle
 
 	switch m.focusIndex {
-	case 0:
+	case urlField:
 		m.urlInput.Focus()
 		m.urlInput.PromptStyle = focusedStyle
 		m.urlInput.TextStyle = focusedStyle
-	case 1:
+	case filenameField:
 		m.filenameInput.Focus()
 		m.filenameInput.PromptStyle = focusedStyle
 		m.filenameInput.TextStyle = focusedStyle
-	case 2:
-		// Blinking effect for queue selection
 	}
 }
 
@@ -253,15 +354,8 @@ func (m AddDownloadTab) View() string {
 			buttonConfirm,
 			buttonCancel,
 		),
+		helpStyle.Render(m.help.View(m.keys)),
 	)
 
 	return docStyle.Render(form)
-}
-
-// Utility function to limit queue list size
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }

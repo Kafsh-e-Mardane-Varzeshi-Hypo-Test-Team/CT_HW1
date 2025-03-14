@@ -61,3 +61,8 @@ func GetDownloads() []Download {
 		},
 	}
 }
+
+func AddDownload(url string, filename string, queue string) (string, error) {
+	// Add download to the database
+	return "Download added successfully", nil
+}
