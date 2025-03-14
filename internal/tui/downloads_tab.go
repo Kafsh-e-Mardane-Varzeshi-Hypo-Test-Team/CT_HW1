@@ -22,7 +22,7 @@ func NewDownloadsTab() DownloadsTab {
 	Downloads := models.GetDownloads()
 	columns := []table.Column{
 		{Title: "URL", Width: 30},
-		{Title: "Queue", Width: 15},
+		{Title: "Queue", Width: 20},
 		{Title: "Status", Width: 15},
 		{Title: "Transfer Rate", Width: 15},
 		{Title: "Progress", Width: 10},
