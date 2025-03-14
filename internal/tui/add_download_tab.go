@@ -56,6 +56,7 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 	fmt.Fprint(w, fn(str))
 }
 
+// AddDownloadTab Model
 type AddDownloadTab struct {
 	focusIndex    int
 	urlInput      textinput.Model
@@ -112,52 +113,78 @@ func (m AddDownloadTab) Init() tea.Cmd {
 
 func (m AddDownloadTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "tab", "shift+tab", "enter", "up", "down":
-			s := msg.String()
-
-			// If queue selection is focused, handle list expansion and selection
-			if m.focusIndex == 2 {
-				if s == "enter" {
-					if m.listExpanded {
-						m.selectedQueue = m.queues.Index()
-						m.listExpanded = false
-					} else {
-						m.listExpanded = true
-					}
+	switch m.focusIndex {
+	case 0:
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "tab", "enter", "down":
+				m.focusIndex = min(m.focusIndex+1, 4)
+			case "up", "shift+tab":
+				m.focusIndex = max(m.focusIndex-1, 0)
+			case "ctrl+c":
+				return m, tea.Quit
+			default:
+				m.urlInput, cmd = m.urlInput.Update(msg)
+			}
+		}
+	case 1:
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "tab", "enter", "down":
+				m.focusIndex = min(m.focusIndex+1, 4)
+			case "up", "shift+tab":
+				m.focusIndex = max(m.focusIndex-1, 0)
+			case "ctrl+c":
+				return m, tea.Quit
+			default:
+				m.filenameInput, cmd = m.filenameInput.Update(msg)
+			}
+		}
+	case 2:
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			if m.listExpanded {
+				switch msg.String() {
+				case "enter":
+					m.selectedQueue = m.queues.Index()
+					m.listExpanded = false
 					return m, nil
-				}
-				if m.listExpanded {
+				case "esc":
+					m.listExpanded = false
+				default:
 					m.queues, cmd = m.queues.Update(msg)
 					return m, cmd
 				}
-			}
-
-			// Handle field navigation
-			if s == "up" || s == "shift+tab" {
-				m.focusIndex--
 			} else {
-				m.focusIndex++
+				switch msg.String() {
+				case "tab", "down":
+					m.focusIndex = min(m.focusIndex+1, 4)
+				case "up", "shift+tab":
+					m.focusIndex = max(m.focusIndex-1, 0)
+				case "enter":
+					m.listExpanded = true
+					return m, nil
+				case "ctrl+c":
+					return m, tea.Quit
+				}
 			}
-
-			if m.focusIndex > 4 {
-				m.focusIndex = 0
-			} else if m.focusIndex < 0 {
-				m.focusIndex = 4
+		}
+	case 3, 4:
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "tab", "enter", "down":
+				m.focusIndex = min(m.focusIndex+1, 4)
+			case "up", "shift+tab":
+				m.focusIndex = max(m.focusIndex-1, 0)
+			case "ctrl+c":
+				return m, tea.Quit
 			}
-
-			m.updateFocus()
 		}
 	}
-
-	// Handle input updates
-	if m.focusIndex == 0 {
-		m.urlInput, cmd = m.urlInput.Update(msg)
-	} else if m.focusIndex == 1 {
-		m.filenameInput, cmd = m.filenameInput.Update(msg)
-	}
+	m.updateFocus()
 
 	return m, cmd
 }
@@ -207,28 +234,28 @@ func (m AddDownloadTab) View() string {
 	form := lipgloss.JoinVertical(
 		lipgloss.Left,
 		lipgloss.JoinHorizontal(
-			lipgloss.Left,
+			lipgloss.Top,
 			"URL: ",
 			m.urlInput.View(),
 		),
 		lipgloss.JoinHorizontal(
-			lipgloss.Left,
+			lipgloss.Top,
 			"Filename: ",
 			m.filenameInput.View(),
 		),
 		lipgloss.JoinHorizontal(
-			lipgloss.Left,
+			lipgloss.Top,
 			"Destination Queue: ",
 			queueDisplay,
 		),
 		lipgloss.JoinHorizontal(
-			lipgloss.Left,
+			lipgloss.Top,
 			buttonConfirm,
 			buttonCancel,
 		),
 	)
 
-	return form
+	return docStyle.Render(form)
 }
 
 // Utility function to limit queue list size

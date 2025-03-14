@@ -1,10 +1,5 @@
 package models
 
-// {Title: "URL", Width: 30},
-// {Title: "Queue", Width: 15},
-// {Title: "Status", Width: 10},
-// {Title: "Transfer Rate", Width: 15},
-// {Title: "Progress", Width: 10},
 type Download struct {
 	Url          string
 	Queue        string

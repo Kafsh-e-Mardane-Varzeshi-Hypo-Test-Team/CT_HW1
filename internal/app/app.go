@@ -20,7 +20,6 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	// assert type before assigning to m.tabView
 	returnValue, cmd := m.tabView.Update(msg)
 	castValue, ok := returnValue.(tui.MainView)
 	if !ok {
