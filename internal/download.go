@@ -89,7 +89,7 @@ func (d *Download) downloadParts() error {
 			startIndex:      i * partSize,
 			endIndex:        (i + 1) * partSize,
 			downloadedBytes: 0,
-			Status:          InProgress,
+			Status:          Pending,
 			req:             req,
 		}
 		if i == d.numberOfParts-1 {
