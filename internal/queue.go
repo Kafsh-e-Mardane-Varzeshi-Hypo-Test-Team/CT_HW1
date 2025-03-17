@@ -2,106 +2,116 @@ package internal
 
 import (
 	"errors"
+	"log"
 	"sync"
 )
 
 type Queue struct {
-	Name            string
-	SavePath        string
-	MaxConcurrent   int
-	activeDownloads int
-	MaxBandwidth    int
-	MaxRetries      int
-	ActiveHours     string
-	downloadChan    chan *Download
+	name          string
+	savePath      string
+	numConcurrent int
+	numRetries    int
+	activeHours   string
+	maxBandwidth  int
+	downloadChan  chan *Download
+	done          chan struct{}
 
 	mu        sync.Mutex
+	isActive  bool
 	downloads []*Download
 }
 
-func NewQueue(name string, savePath string, maxConcurrent int, maxBandwidth int, maxRetries int, activeHours string) *Queue {
+func NewQueue(name, savePath string, numConcurrent, numRetries int, activeHours string, maxBandwidth int) *Queue {
 	return &Queue{
-		Name:          name,
-		SavePath:      savePath,
-		MaxConcurrent: maxConcurrent,
-		MaxBandwidth:  maxBandwidth,
-		MaxRetries:    maxRetries,
-		ActiveHours:   activeHours,
-		downloadChan:  make(chan *Download, 100), // This may cause waiting for the channel to have capacity, check if there is a better way
+		name:          name,
+		savePath:      savePath,
+		numConcurrent: numConcurrent,
+		numRetries:    numRetries,
+		activeHours:   activeHours,
+		maxBandwidth:  maxBandwidth,
+		isActive:      false,
 	}
-}
-
-func (q *Queue) UpdateConfig(savePath string, maxConcurrent int, maxBandwidth int, maxRetries int, activeHours string) {
-	q.SavePath = savePath
-	q.MaxConcurrent = maxConcurrent
-	q.MaxBandwidth = maxBandwidth
-	q.MaxRetries = maxRetries
-	q.ActiveHours = activeHours
 }
 
 func (q *Queue) AddDownload(d *Download) error {
-	if d == nil {
-		return errors.New("invalid download (nil)")
-	}
-
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	q.downloads = append(q.downloads, d)
-	q.downloadChan <- d
+	if !q.isActive {
+		q.downloads = append(q.downloads, d)
+		log.Printf("download %T added to inactive queue %T\n", d, q)
+		return nil
+	}
 
+	select {
+	case q.downloadChan <- d:
+		q.downloads = append(q.downloads, d)
+		log.Printf("download %T added to queue %T\n", d, q)
+	default:
+		log.Printf("failed to add downlaod %T to queue %T, too many downloads has beed added", d, q)
+		return errors.New("failed to add to queue")
+	}
 	return nil
 }
 
-func (q *Queue) CancelDownload(d *Download) error {
-	if d == nil {
-		return errors.New("invalid download (nil)")
-	}
-
-	q.mu.Lock()
-	defer q.mu.Unlock()
-
-	for i, dl := range q.downloads {
-		if dl == d {
-			if d.Status == InProgress || d.Status == Pending {
-				d.Stop()
-			}
-			q.downloads = append(q.downloads[:i], q.downloads[i+1:]...)
-			return nil
-		}
-	}
-
-	return errors.New("download not found")
-}
-
-func (q *Queue) CancelAll() {
-	q.mu.Lock()
-	defer q.mu.Unlock()
-
-	for _, d := range q.downloads {
-		if d.Status == InProgress || d.Status == Pending {
-			d.Stop()
-		}
-	}
-}
-
 func (q *Queue) Start() {
-	for i := 0; i < q.MaxConcurrent; i++ {
-		go func() {
-			for d := range q.downloadChan {
-				if d.Status == Pending {
-					q.processDownload(d)
+	q.downloadChan = make(chan *Download, 100)
+	q.done = make(chan struct{})
+
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
+	if q.isActive {
+		return
+	}
+	q.isActive = true
+
+	for i := 0; i < q.numConcurrent; i++ {
+		go q.downloader()
+	}
+
+	go q.addBufferedDownloads()
+}
+
+func (q *Queue) downloader() {
+	for {
+		select {
+		case d := <-q.downloadChan:
+			if d.GetQueueName() == q.name && d.GetStatus() == Pending {
+				for i := 0; i < q.numRetries; i++ {
+					err := d.Start()
+					if err == nil {
+						return
+					}
+					log.Println(err)
+
+					if d.GetStatus() != Failed {
+						return
+					}
 				}
 			}
-		}()
+		case <-q.done:
+			return
+		}
 	}
 }
 
-func (q *Queue) processDownload(d *Download) {
-	for i := 0; i < q.MaxRetries; i++ {
-		err := d.Start()
-		if err == nil {
-			break
+func (q *Queue) addBufferedDownloads() {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	for _, d := range q.downloads {
+		if d.GetStatus() == Pending {
+			select {
+			case q.downloadChan <- d:
+				log.Printf("download %T added to queue %T\n", d, q)
+			case <-q.done:
+				return
+			}
 		}
 	}
+}
+
+func (q *Queue) Stop() {
+	close(q.done)
+	close(q.downloadChan)
 }
