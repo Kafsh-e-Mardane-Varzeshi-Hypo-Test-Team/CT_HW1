@@ -88,7 +88,13 @@ func (q *Queue) downloader() {
 }
 
 func (q *Queue) Stop() {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
+	q.isActive = false
+
 	close(q.done)
 	q.wg.Wait()
+
 	log.Printf("queue %T stopped", q)
 }
