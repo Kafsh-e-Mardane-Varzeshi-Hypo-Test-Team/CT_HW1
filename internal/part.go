@@ -25,6 +25,7 @@ func (p *Part) start(channel chan error) {
 	client := &http.Client{}
 	resp, err := client.Do(p.req)
 	if err != nil {
+		p.Status = Failed
 		log.Fatal(err)
 		channel <- err
 		return
@@ -33,6 +34,7 @@ func (p *Part) start(channel chan error) {
 
 	file, err := os.Create(p.path)
 	if err != nil {
+		p.Status = Failed
 		log.Fatal(err)
 		channel <- err
 		return
