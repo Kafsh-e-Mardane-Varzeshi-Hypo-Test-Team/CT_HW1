@@ -15,10 +15,10 @@ type Queue struct {
 	maxBandwidth  int
 	downloadChan  chan *Download
 	done          chan struct{}
+	wg            sync.WaitGroup
 
-	mu        sync.Mutex
-	isActive  bool
-	downloads []*Download
+	mu       sync.Mutex
+	isActive bool
 }
 
 func NewQueue(name, savePath string, numConcurrent, numRetries int, activeHours string, maxBandwidth int) *Queue {
@@ -29,23 +29,14 @@ func NewQueue(name, savePath string, numConcurrent, numRetries int, activeHours 
 		numRetries:    numRetries,
 		activeHours:   activeHours,
 		maxBandwidth:  maxBandwidth,
+		downloadChan:  make(chan *Download, 100),
 		isActive:      false,
 	}
 }
 
 func (q *Queue) AddDownload(d *Download) error {
-	q.mu.Lock()
-	defer q.mu.Unlock()
-
-	if !q.isActive {
-		q.downloads = append(q.downloads, d)
-		log.Printf("download %T added to inactive queue %T\n", d, q)
-		return nil
-	}
-
 	select {
 	case q.downloadChan <- d:
-		q.downloads = append(q.downloads, d)
 		log.Printf("download %T added to queue %T\n", d, q)
 	default:
 		log.Printf("failed to add downlaod %T to queue %T, too many downloads has beed added", d, q)
@@ -55,25 +46,25 @@ func (q *Queue) AddDownload(d *Download) error {
 }
 
 func (q *Queue) Start() {
-	q.downloadChan = make(chan *Download, 100)
-	q.done = make(chan struct{})
-
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
 	if q.isActive {
 		return
 	}
-	q.isActive = true
 
+	q.isActive = true
+	q.done = make(chan struct{})
+
+	q.wg.Add(q.numConcurrent)
 	for i := 0; i < q.numConcurrent; i++ {
 		go q.downloader()
 	}
-
-	go q.addBufferedDownloads()
 }
 
 func (q *Queue) downloader() {
+	defer q.wg.Done()
+
 	for {
 		select {
 		case d := <-q.downloadChan:
@@ -96,22 +87,8 @@ func (q *Queue) downloader() {
 	}
 }
 
-func (q *Queue) addBufferedDownloads() {
-	q.mu.Lock()
-	defer q.mu.Unlock()
-	for _, d := range q.downloads {
-		if d.GetStatus() == Pending {
-			select {
-			case q.downloadChan <- d:
-				log.Printf("download %T added to queue %T\n", d, q)
-			case <-q.done:
-				return
-			}
-		}
-	}
-}
-
 func (q *Queue) Stop() {
 	close(q.done)
-	close(q.downloadChan)
+	q.wg.Wait()
+	log.Printf("queue %T stopped", q)
 }
