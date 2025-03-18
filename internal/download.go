@@ -26,7 +26,7 @@ type Download struct {
 	URL            string
 	Destination    string
 	OutputFileName string
-	Queue          *Queue
+	queueName      string
 	headResp       *http.Response
 	contentLength  int
 	numberOfParts  int
@@ -186,4 +186,12 @@ func (d *Download) Stop() {
 		part.stop()
 	}
 	d.Status = Paused
+}
+
+func (d *Download) GetQueueName() string {
+	return d.queueName
+}
+
+func (d *Download) GetStatus() Status {
+	return d.Status
 }
