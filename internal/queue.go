@@ -4,30 +4,33 @@ import (
 	"errors"
 	"log"
 	"sync"
+	"time"
 )
 
 type Queue struct {
-	name          string
+	name         string
+	downloadChan chan *Download
+	done         chan struct{}
+	wg           sync.WaitGroup
+
+	mu            sync.Mutex
 	savePath      string
 	numConcurrent int
 	numRetries    int
-	activeHours   string
+	startTime     time.Time
+	endTime       time.Time
 	maxBandwidth  int
-	downloadChan  chan *Download
-	done          chan struct{}
-	wg            sync.WaitGroup
-
-	mu       sync.Mutex
-	isActive bool
+	isActive      bool
 }
 
-func NewQueue(name, savePath string, numConcurrent, numRetries int, activeHours string, maxBandwidth int) *Queue {
+func NewQueue(name, savePath string, numConcurrent, numRetries int, startTime, endTime time.Time, maxBandwidth int) *Queue {
 	return &Queue{
 		name:          name,
 		savePath:      savePath,
 		numConcurrent: numConcurrent,
 		numRetries:    numRetries,
-		activeHours:   activeHours,
+		startTime:     startTime,
+		endTime:       endTime,
 		maxBandwidth:  maxBandwidth,
 		downloadChan:  make(chan *Download, 100),
 		isActive:      false,
@@ -97,4 +100,16 @@ func (q *Queue) Stop() {
 	q.wg.Wait()
 
 	log.Printf("queue %T stopped", q)
+}
+
+func (q *Queue) IsActive() bool {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	return q.isActive
+}
+
+func (q *Queue) CheckActiveTime(now time.Time) bool {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	return now.After(q.startTime) && now.Before(q.endTime)
 }
