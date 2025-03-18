@@ -37,6 +37,15 @@ func NewQueue(name, savePath string, numConcurrent, numRetries int, startTime, e
 	}
 }
 
+func (q *Queue) UpdateConfig(savePath string, numConcurrent, numRetries int, startTime, endTime time.Time, maxBandwidth int) {
+	q.savePath = savePath
+	q.numConcurrent = numConcurrent
+	q.numRetries = numRetries
+	q.startTime = startTime
+	q.endTime = endTime
+	q.maxBandwidth = maxBandwidth
+}
+
 func (q *Queue) AddDownload(d *Download) error {
 	select {
 	case q.downloadChan <- d:
