@@ -1,11 +1,19 @@
 package internal
 
-import "sync"
+import (
+	"sync"
+)
 
 type Manager struct {
 	mu        sync.Mutex
 	downloads []*Download
 	queues    map[string]*Queue
+}
+
+func NewManager() *Manager {
+	return &Manager{
+		queues: make(map[string]*Queue),
+	}
 }
 
 func (m *Manager) Start(send, recieve chan interface{}) {
