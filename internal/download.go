@@ -103,12 +103,10 @@ func (d *Download) downloadParts() error {
 	}
 
 	for range d.numberOfParts {
-		select {
-		case err := <-d.channel:
-			if err != nil {
-				d.Status = Failed
-				return err
-			}
+		err := <-d.channel;
+		if err != nil {
+			d.Status = Failed
+			return err
 		}
 	}
 	return nil
