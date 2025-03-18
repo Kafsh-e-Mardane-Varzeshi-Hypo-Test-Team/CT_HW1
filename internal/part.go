@@ -1,10 +1,12 @@
 package internal
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 type Part struct {
@@ -19,6 +21,7 @@ type Part struct {
 }
 
 func (p *Part) start(channel chan error) {
+	// TODO: rangeOfDownload should be updated.
 	p.req.Header.Set("Range", "bytes="+p.rangeOfDownload)
 
 	// TODO: Ask if it's better to save this client as a field in Download struct
@@ -41,13 +44,38 @@ func (p *Part) start(channel chan error) {
 	}
 	defer file.Close()
 
-	written, err := io.Copy(file, resp.Body)
-	p.downloadedBytes += written
-	if err != nil {
-		p.Status = Failed
-		log.Fatal(err)
-		channel <- err
-		return
+	buffer := make([]byte, 32*1024)
+	for {
+		if p.Status == Paused {
+			time.Sleep(500 * time.Millisecond)
+			continue
+		} else if p.Status == Failed || p.Status == Cancelled {
+			return
+		}
+
+		p.Status = InProgress
+		n, err := resp.Body.Read(buffer)
+		if n > 0 {
+			_, err := file.Write(buffer[:n])
+			if err != nil {
+				p.Status = Failed
+				log.Fatal(err)
+				channel <- err
+				return
+			}
+
+			p.downloadedBytes += int64(n)
+		}
+
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			p.Status = Failed
+			log.Fatal(err)
+			channel <- err
+			return
+		}
 	}
 
 	channel <- nil
@@ -56,6 +84,6 @@ func (p *Part) start(channel chan error) {
 }
 
 func (p *Part) stop() {
-	p.req.Close = true
+	fmt.Println("downloaded bytes of part", p.partIndex, " :: ", p.downloadedBytes)
 	p.Status = Paused
 }
