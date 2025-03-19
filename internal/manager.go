@@ -3,8 +3,10 @@ package internal
 import (
 	"errors"
 	"log"
+	"maps"
 	"slices"
 	"sync"
+	"time"
 )
 
 type Manager struct {
@@ -105,4 +107,29 @@ func (m *Manager) getQueuePendingDownloads(queueName string) []*Download {
 		}
 	}
 	return queuedDownloads
+}
+
+func (m *Manager) monitorActiveHours() {
+	ticker := time.NewTicker(time.Minute)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			now := time.Now()
+			m.mu.Lock()
+			for q := range maps.Values(m.Queues) {
+				isActive := q.IsActive()
+				checkTime := q.CheckActiveTime(now)
+				if isActive && !checkTime {
+					q.Stop()
+				}
+				if !isActive && checkTime {
+					queuedDownloads := m.getQueuePendingDownloads(q.Name)
+					q.Start(queuedDownloads)
+				}
+			}
+			m.mu.Unlock()
+		}
+	}
 }
