@@ -147,30 +147,32 @@ func (q *Queue) CheckActiveTime(now time.Time) bool {
 type BandwidthLimiter struct {
 	rate   int
 	tokens chan struct{}
+	stop   chan struct{}
 }
 
-func NewBandwidthLimiter(rate int, done chan struct{}) *BandwidthLimiter {
+func NewBandwidthLimiter(rate int, stop chan struct{}) *BandwidthLimiter {
 	bl := &BandwidthLimiter{
 		rate:   rate,
 		tokens: make(chan struct{}, rate/32), // why 32? like fps =)
+		stop:   stop,
 	}
 
 	if rate > 0 {
-		go bl.generateTokens(done)
+		go bl.generateTokens()
 	}
 
 	return bl
 }
 
-func (bl *BandwidthLimiter) generateTokens(done chan struct{}) {
+func (bl *BandwidthLimiter) generateTokens() {
 	ticker := time.NewTicker(time.Second / time.Duration(bl.rate/32)) // why 32? like fps =)
 	defer ticker.Stop()
 
 	for range ticker.C {
 		select {
-		case bl.tokens <- struct{}{}:
-		case <-done:
+		case <-bl.stop:
 			return
+		case bl.tokens <- struct{}{}:
 		default:
 		}
 	}
