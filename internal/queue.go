@@ -8,41 +8,41 @@ import (
 )
 
 type Queue struct {
-	name         string
+	Name         string
 	downloadChan chan *Download
 	done         chan struct{}
 	wg           sync.WaitGroup
 
 	mu            sync.Mutex
-	savePath      string
-	numConcurrent int
-	numRetries    int
-	startTime     time.Time
-	endTime       time.Time
-	maxBandwidth  int
+	SavePath      string
+	NumConcurrent int
+	NumRetries    int
+	StartTime     time.Time
+	EndTime       time.Time
+	MaxBandwidth  int
 	isActive      bool
 }
 
 func NewQueue(name, savePath string, numConcurrent, numRetries int, startTime, endTime time.Time, maxBandwidth int) *Queue {
 	return &Queue{
-		name:          name,
-		savePath:      savePath,
-		numConcurrent: numConcurrent,
-		numRetries:    numRetries,
-		startTime:     startTime,
-		endTime:       endTime,
-		maxBandwidth:  maxBandwidth,
+		Name:          name,
+		SavePath:      savePath,
+		NumConcurrent: numConcurrent,
+		NumRetries:    numRetries,
+		StartTime:     startTime,
+		EndTime:       endTime,
+		MaxBandwidth:  maxBandwidth,
 		isActive:      false,
 	}
 }
 
 func (q *Queue) UpdateConfig(savePath string, numConcurrent, numRetries int, startTime, endTime time.Time, maxBandwidth int) {
-	q.savePath = savePath
-	q.numConcurrent = numConcurrent
-	q.numRetries = numRetries
-	q.startTime = startTime
-	q.endTime = endTime
-	q.maxBandwidth = maxBandwidth
+	q.SavePath = savePath
+	q.NumConcurrent = numConcurrent
+	q.NumRetries = numRetries
+	q.StartTime = startTime
+	q.EndTime = endTime
+	q.MaxBandwidth = maxBandwidth
 }
 
 func (q *Queue) AddDownload(d *Download) error {
@@ -73,8 +73,8 @@ func (q *Queue) Start(queuedDownloads []*Download) {
 	q.downloadChan = make(chan *Download, 100)
 	q.done = make(chan struct{})
 
-	q.wg.Add(q.numConcurrent)
-	for i := 0; i < q.numConcurrent; i++ {
+	q.wg.Add(q.NumConcurrent)
+	for i := 0; i < q.NumConcurrent; i++ {
 		go q.downloader()
 	}
 
@@ -98,8 +98,8 @@ func (q *Queue) downloader() {
 	for {
 		select {
 		case d := <-q.downloadChan:
-			if d.GetQueueName() == q.name && d.GetStatus() == Pending {
-				for i := 0; i < q.numRetries; i++ {
+			if d.GetQueueName() == q.Name && d.GetStatus() == Pending {
+				for i := 0; i < q.NumRetries; i++ {
 					err := d.Start()
 					if err == nil {
 						return
@@ -139,5 +139,5 @@ func (q *Queue) IsActive() bool {
 func (q *Queue) CheckActiveTime(now time.Time) bool {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	return now.After(q.startTime) && now.Before(q.endTime)
+	return now.After(q.StartTime) && now.Before(q.EndTime)
 }

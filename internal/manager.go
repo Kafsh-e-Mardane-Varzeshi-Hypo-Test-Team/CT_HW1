@@ -9,13 +9,13 @@ import (
 
 type Manager struct {
 	mu        sync.Mutex
-	downloads []*Download
-	queues    map[string]*Queue
+	Downloads []*Download
+	Queues    map[string]*Queue
 }
 
 func NewManager() *Manager {
 	return &Manager{
-		queues: make(map[string]*Queue),
+		Queues: make(map[string]*Queue),
 	}
 }
 
@@ -31,7 +31,7 @@ func (m *Manager) addDownload(d *Download) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	q, exists := m.queues[d.GetQueueName()]
+	q, exists := m.Queues[d.GetQueueName()]
 	if !exists {
 		return errors.New("queue does not exist")
 	}
@@ -43,7 +43,7 @@ func (m *Manager) addDownload(d *Download) error {
 		}
 	}
 
-	m.downloads = append(m.downloads, d)
+	m.Downloads = append(m.Downloads, d)
 	log.Printf("added download %q to queue %q\n", d.URL, d.GetQueueName())
 	return nil
 }
@@ -54,9 +54,9 @@ func (m *Manager) removeDownload(d *Download) error {
 
 	d.Stop() // TODO: error handling
 
-	for i, download := range m.downloads {
+	for i, download := range m.Downloads {
 		if download == d {
-			m.downloads = slices.Delete(m.downloads, i, i+1)
+			m.Downloads = slices.Delete(m.Downloads, i, i+1)
 			break
 		}
 	}
@@ -69,12 +69,12 @@ func (m *Manager) addQueue(q *Queue) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	if _, exists := m.queues[q.name]; exists {
+	if _, exists := m.Queues[q.Name]; exists {
 		return errors.New("queue already exists")
 	}
 
-	m.queues[q.name] = q
-	log.Printf("Manager: Added queue %q\n", q.name)
+	m.Queues[q.Name] = q
+	log.Printf("Manager: Added queue %q\n", q.Name)
 	return nil
 }
 
@@ -82,14 +82,14 @@ func (m *Manager) removeQueue(queueName string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	q, exists := m.queues[queueName]
+	q, exists := m.Queues[queueName]
 	if !exists {
 		return errors.New("queue does not exist")
 	}
 
 	q.Stop() // TODO: error handling
 
-	delete(m.queues, queueName)
+	delete(m.Queues, queueName)
 	log.Printf("Manager: Removed queue %q\n", queueName)
 	return nil
 }
@@ -99,7 +99,7 @@ func (m *Manager) getQueuePendingDownloads(queueName string) []*Download {
 	defer m.mu.Unlock()
 
 	var queuedDownloads []*Download
-	for _, d := range m.downloads {
+	for _, d := range m.Downloads {
 		if d.GetQueueName() == queueName && d.GetStatus() == Pending {
 			queuedDownloads = append(queuedDownloads, d)
 		}
