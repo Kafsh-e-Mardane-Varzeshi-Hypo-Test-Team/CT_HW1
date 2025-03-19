@@ -73,9 +73,11 @@ func (q *Queue) Start(queuedDownloads []*Download) {
 	q.downloadChan = make(chan *Download, 100)
 	q.done = make(chan struct{})
 
+	bl := NewBandwidthLimiter(q.MaxBandwidth, q.done)
+
 	q.wg.Add(q.NumConcurrent)
 	for i := 0; i < q.NumConcurrent; i++ {
-		go q.downloader()
+		go q.downloader(bl)
 	}
 
 	go q.addQueuedDownloads(queuedDownloads)
@@ -92,10 +94,8 @@ func (q *Queue) addQueuedDownloads(downloads []*Download) {
 	}
 }
 
-func (q *Queue) downloader() {
+func (q *Queue) downloader(bl *BandwidthLimiter) {
 	defer q.wg.Done()
-
-	bl := NewBandwidthLimiter(q.MaxBandwidth)
 
 	for {
 		select {
@@ -149,26 +149,28 @@ type BandwidthLimiter struct {
 	tokens chan struct{}
 }
 
-func NewBandwidthLimiter(rate int) *BandwidthLimiter {
+func NewBandwidthLimiter(rate int, done chan struct{}) *BandwidthLimiter {
 	bl := &BandwidthLimiter{
 		rate:   rate,
 		tokens: make(chan struct{}, rate/32), // why 32? like fps =)
 	}
 
 	if rate > 0 {
-		go bl.generateTokens()
+		go bl.generateTokens(done)
 	}
 
 	return bl
 }
 
-func (bl *BandwidthLimiter) generateTokens() {
+func (bl *BandwidthLimiter) generateTokens(done chan struct{}) {
 	ticker := time.NewTicker(time.Second / time.Duration(bl.rate/32)) // why 32? like fps =)
 	defer ticker.Stop()
 
 	for range ticker.C {
 		select {
 		case bl.tokens <- struct{}{}:
+		case <-done:
+			return
 		default:
 		}
 	}
