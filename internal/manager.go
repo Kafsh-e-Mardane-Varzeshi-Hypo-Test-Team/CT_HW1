@@ -36,9 +36,11 @@ func (m *Manager) addDownload(d *Download) error {
 		return errors.New("queue does not exist")
 	}
 
-	err := q.AddDownload(d)
-	if err != nil {
-		return err
+	if q.IsActive() {
+		err := q.AddDownload(d)
+		if err != nil {
+			return err
+		}
 	}
 
 	m.downloads = append(m.downloads, d)
@@ -90,4 +92,17 @@ func (m *Manager) removeQueue(queueName string) error {
 	delete(m.queues, queueName)
 	log.Printf("Manager: Removed queue %q\n", queueName)
 	return nil
+}
+
+func (m *Manager) getQueuePendingDownloads(queueName string) []*Download {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	var queuedDownloads []*Download
+	for _, d := range m.downloads {
+		if d.GetQueueName() == queueName && d.GetStatus() == Pending {
+			queuedDownloads = append(queuedDownloads, d)
+		}
+	}
+	return queuedDownloads
 }

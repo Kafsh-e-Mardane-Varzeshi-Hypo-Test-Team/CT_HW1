@@ -32,7 +32,6 @@ func NewQueue(name, savePath string, numConcurrent, numRetries int, startTime, e
 		startTime:     startTime,
 		endTime:       endTime,
 		maxBandwidth:  maxBandwidth,
-		downloadChan:  make(chan *Download, 100),
 		isActive:      false,
 	}
 }
@@ -47,6 +46,11 @@ func (q *Queue) UpdateConfig(savePath string, numConcurrent, numRetries int, sta
 }
 
 func (q *Queue) AddDownload(d *Download) error {
+	if !q.IsActive() {
+		log.Printf("download %T did NOT add to queue %T downloadChan\n", d, q)
+		return nil // TODO: error handling
+	}
+
 	select {
 	case q.downloadChan <- d:
 		log.Printf("download %T added to queue %T\n", d, q)
@@ -57,20 +61,34 @@ func (q *Queue) AddDownload(d *Download) error {
 	return nil
 }
 
-func (q *Queue) Start() {
+func (q *Queue) Start(queuedDownloads []*Download) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
 	if q.isActive {
 		return
 	}
-
 	q.isActive = true
+
+	q.downloadChan = make(chan *Download, 100)
 	q.done = make(chan struct{})
 
 	q.wg.Add(q.numConcurrent)
 	for i := 0; i < q.numConcurrent; i++ {
 		go q.downloader()
+	}
+
+	go q.addQueuedDownloads(queuedDownloads)
+}
+
+func (q *Queue) addQueuedDownloads(downloads []*Download) {
+	for _, d := range downloads {
+		select {
+		case <-q.done:
+			return
+		default:
+			q.AddDownload(d)
+		}
 	}
 }
 
@@ -105,6 +123,7 @@ func (q *Queue) Stop() {
 
 	q.isActive = false
 
+	close(q.downloadChan)
 	close(q.done)
 	q.wg.Wait()
 
