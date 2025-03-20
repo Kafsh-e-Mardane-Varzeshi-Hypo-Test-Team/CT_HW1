@@ -54,7 +54,7 @@ func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
 			return
 		}
 
-		// bandwidthLimiter.WaitForToken()
+		bandwidthLimiter.WaitForToken()
 		n, err := resp.Body.Read(buffer)
 		if n > 0 {
 			_, err := file.Write(buffer[:n])
