@@ -232,9 +232,6 @@ func (m *Manager) GetQueueList() []*QueueInfo {
 }
 
 func (m *Manager) getQueuePendingDownloads(queueName string) []*Download {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
 	var queuedDownloads []*Download
 	for _, d := range m.Downloads {
 		if d.GetQueueName() == queueName && d.GetStatus() == Pending {
