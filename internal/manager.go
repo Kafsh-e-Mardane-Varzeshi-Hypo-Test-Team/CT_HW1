@@ -29,14 +29,16 @@ func (m *Manager) Stop() {
 
 }
 
-func (m *Manager) addDownload(d *Download) error {
+func (m *Manager) AddDownload(url, outputFileName, queueName string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	q, exists := m.Queues[d.GetQueueName()]
+	q, exists := m.Queues[queueName]
 	if !exists {
 		return errors.New("queue does not exist")
 	}
+
+	d := NewDownload(url, q.GetSavePath(), outputFileName, queueName)
 
 	if q.IsActive() {
 		err := q.AddDownload(d)
