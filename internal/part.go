@@ -95,6 +95,12 @@ func (p *Part) pend() error {
 	return nil
 }
 
+func (p *Part) cancel() error {
+	log.Printf("Canceling download of part %v : %v bytes downloaded", p.partIndex, p.downloadedBytes)
+	p.setStatus(Cancelled)
+	return nil
+}
+
 func (p *Part) setStatus(status Status) {
 	p.mu.Lock()
 	p.Status = status
