@@ -22,8 +22,8 @@ func NewManager() *Manager {
 	}
 }
 
-func (m *Manager) Start(send, recieve chan interface{}) {
-
+func (m *Manager) Start(save chan struct{}) {
+	go m.monitorActiveHours()
 }
 
 func (m *Manager) Stop() {
