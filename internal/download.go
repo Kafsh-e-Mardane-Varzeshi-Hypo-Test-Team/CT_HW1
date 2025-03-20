@@ -211,23 +211,30 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 	return nil
 }
 
-// TODO: error
-func (d *Download) Pause() {
+func (d *Download) Pause() error {
 	d.setStatus(Paused)
-	d.stopDownload()
-}
-
-// TODO: error
-func (d *Download) Pend() {
-	d.setStatus(Pending)
-	d.stopDownload()
-}
-
-func (d *Download) stopDownload() {
 	for _, part := range d.parts {
-		part.stop()
+		err := part.pause()
+		if err != nil {
+			log.Printf("Error while pausing download of partId %v", part.partIndex)
+			return err
+		}
 	}
+	return nil
 }
+
+func (d *Download) Pend() error {
+	d.setStatus(Pending)
+	for _, part := range d.parts {
+		err := part.pend()
+		if err != nil {
+			log.Printf("Error while pending download of partId %v", part.partIndex)
+			return err
+		}
+	}
+	return nil
+}
+
 func (d *Download) Cancel() error {
 	d.setStatus(Cancelled)
 	for _, part := range d.parts {

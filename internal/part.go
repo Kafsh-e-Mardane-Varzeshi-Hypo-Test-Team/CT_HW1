@@ -51,7 +51,7 @@ func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
 
 	buffer := make([]byte, 32*1024)
 	for {
-		if p.Status == Paused {
+		if p.Status == Paused || p.Status == Pending {
 			time.Sleep(500 * time.Millisecond)
 			continue
 		} else if p.Status == Failed || p.Status == Cancelled {
@@ -88,9 +88,16 @@ func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
 	log.Println("Downloaded ", p.rangeOfDownload)
 }
 
-func (p *Part) stop() {
-	fmt.Println("downloaded bytes of part", p.partIndex, " :: ", p.downloadedBytes)
+func (p *Part) pause() error {
+	log.Printf("Pausing download of part %v : %v bytes downloaded", p.partIndex, p.downloadedBytes)
 	p.setStatus(Paused)
+	return nil
+}
+
+func (p *Part) pend() error {
+	log.Printf("Pending download of part %v : %v bytes downloaded", p.partIndex, p.downloadedBytes)
+	p.setStatus(Pending)
+	return nil
 }
 
 func (p *Part) setStatus(status Status) {
