@@ -1,8 +1,6 @@
 package tui
 
 import (
-	"strings"
-
 	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal/models"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -41,6 +39,7 @@ type MainView struct {
 	downloadTab    tea.Model
 	queueTab       tea.Model
 	addDownloadTab tea.Model
+	footerString   string
 }
 
 func NewMainView(manager *models.Manager) MainView {
@@ -50,6 +49,7 @@ func NewMainView(manager *models.Manager) MainView {
 		downloadTab:    NewDownloadsTab(manager),
 		queueTab:       NewQueuesTab(manager),
 		addDownloadTab: NewAddDownloadTab(manager),
+		footerString:   "",
 	}
 }
 
@@ -96,8 +96,6 @@ func (m MainView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m MainView) View() string {
-	builder := strings.Builder{}
-
 	// Render tabs
 	tabs := []string{"Add Download", "Downloads List", "Queues List"}
 	var renderedTabs []string
@@ -121,12 +119,12 @@ func (m MainView) View() string {
 	case addDownload:
 		content = m.addDownloadTab.View()
 	}
-
-	builder.WriteString(row)
-	builder.WriteString("\n")
-	builder.WriteString(content)
-
-	return docStyle.Render(builder.String())
+	return docStyle.Render(lipgloss.JoinVertical(
+		lipgloss.Left,
+		row,
+		content,
+		noStyle.Width(100).Render(m.footerString),
+	))
 }
 
 // // cmd

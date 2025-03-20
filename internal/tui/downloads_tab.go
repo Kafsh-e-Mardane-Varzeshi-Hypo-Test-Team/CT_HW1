@@ -37,7 +37,7 @@ func (k downloadsKeyMap) FullHelp() [][]key.Binding {
 
 type DownloadsTab struct {
 	manager      *models.Manager
-	downloads    []models.Download
+	downloads    []*models.DownloadInfo
 	table        table.Model
 	help         help.Model
 	keys         downloadsKeyMap
@@ -45,7 +45,6 @@ type DownloadsTab struct {
 }
 
 func NewDownloadsTab(manager *models.Manager) DownloadsTab {
-	Downloads := models.GetDownloads()
 	columns := []table.Column{
 		{Title: "URL", Width: 30},
 		{Title: "Queue", Width: 20},
@@ -53,16 +52,8 @@ func NewDownloadsTab(manager *models.Manager) DownloadsTab {
 		{Title: "Transfer Rate", Width: 15},
 		{Title: "Progress", Width: 10},
 	}
+
 	rows := []table.Row{}
-	for _, download := range Downloads {
-		rows = append(rows, []string{
-			download.Url,
-			download.Queue,
-			download.Status,
-			download.TransferRate,
-			fmt.Sprintf("%#6.2f%%", download.Progress*100),
-		})
-	}
 
 	t := table.New(
 		table.WithColumns(columns),
@@ -87,9 +78,9 @@ func NewDownloadsTab(manager *models.Manager) DownloadsTab {
 	help.ShowAll = true
 	help.FullSeparator = " \t "
 
-	return DownloadsTab{
+	downloadsTab := DownloadsTab{
 		manager:   manager,
-		downloads: Downloads,
+		downloads: nil,
 		table:     t,
 		help:      help,
 		keys: downloadsKeyMap{
@@ -116,33 +107,49 @@ func NewDownloadsTab(manager *models.Manager) DownloadsTab {
 		},
 		footerString: "",
 	}
+
+	downloadsTab.updateRows()
+
+	return downloadsTab
 }
 
 func (m DownloadsTab) Init() tea.Cmd { return nil }
 
 func (m DownloadsTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
+
+	m.updateRows()
+
 	switch msg := msg.(type) {
 
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keys.Navigation):
 		case key.Matches(msg, m.keys.Pause):
-			// case "p":
-			// 	row := m.table.Cursor()
-			// 	// case switch for selected row
-			// 	// if status is downloading, pause it
-			// 	// if status is paused, resume it
+			if m.table.Cursor() >= 0 && m.table.Cursor() < len(m.downloads) {
+				dl := m.downloads[m.table.Cursor()]
+				switch dl.Status {
+				case models.InProgress:
+					m.manager.PauseDownload(dl.ID)
+					m.updateRows()
+				case models.Paused:
+					m.manager.ResumeDownload(dl.ID)
+					m.updateRows()
+				}
+			}
 		case key.Matches(msg, m.keys.Retry):
-			// case "r":
-			// 	row := m.table.Cursor()
-			// 	// case switch for selected row
-			// 	// if status is failed, retry it
+			if m.table.Cursor() >= 0 && m.table.Cursor() < len(m.downloads) {
+				dl := m.downloads[m.table.Cursor()]
+				if dl.Status == models.Failed {
+					m.manager.ResumeDownload(dl.ID)
+					m.updateRows()
+				}
+			}
 		case key.Matches(msg, m.keys.Delete):
-			// case "d":
-			// 	row := m.table.Cursor()
-			// 	// case switch for selected row
-			// 	// delete the download
+			if m.table.Cursor() >= 0 && m.table.Cursor() < len(m.downloads) {
+				dl := m.downloads[m.table.Cursor()]
+				m.manager.RemoveDownload(dl.ID)
+			}
 		case key.Matches(msg, m.keys.Quit):
 			return m, tea.Quit
 		}
@@ -153,23 +160,26 @@ func (m DownloadsTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m DownloadsTab) View() string {
-	row := m.table.Cursor()
-	status := m.downloads[row].Status
+	m.footerString = fmt.Sprint(m.table.Cursor())
+	if len(m.table.Rows()) != 0 {
+		row := m.table.Cursor()
+		status := m.downloads[row].Status
 
-	// Update the help view
-	switch status {
-	case "Downloading":
-		m.keys.Retry.SetEnabled(false)
-		m.keys.Pause.SetEnabled(true)
-	case "Paused":
-		m.keys.Retry.SetEnabled(false)
-		m.keys.Pause.SetEnabled(true)
-	case "Failed":
-		m.keys.Retry.SetEnabled(true)
-		m.keys.Pause.SetEnabled(false)
-	case "Completed":
-		m.keys.Retry.SetEnabled(false)
-		m.keys.Pause.SetEnabled(false)
+		// Update the help view
+		switch status {
+		case models.InProgress:
+			m.keys.Retry.SetEnabled(false)
+			m.keys.Pause.SetEnabled(true)
+		case models.Paused:
+			m.keys.Retry.SetEnabled(false)
+			m.keys.Pause.SetEnabled(true)
+		case models.Failed:
+			m.keys.Retry.SetEnabled(true)
+			m.keys.Pause.SetEnabled(false)
+		case models.Completed:
+			m.keys.Retry.SetEnabled(false)
+			m.keys.Pause.SetEnabled(false)
+		}
 	}
 
 	return lipgloss.JoinVertical(
@@ -178,4 +188,44 @@ func (m DownloadsTab) View() string {
 		noStyle.Render(m.footerString),
 		helpStyle.Render(m.help.View(m.keys)),
 	)
+}
+
+func (m *DownloadsTab) updateRows() {
+	m.downloads = m.manager.GetDownloadList()
+	rows := []table.Row{}
+	for _, download := range m.downloads {
+		status := download.Status
+
+		var statusString string
+		switch status {
+		case models.InProgress:
+			statusString = "Downloading"
+		case models.Paused:
+			statusString = "Paused"
+		case models.Completed:
+			statusString = "Completed"
+		case models.Failed:
+			statusString = "Failed"
+		}
+
+		rows = append(rows, []string{
+			download.URL,
+			download.QueueName,
+			statusString,
+			speedString(download.TransferRate),
+			fmt.Sprintf("%#6.2f%%", download.Progress*100),
+		})
+	}
+
+	m.table.SetRows(rows)
+}
+
+func speedString(speed int64) string {
+	if speed < 1024 {
+		return fmt.Sprintf("%d B/s", speed)
+	} else if speed < 1024*1024 {
+		return fmt.Sprintf("%d KB/s", speed/1024)
+	} else {
+		return fmt.Sprintf("%d MB/s", speed/1024/1024)
+	}
 }

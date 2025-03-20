@@ -246,11 +246,22 @@ func (m AddDownloadTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				url := m.urlInput.Value()
 				filename := m.filenameInput.Value()
 				queue := m.choices[m.selectedQueue]
-				id, err := models.AddDownload(url, filename, queue)
-				if err == nil {
-					fmt.Println("Download added with ID:", id)
+
+				var err error
+				if url == "" {
+					err = fmt.Errorf("URL cannot be empty")
 				} else {
-					fmt.Println("Error adding download:", err)
+					err = m.manager.AddDownload(url, filename, queue)
+				}
+
+				if err == nil {
+					m.footerMessage = "Download added successfully."
+					m.urlInput.SetValue("")
+					m.filenameInput.SetValue("")
+					m.selectedQueue = 0
+					m.focusIndex = 0
+				} else {
+					m.footerMessage = "Error adding download:" + err.Error()
 				}
 			case "tab", "right":
 				m.focusIndex = min(m.focusIndex+1, 4)
@@ -271,6 +282,7 @@ func (m AddDownloadTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.filenameInput.SetValue("")
 				m.selectedQueue = 0
 				m.focusIndex = 0
+				m.footerMessage = ""
 			case "tab", "down":
 			case "shift+tab", "left":
 				m.focusIndex = max(m.focusIndex-1, 0)
