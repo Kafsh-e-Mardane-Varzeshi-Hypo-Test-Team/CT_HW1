@@ -4,14 +4,38 @@ import (
 	"fmt"
 
 	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal/models"
+	"github.com/charmbracelet/bubbles/help"
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
+// Key Bindings
+type queuesKeyMap struct {
+	Navigation key.Binding
+	Delete     key.Binding
+	Edit       key.Binding
+	NewQueue   key.Binding
+	Quit       key.Binding
+}
+
+func (k queuesKeyMap) ShortHelp() []key.Binding {
+	return []key.Binding{k.Quit}
+}
+
+func (k queuesKeyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		{k.Navigation, k.Quit},
+		{k.NewQueue, k.Edit, k.Delete},
+	}
+}
+
 type QueuesTab struct {
 	Queues []models.Queue
 	table  table.Model
+	help   help.Model
+	keys   queuesKeyMap
 }
 
 func NewQueuesTab() QueuesTab {
@@ -55,9 +79,36 @@ func NewQueuesTab() QueuesTab {
 		Bold(false)
 	t.SetStyles(s)
 
+	help := help.New()
+	help.ShowAll = true
+	help.FullSeparator = " \t "
+
 	return QueuesTab{
 		Queues: Queues,
 		table:  t,
+		help:   help,
+		keys: queuesKeyMap{
+			Navigation: key.NewBinding(
+				key.WithKeys("up", "down", "left", "right"),
+				key.WithHelp("↑/↓/←/→", "navigate"),
+			),
+			Delete: key.NewBinding(
+				key.WithKeys("d"),
+				key.WithHelp("d", "delete"),
+			),
+			NewQueue: key.NewBinding(
+				key.WithKeys("n"),
+				key.WithHelp("n", "new queue"),
+			),
+			Edit: key.NewBinding(
+				key.WithKeys("e"),
+				key.WithHelp("e", "edit"),
+			),
+			Quit: key.NewBinding(
+				key.WithKeys("ctrl+c", "esc", "q"),
+				key.WithHelp("ctrl+c/esc", "quit"),
+			),
+		},
 	}
 }
 
@@ -69,8 +120,15 @@ func (m QueuesTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// case tea.WindowSizeMsg:
 	// 	m.table.SetHeight(msg.Height - 3)
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "esc", "ctrl+c":
+		switch {
+		case key.Matches(msg, m.keys.Navigation):
+		case key.Matches(msg, m.keys.Delete):
+
+		case key.Matches(msg, m.keys.NewQueue):
+
+		case key.Matches(msg, m.keys.Edit):
+
+		case key.Matches(msg, m.keys.Quit):
 			return m, tea.Quit
 		}
 	}
@@ -80,6 +138,9 @@ func (m QueuesTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m QueuesTab) View() string {
-	// TODO: add help text
-	return baseStyle.Render(m.table.View()) + "\n"
+	return lipgloss.JoinVertical(
+		lipgloss.Left,
+		baseStyle.Render(m.table.View()),
+		helpStyle.Render(m.help.View(m.keys)),
+	)
 }

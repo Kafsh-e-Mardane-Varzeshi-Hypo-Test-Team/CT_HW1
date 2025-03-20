@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal/models"
+	"github.com/charmbracelet/bubbles/help"
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -13,9 +15,31 @@ var baseStyle = lipgloss.NewStyle().
 	BorderStyle(lipgloss.NormalBorder()).
 	BorderForeground(lipgloss.Color("240"))
 
+// Key Bindings
+type downloadsKeyMap struct {
+	Navigation key.Binding
+	Delete     key.Binding
+	Pause      key.Binding
+	Retry      key.Binding
+	Quit       key.Binding
+}
+
+func (k downloadsKeyMap) ShortHelp() []key.Binding {
+	return []key.Binding{k.Quit}
+}
+
+func (k downloadsKeyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		{k.Navigation, k.Quit},
+		{k.Delete, k.Pause, k.Retry},
+	}
+}
+
 type DownloadsTab struct {
 	downloads []models.Download
 	table     table.Model
+	help      help.Model
+	keys      downloadsKeyMap
 }
 
 func NewDownloadsTab() DownloadsTab {
@@ -57,9 +81,36 @@ func NewDownloadsTab() DownloadsTab {
 		Bold(false)
 	t.SetStyles(s)
 
+	help := help.New()
+	help.ShowAll = true
+	help.FullSeparator = " \t "
+
 	return DownloadsTab{
 		downloads: Downloads,
 		table:     t,
+		help:      help,
+		keys: downloadsKeyMap{
+			Navigation: key.NewBinding(
+				key.WithKeys("up", "down", "left", "right"),
+				key.WithHelp("↑/↓/←/→", "navigate"),
+			),
+			Delete: key.NewBinding(
+				key.WithKeys("d"),
+				key.WithHelp("d", "delete"),
+			),
+			Pause: key.NewBinding(
+				key.WithKeys("p"),
+				key.WithHelp("p", "pause/resume"),
+			),
+			Retry: key.NewBinding(
+				key.WithKeys("r"),
+				key.WithHelp("r", "retry"),
+			),
+			Quit: key.NewBinding(
+				key.WithKeys("ctrl+c", "esc"),
+				key.WithHelp("ctrl+c/esc", "quit"),
+			),
+		},
 	}
 }
 
@@ -70,14 +121,26 @@ func (m DownloadsTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "esc", "ctrl+c":
-			return m, tea.Quit
+		switch {
+		case key.Matches(msg, m.keys.Navigation):
+		case key.Matches(msg, m.keys.Pause):
 			// case "p":
 			// 	row := m.table.Cursor()
 			// 	// case switch for selected row
 			// 	// if status is downloading, pause it
 			// 	// if status is paused, resume it
+		case key.Matches(msg, m.keys.Retry):
+			// case "r":
+			// 	row := m.table.Cursor()
+			// 	// case switch for selected row
+			// 	// if status is failed, retry it
+		case key.Matches(msg, m.keys.Delete):
+			// case "d":
+			// 	row := m.table.Cursor()
+			// 	// case switch for selected row
+			// 	// delete the download
+		case key.Matches(msg, m.keys.Quit):
+			return m, tea.Quit
 		}
 	}
 
@@ -86,6 +149,28 @@ func (m DownloadsTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m DownloadsTab) View() string {
-	// TODO: add help text
-	return baseStyle.Render(m.table.View()) + "\n"
+	row := m.table.Cursor()
+	status := m.downloads[row].Status
+
+	// Update the help view
+	switch status {
+	case "Downloading":
+		m.keys.Retry.SetEnabled(false)
+		m.keys.Pause.SetEnabled(true)
+	case "Paused":
+		m.keys.Retry.SetEnabled(false)
+		m.keys.Pause.SetEnabled(true)
+	case "Failed":
+		m.keys.Retry.SetEnabled(true)
+		m.keys.Pause.SetEnabled(false)
+	case "Completed":
+		m.keys.Retry.SetEnabled(false)
+		m.keys.Pause.SetEnabled(false)
+	}
+
+	return lipgloss.JoinVertical(
+		lipgloss.Left,
+		baseStyle.Render(m.table.View()),
+		helpStyle.Render(m.help.View(m.keys)),
+	)
 }

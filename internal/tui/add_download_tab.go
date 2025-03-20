@@ -31,48 +31,23 @@ var (
 )
 
 // Key Bindings
-type keyMap struct {
+type addDownloadKeyMap struct {
 	Next       key.Binding
 	Prev       key.Binding
 	Navigation key.Binding
 	Select     key.Binding
-	Submit     key.Binding
-	Cancel     key.Binding
 	Quit       key.Binding
 }
 
-func (k keyMap) ShortHelp() []key.Binding {
+func (k addDownloadKeyMap) ShortHelp() []key.Binding {
 	return []key.Binding{k.Quit}
 }
 
-func (k keyMap) FullHelp() [][]key.Binding {
+func (k addDownloadKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.Next, k.Prev, k.Navigation}, // Navigation keys
 		{k.Select, k.Quit},             // Actions
 	}
-}
-
-var keys = keyMap{
-	Next: key.NewBinding(
-		key.WithKeys("tab"),
-		key.WithHelp("tab", "next field"),
-	),
-	Prev: key.NewBinding(
-		key.WithKeys("shift+tab"),
-		key.WithHelp("shift+tab", "previous field"),
-	),
-	Navigation: key.NewBinding(
-		key.WithKeys("up", "down", "left", "right"),
-		key.WithHelp("↑/↓/←/→", "navigate"),
-	),
-	Select: key.NewBinding(
-		key.WithKeys("enter"),
-		key.WithHelp("enter", "select"),
-	),
-	Quit: key.NewBinding(
-		key.WithKeys("ctrl+c", "esc"),
-		key.WithHelp("ctrl+c/esc", "quit"),
-	),
 }
 
 // List Item Delegate
@@ -124,8 +99,7 @@ type AddDownloadTab struct {
 	selectedQueue int
 	listExpanded  bool
 	help          help.Model
-	keys          keyMap
-	showHelp      bool
+	keys          addDownloadKeyMap
 }
 
 func NewAddDownloadTab() AddDownloadTab {
@@ -170,8 +144,28 @@ func NewAddDownloadTab() AddDownloadTab {
 		selectedQueue: 0,
 		focusIndex:    0,
 		help:          help,
-		keys:          keys,
-		showHelp:      true,
+		keys: addDownloadKeyMap{
+			Next: key.NewBinding(
+				key.WithKeys("tab"),
+				key.WithHelp("tab", "next field"),
+			),
+			Prev: key.NewBinding(
+				key.WithKeys("shift+tab"),
+				key.WithHelp("shift+tab", "previous field"),
+			),
+			Navigation: key.NewBinding(
+				key.WithKeys("up", "down", "left", "right"),
+				key.WithHelp("↑/↓/←/→", "navigate"),
+			),
+			Select: key.NewBinding(
+				key.WithKeys("enter"),
+				key.WithHelp("enter", "select"),
+			),
+			Quit: key.NewBinding(
+				key.WithKeys("ctrl+c", "esc"),
+				key.WithHelp("ctrl+c/esc", "quit"),
+			),
+		},
 	}
 }
 

@@ -49,7 +49,7 @@ func GetDownloads() []Download {
 		{
 			Url:          "https://instagram.com",
 			Queue:        "6",
-			Status:       "Error",
+			Status:       "Failed",
 			TransferRate: "",
 			Progress:     0,
 		},
