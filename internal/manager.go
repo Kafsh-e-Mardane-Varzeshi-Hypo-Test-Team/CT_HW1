@@ -42,6 +42,7 @@ func (m *Manager) AddDownload(url, outputFileName, queueName string) error {
 	d := NewDownload(m.LastID, url, q.GetSavePath(), outputFileName, queueName)
 	m.LastID++
 
+	d.SetStatus(Pending)
 	if q.IsActive() {
 		err := q.AddDownload(d)
 		if err != nil {
@@ -78,7 +79,7 @@ func (m *Manager) PauseDownload(id int) error {
 	defer m.mu.Unlock()
 
 	var d *Download
-	for i, dl := range m.Downloads {
+	for _, dl := range m.Downloads {
 		if dl.ID == id {
 			d = dl
 			break
@@ -91,7 +92,7 @@ func (m *Manager) PauseDownload(id int) error {
 	return nil
 }
 
-func (m *Manager) ResumeDownload(id int) {
+func (m *Manager) ResumeDownload(id int) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -103,7 +104,20 @@ func (m *Manager) ResumeDownload(id int) {
 		}
 	}
 
-	log.Printf("removed download %q from queue %q\n", d.URL, d.GetQueueName())
+	q, exists := m.Queues[d.queueName]
+	if !exists {
+		return errors.New("queue not found")
+	}
+
+	d.SetStatus(Pending)
+	if q.IsActive() {
+		err := q.AddDownload(d)
+		if err != nil {
+			return err
+		}
+	}
+
+	log.Printf("resume download %q in queue %q\n", d.URL, d.GetQueueName())
 	return nil
 }
 
