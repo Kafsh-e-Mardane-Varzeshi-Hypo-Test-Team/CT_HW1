@@ -205,3 +205,13 @@ func (d *Download) GetQueueName() string {
 func (d *Download) GetStatus() Status {
 	return d.Status
 }
+
+func (d *Download) GetTransferRate() int64 {
+	// TODO
+	return 0
+}
+
+func (d *Download) GetProgress() float32 {
+	// TODO
+	return 0.
+}

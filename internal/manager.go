@@ -71,6 +71,19 @@ func (m *Manager) removeDownload(d *Download) error {
 	return nil
 }
 
+func (m *Manager) GetDownloadList() []*DownloadInfo {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	var list []*DownloadInfo
+
+	for _, d := range m.Downloads {
+		list = append(list, &DownloadInfo{d.ID, d.URL, d.GetQueueName(), d.GetTransferRate(), d.GetProgress(), d.GetStatus()})
+	}
+
+	return list
+}
+
 func (m *Manager) addQueue(q *Queue) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
