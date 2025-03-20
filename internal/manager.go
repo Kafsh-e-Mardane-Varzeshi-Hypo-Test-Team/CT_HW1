@@ -71,8 +71,6 @@ func (m *Manager) removeDownload(d *Download) error {
 	return nil
 }
 
-func (m *Manager) GetDownloadList() []DownloadInfo
-
 func (m *Manager) addQueue(q *Queue) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
