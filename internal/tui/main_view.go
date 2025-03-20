@@ -84,7 +84,7 @@ func (m MainView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.currentTab++
 			}
 		// TODO: q means different things in different tabs (e.g. in addDownloadTab, q is a character that can be typed)
-		case "q", "esc", "ctrl+c":
+		case "esc", "ctrl+c":
 			return m, tea.Quit
 		}
 	}

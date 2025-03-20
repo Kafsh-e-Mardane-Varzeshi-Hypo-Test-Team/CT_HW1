@@ -34,49 +34,44 @@ var (
 type keyMap struct {
 	Next       key.Binding
 	Prev       key.Binding
+	Navigation key.Binding
 	Select     key.Binding
 	Submit     key.Binding
 	Cancel     key.Binding
-	ToggleHelp key.Binding
 	Quit       key.Binding
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.ToggleHelp, k.Quit}
+	return []key.Binding{k.Quit}
 }
 
 func (k keyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Next, k.Prev},               // Navigation keys
-		{k.Select, k.Submit, k.Cancel}, // Actions
-		{k.ToggleHelp, k.Quit},         // Help and quit
+		{k.Next, k.Prev, k.Navigation}, // Navigation keys
+		{k.Select, k.Quit},             // Actions
 	}
 }
 
 var keys = keyMap{
 	Next: key.NewBinding(
-		key.WithKeys("tab", "down"),
-		key.WithHelp("tab/↓", "next field"),
+		key.WithKeys("tab"),
+		key.WithHelp("tab", "next field"),
 	),
 	Prev: key.NewBinding(
-		key.WithKeys("shift+tab", "up"),
-		key.WithHelp("shift+tab/↑", "previous field"),
+		key.WithKeys("shift+tab"),
+		key.WithHelp("shift+tab", "previous field"),
+	),
+	Navigation: key.NewBinding(
+		key.WithKeys("up", "down", "left", "right"),
+		key.WithHelp("↑/↓/←/→", "navigate"),
 	),
 	Select: key.NewBinding(
 		key.WithKeys("enter"),
 		key.WithHelp("enter", "select"),
 	),
-	Submit: key.NewBinding(
-		key.WithKeys("enter"),
-		key.WithHelp("enter", "confirm download"),
-	),
-	Cancel: key.NewBinding(
-		key.WithKeys("esc"),
-		key.WithHelp("esc", "cancel"),
-	),
 	Quit: key.NewBinding(
-		key.WithKeys("ctrl+c"),
-		key.WithHelp("ctrl+c", "quit"),
+		key.WithKeys("ctrl+c", "esc"),
+		key.WithHelp("ctrl+c/esc", "quit"),
 	),
 }
 
@@ -165,6 +160,7 @@ func NewAddDownloadTab() AddDownloadTab {
 
 	help := help.New()
 	help.ShowAll = true
+	help.FullSeparator = " \t "
 
 	return AddDownloadTab{
 		urlInput:      urlInput,
@@ -185,19 +181,12 @@ func (m AddDownloadTab) Init() tea.Cmd {
 
 func (m AddDownloadTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, m.keys.ToggleHelp):
-			m.showHelp = !m.showHelp
-		}
-	}
 	switch m.focusIndex {
 	case urlField:
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
-			case "tab", "enter", "down":
+			case "tab", "down":
 				m.focusIndex = min(m.focusIndex+1, 4)
 			case "up", "shift+tab":
 				m.focusIndex = max(m.focusIndex-1, 0)
@@ -211,7 +200,7 @@ func (m AddDownloadTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
-			case "tab", "enter", "down":
+			case "tab", "down":
 				m.focusIndex = min(m.focusIndex+1, 4)
 			case "up", "shift+tab":
 				m.focusIndex = max(m.focusIndex-1, 0)
@@ -264,8 +253,9 @@ func (m AddDownloadTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				} else {
 					fmt.Println("Error adding download:", err)
 				}
-			case "tab", "down":
+			case "tab", "right":
 				m.focusIndex = min(m.focusIndex+1, 4)
+				cmd = tea.Cmd(textinput.Blink)
 			case "up", "shift+tab":
 				m.focusIndex = max(m.focusIndex-1, 0)
 			case "ctrl+c":
@@ -279,9 +269,10 @@ func (m AddDownloadTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter":
 				return NewMainView(), nil
 			case "tab", "down":
-				m.focusIndex = min(m.focusIndex+1, 4)
-			case "up", "shift+tab":
+			case "shift+tab", "left":
 				m.focusIndex = max(m.focusIndex-1, 0)
+			case "up":
+				m.focusIndex = queueField
 			case "ctrl+c":
 				return m, tea.Quit
 			}

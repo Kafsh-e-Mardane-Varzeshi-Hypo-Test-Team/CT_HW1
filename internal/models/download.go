@@ -1,6 +1,7 @@
 package models
 
 type Download struct {
+	ID           int
 	Url          string
 	Queue        string
 	Status       string

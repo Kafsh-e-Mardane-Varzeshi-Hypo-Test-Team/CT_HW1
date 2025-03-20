@@ -14,7 +14,7 @@ var baseStyle = lipgloss.NewStyle().
 	BorderForeground(lipgloss.Color("240"))
 
 type DownloadsTab struct {
-	Downloads []models.Download
+	downloads []models.Download
 	table     table.Model
 }
 
@@ -58,7 +58,7 @@ func NewDownloadsTab() DownloadsTab {
 	t.SetStyles(s)
 
 	return DownloadsTab{
-		Downloads: Downloads,
+		downloads: Downloads,
 		table:     t,
 	}
 }
@@ -68,18 +68,16 @@ func (m DownloadsTab) Init() tea.Cmd { return nil }
 func (m DownloadsTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
-	// case tea.WindowSizeMsg:
-	// 	m.table.SetHeight(msg.Height - 3)
+
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "q", "ctrl+c":
+		case "esc", "ctrl+c":
 			return m, tea.Quit
-		case "esc":
-			if m.table.Focused() {
-				m.table.Blur()
-			} else {
-				m.table.Focus()
-			}
+			// case "p":
+			// 	row := m.table.Cursor()
+			// 	// case switch for selected row
+			// 	// if status is downloading, pause it
+			// 	// if status is paused, resume it
 		}
 	}
 

@@ -70,14 +70,8 @@ func (m QueuesTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// 	m.table.SetHeight(msg.Height - 3)
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "q", "ctrl+c":
+		case "esc", "ctrl+c":
 			return m, tea.Quit
-		case "esc":
-			if m.table.Focused() {
-				m.table.Blur()
-			} else {
-				m.table.Focus()
-			}
 		}
 	}
 
