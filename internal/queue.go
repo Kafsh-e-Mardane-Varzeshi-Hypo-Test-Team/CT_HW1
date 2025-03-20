@@ -20,7 +20,7 @@ type Queue struct {
 	StartTime     time.Time
 	EndTime       time.Time
 	MaxBandwidth  int
-	isActive      bool
+	active        bool
 }
 
 func NewQueue(name, savePath string, numConcurrent, numRetries int, startTime, endTime time.Time, maxBandwidth int) *Queue {
@@ -32,7 +32,7 @@ func NewQueue(name, savePath string, numConcurrent, numRetries int, startTime, e
 		StartTime:     startTime,
 		EndTime:       endTime,
 		MaxBandwidth:  maxBandwidth,
-		isActive:      false,
+		active:        false,
 	}
 }
 
@@ -49,7 +49,7 @@ func (q *Queue) AddDownload(d *Download) error {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	if !q.isActive {
+	if !q.active {
 		log.Printf("download %T did NOT add to queue %T downloadChan\n", d, q)
 		return nil // TODO: error handling
 	}
@@ -68,10 +68,10 @@ func (q *Queue) Start(queuedDownloads []*Download) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	if q.isActive {
+	if q.active {
 		return
 	}
-	q.isActive = true
+	q.active = true
 
 	q.downloadChan = make(chan *Download, 100)
 	q.done = make(chan struct{})
@@ -129,7 +129,7 @@ func (q *Queue) Stop() {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	q.isActive = false
+	q.active = false
 
 	close(q.downloadChan)
 	close(q.done)
@@ -144,10 +144,10 @@ func (q *Queue) GetSavePath() string {
 	return q.SavePath
 }
 
-func (q *Queue) GetNumConcurrent() string {
+func (q *Queue) GetNumConcurrent() int {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	return q.SavePath
+	return q.NumConcurrent
 }
 
 func (q *Queue) GetMaxBandwidth() int {
@@ -171,7 +171,7 @@ func (q *Queue) GetEndTime() time.Time {
 func (q *Queue) IsActive() bool {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	return q.isActive
+	return q.active
 }
 
 func (q *Queue) CheckActiveTime(now time.Time) bool {
