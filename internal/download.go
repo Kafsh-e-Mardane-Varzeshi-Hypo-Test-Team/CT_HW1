@@ -212,7 +212,7 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 }
 
 // TODO: error
-func (d *Download) Stop() {
+func (d *Download) Pause() {
 	d.setStatus(Paused)
 	for _, part := range d.parts {
 		part.stop()
