@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"sync"
+	"time"
 )
 
 const NUMBER_OF_PARTS int = 5
@@ -25,18 +26,22 @@ const (
 )
 
 type Download struct {
-	ID             int
-	URL            string
-	Destination    string
-	OutputFileName string
-	queueName      string
-	headResp       *http.Response
-	numberOfParts  int
-	totalSize      int64
-	downloadedSize int64
-	channel        chan error
-	parts          []*Part
-	mu             sync.Mutex
+	ID                 int
+	URL                string
+	Destination        string
+	OutputFileName     string
+	queueName          string
+	headResp           *http.Response
+	numberOfParts      int
+	totalSize          int64
+	lastDownloadedSize int64
+	downloadedSize     int64
+	downloadPercentage float64
+	currentSpeed       float64
+	lastUpdateTime     time.Time
+	channel            chan error
+	parts              []*Part
+	mu                 sync.Mutex
 	Status
 	// TODO: Add array of size 'numberOfParts' for storing number of downloaded bytes from this part
 	// TODO: Calculate download percentage using this array
@@ -45,12 +50,15 @@ type Download struct {
 
 func NewDownload(id int, url, destination, outputFileName, queueName string) *Download {
 	return &Download{
-		ID:             id,
-		URL:            url,
-		Destination:    destination,
-		OutputFileName: outputFileName,
-		queueName:      queueName,
-		Status:         Pending,
+		ID:                 id,
+		URL:                url,
+		Destination:        destination,
+		OutputFileName:     outputFileName,
+		queueName:          queueName,
+		Status:             Pending,
+		lastDownloadedSize: 0,
+		downloadedSize:     0,
+		downloadPercentage: 0,
 	}
 }
 
@@ -161,6 +169,9 @@ func (d *Download) mergeParts() error {
 }
 
 func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
+	d.lastUpdateTime = time.Now()
+	go d.monitorProgress()
+
 	err := d.setHttpResponse()
 	if err != nil {
 		return err
@@ -209,6 +220,40 @@ func (d *Download) setStatus(status Status) {
 	d.mu.Lock()
 	d.Status = status
 	d.mu.Unlock()
+}
+
+func (d *Download) monitorProgress() {
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
+	isActive := true
+	for range ticker.C {
+		<-ticker.C
+		if d.Status != InProgress {
+			if isActive {
+				isActive = false
+			} else {
+				return
+			}
+		}
+
+		d.mu.Lock()
+		now := time.Now()
+		elapsed := now.Sub(d.lastUpdateTime).Seconds()
+		bytesDownloaded := d.downloadedSize - d.lastDownloadedSize
+
+		if d.Status != Paused && elapsed > 0 {
+			d.currentSpeed = float64(bytesDownloaded) / elapsed
+			d.lastDownloadedSize = d.downloadedSize
+			d.lastUpdateTime = now
+		} else if d.Status == Paused {
+			d.currentSpeed = 0
+		}
+
+		percentage := float64(d.downloadedSize) / float64(d.totalSize) * 100
+		d.downloadPercentage = percentage
+		d.mu.Unlock()
+	}
 }
 
 func (d *Download) GetQueueName() string {
