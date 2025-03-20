@@ -168,6 +168,8 @@ func (d *Download) mergeParts() error {
 }
 
 func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
+	d.path = d.Destination + "/" + d.OutputFileName
+
 	d.lastUpdateTime = time.Now()
 	go d.monitorProgress()
 
