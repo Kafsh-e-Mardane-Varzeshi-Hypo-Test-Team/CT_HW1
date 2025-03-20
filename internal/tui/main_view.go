@@ -109,7 +109,3 @@ func (m MainView) View() string {
 		noStyle.Width(100).Render(m.footerString),
 	))
 }
-
-// // cmd
-
-// // msg

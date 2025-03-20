@@ -32,12 +32,13 @@ func (k queuesKeyMap) FullHelp() [][]key.Binding {
 }
 
 type QueuesTab struct {
-	manager *models.Manager
-	queues  []models.Queue
-	table   table.Model
-	help    help.Model
-	keys    queuesKeyMap
-
+	manager      *models.Manager
+	queues       []models.Queue
+	table        table.Model
+	help         help.Model
+	keys         queuesKeyMap
+	addQueueTab  tea.Model
+	addingQueue  bool
 	footerString string
 }
 
@@ -87,10 +88,12 @@ func NewQueuesTab(manager *models.Manager) QueuesTab {
 	help.FullSeparator = " \t "
 
 	return QueuesTab{
-		manager: manager,
-		queues:  Queues,
-		table:   t,
-		help:    help,
+		manager:     manager,
+		queues:      Queues,
+		table:       t,
+		addQueueTab: NewAddQueueTab(manager),
+		addingQueue: false,
+		help:        help,
 		keys: queuesKeyMap{
 			Navigation: key.NewBinding(
 				key.WithKeys("up", "down", "left", "right"),
@@ -121,32 +124,50 @@ func (m QueuesTab) Init() tea.Cmd { return nil }
 
 func (m QueuesTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-	switch msg := msg.(type) {
-	// case tea.WindowSizeMsg:
-	// 	m.table.SetHeight(msg.Height - 3)
-	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, m.keys.Navigation):
-		case key.Matches(msg, m.keys.Delete):
 
-		case key.Matches(msg, m.keys.NewQueue):
-
-		case key.Matches(msg, m.keys.Edit):
-
-		case key.Matches(msg, m.keys.Quit):
-			return m, tea.Quit
+	if m.addingQueue {
+		switch msg := msg.(type) {
+		case CloseChildMsg:
+			m.addingQueue = false
+			m.footerString = ""
+			return m, nil
+		default:
+			m.addQueueTab, cmd = m.addQueueTab.Update(msg)
+			return m, cmd
 		}
-	}
+	} else {
+		switch msg := msg.(type) {
+		// case tea.WindowSizeMsg:
+		// 	m.table.SetHeight(msg.Height - 3)
+		case tea.KeyMsg:
+			switch {
+			case key.Matches(msg, m.keys.Navigation):
+			case key.Matches(msg, m.keys.Delete):
 
-	m.table, cmd = m.table.Update(msg)
-	return m, cmd
+			case key.Matches(msg, m.keys.NewQueue):
+				m.addingQueue = true
+				cmd = m.addQueueTab.Init()
+			case key.Matches(msg, m.keys.Edit):
+
+			case key.Matches(msg, m.keys.Quit):
+				return m, tea.Quit
+			}
+		}
+		var cmds tea.Cmd
+		m.table, cmds = m.table.Update(msg)
+		return m, tea.Batch(cmd, cmds)
+	}
 }
 
 func (m QueuesTab) View() string {
-	return lipgloss.JoinVertical(
-		lipgloss.Left,
-		borderedStyle.Render(m.table.View()),
-		noStyle.Render(m.footerString),
-		helpStyle.Render(m.help.View(m.keys)),
-	)
+	if m.addingQueue {
+		return m.addQueueTab.View()
+	} else {
+		return lipgloss.JoinVertical(
+			lipgloss.Left,
+			borderedStyle.Render(m.table.View()),
+			noStyle.Render(m.footerString),
+			helpStyle.Render(m.help.View(m.keys)),
+		)
+	}
 }
