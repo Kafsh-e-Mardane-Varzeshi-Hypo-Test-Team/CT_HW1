@@ -238,6 +238,11 @@ func (d *Download) monitorProgress() {
 		}
 
 		d.mu.Lock()
+		d.downloadedSize = 0
+		for _, part := range d.parts {
+			d.downloadedSize += part.downloadedBytes
+		}
+		
 		now := time.Now()
 		elapsed := now.Sub(d.lastUpdateTime).Seconds()
 		bytesDownloaded := d.downloadedSize - d.lastDownloadedSize
