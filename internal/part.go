@@ -11,8 +11,8 @@ import (
 
 type Part struct {
 	partIndex       int
-	startIndex      int
-	endIndex        int
+	startIndex      int64
+	endIndex        int64
 	downloadedBytes int64
 	rangeOfDownload string
 	path            string
@@ -20,7 +20,7 @@ type Part struct {
 	Status
 }
 
-func (p *Part) start(channel chan error) {
+func (p *Part) start(channel chan error) { 
 	// TODO: rangeOfDownload should be updated.
 	p.req.Header.Set("Range", "bytes="+p.rangeOfDownload)
 

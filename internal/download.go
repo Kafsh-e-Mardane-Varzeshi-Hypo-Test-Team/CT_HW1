@@ -28,8 +28,9 @@ type Download struct {
 	OutputFileName string
 	queueName      string
 	headResp       *http.Response
-	contentLength  int
 	numberOfParts  int
+	totalSize int64
+	downloadedSize int64
 	channel        chan error
 	parts          []*Part
 	Status
@@ -71,8 +72,8 @@ func (d *Download) setHttpResponse() error {
 	return nil
 }
 
-func (d *Download) setContentLength() {
-	d.contentLength = int(d.headResp.ContentLength)
+func (d *Download) setTotalSize() {
+	d.totalSize = d.headResp.ContentLength
 }
 
 func (d *Download) supportsPartialDownload() bool {
@@ -85,7 +86,7 @@ func (d *Download) supportsPartialDownload() bool {
 }
 
 func (d *Download) downloadParts() error {
-	partSize := d.contentLength / d.numberOfParts
+	partSize := d.totalSize / int64(d.numberOfParts)
 	for i := range d.numberOfParts {
 		req, err := http.NewRequest("GET", d.URL, nil)
 		if err != nil {
@@ -95,16 +96,16 @@ func (d *Download) downloadParts() error {
 
 		p := Part{
 			partIndex:       i,
-			startIndex:      i * partSize,
-			endIndex:        (i + 1) * partSize,
+			startIndex:      int64(i) * partSize,
+			endIndex:        int64(i + 1) * partSize,
 			downloadedBytes: 0,
 			Status:          Pending,
 			req:             req,
 		}
 		if i == d.numberOfParts-1 {
-			p.endIndex = d.contentLength - 1
+			p.endIndex = d.totalSize - 1
 		}
-		p.rangeOfDownload = strconv.Itoa(p.startIndex) + "-" + strconv.Itoa(p.endIndex)
+		p.rangeOfDownload = strconv.Itoa(int(p.startIndex)) + "-" + strconv.Itoa(int(p.endIndex))
 		p.path = d.Destination + "/" + d.OutputFileName + p.rangeOfDownload + ".part"
 
 		d.parts[i] = &p
@@ -155,16 +156,16 @@ func (d *Download) Start() error {
 	if err != nil {
 		return err
 	}
-	d.setContentLength()
+	d.setTotalSize()
 
-	if d.contentLength == 0 {
+	if d.totalSize == 0 {
 		d.Status = Failed
 		log.Fatal("Content length is invalid")
 		return errors.New("content length is invalid")
 	}
 
 	d.Status = InProgress
-	log.Println("Content length is", d.contentLength)
+	log.Println("Content length is", d.totalSize)
 	if d.supportsPartialDownload() {
 		d.numberOfParts = NUMBER_OF_PARTS
 	} else {
