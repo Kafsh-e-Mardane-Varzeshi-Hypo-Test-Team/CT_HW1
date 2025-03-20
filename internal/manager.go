@@ -172,6 +172,26 @@ func (m *Manager) RemoveQueue(queueName string) error {
 	return nil
 }
 
+func (m *Manager) UpdateQueue(qInfo QueueInfo) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	q, exists := m.Queues[qInfo.Name]
+	if !exists {
+		return errors.New("queue does not exist")
+	}
+
+	q.UpdateConfig(
+		qInfo.TargetDirectory,
+		qInfo.MaxParallel,
+		qInfo.NumRetries,
+		qInfo.StartTime,
+		qInfo.EndTime,
+		qInfo.SpeedLimit,
+	) // error handling
+	return nil
+}
+
 func (m *Manager) getQueuePendingDownloads(queueName string) []*Download {
 	m.mu.Lock()
 	defer m.mu.Unlock()
