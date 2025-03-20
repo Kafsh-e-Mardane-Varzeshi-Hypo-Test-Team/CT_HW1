@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -17,6 +18,7 @@ type Part struct {
 	rangeOfDownload string
 	path            string
 	req             *http.Request
+	mu              sync.Mutex
 	Status
 }
 
@@ -32,7 +34,7 @@ func (p *Part) start(channel chan error) {
 	resp, err := client.Do(p.req)
 	if err != nil {
 		log.Printf("Error performing http request for partId = %d: %v\n", p.partIndex, err)
-		p.Status = Failed
+		p.setStatus(Failed)
 		channel <- err
 		return
 	}
@@ -41,7 +43,7 @@ func (p *Part) start(channel chan error) {
 	file, err := os.OpenFile(p.path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		log.Printf("Error opening part file with partId = %d: %v\n", p.partIndex, err)
-		p.Status = Failed
+		p.setStatus(Failed)
 		channel <- err
 		return
 	}
@@ -56,37 +58,48 @@ func (p *Part) start(channel chan error) {
 			return
 		}
 
-		p.Status = InProgress
+		p.setStatus(InProgress)
 		n, err := resp.Body.Read(buffer)
 		if n > 0 {
 			_, err := file.Write(buffer[:n])
 			if err != nil {
-				p.Status = Failed
 				log.Printf("Error writing buffer to part file for partId = %d: %v\n", p.partIndex, err)
-				log.Fatal(err)
+				p.setStatus(Failed)
 				channel <- err
 				return
 			}
 
-			p.downloadedBytes += int64(n)
+			p.addToDownloadedBytes(n)
 		}
 		if err != nil {
 			if err == io.EOF {
 				break
 			}
-			p.Status = Failed
 			log.Printf("Error reading body of http request for partId = %d: %v\n", p.partIndex, err)
+			p.setStatus(Failed)
 			channel <- err
 			return
 		}
 	}
 
+	p.setStatus(Completed)
 	channel <- nil
-	p.Status = Completed
 	log.Println("Downloaded ", p.rangeOfDownload)
 }
 
 func (p *Part) stop() {
 	fmt.Println("downloaded bytes of part", p.partIndex, " :: ", p.downloadedBytes)
-	p.Status = Paused
+	p.setStatus(Paused)
+}
+
+func (p *Part) setStatus(status Status) {
+	p.mu.Lock()
+	p.Status = status
+	p.mu.Unlock()
+}
+
+func (p *Part) addToDownloadedBytes(n int) {
+	p.mu.Lock()
+	p.downloadedBytes += int64(n)
+	p.mu.Unlock()
 }

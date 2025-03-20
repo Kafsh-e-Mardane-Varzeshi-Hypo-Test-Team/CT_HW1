@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"sync"
 )
 
 const NUMBER_OF_PARTS int = 5
@@ -35,6 +36,7 @@ type Download struct {
 	downloadedSize int64
 	channel        chan error
 	parts          []*Part
+	mu             sync.Mutex
 	Status
 	// TODO: Add array of size 'numberOfParts' for storing number of downloaded bytes from this part
 	// TODO: Calculate download percentage using this array
@@ -166,12 +168,12 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 	d.setTotalSize()
 
 	if d.totalSize == 0 {
-		d.Status = Failed
+		d.setStatus(Failed)
 		log.Printf("Content length in downloadID = %d is invalid\n", d.ID)
 		return errors.New("content length is invalid")
 	}
 
-	d.Status = InProgress
+	d.setStatus(InProgress)
 	log.Printf("Content length in downloadID = %d is %d\n", d.ID, d.totalSize)
 	if d.supportsPartialDownload() {
 		d.numberOfParts = NUMBER_OF_PARTS
@@ -192,7 +194,7 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 		return err
 	}
 
-	d.Status = Completed
+	d.setStatus(Completed)
 	return nil
 }
 
@@ -200,7 +202,13 @@ func (d *Download) Stop() {
 	for _, part := range d.parts {
 		part.stop()
 	}
-	d.Status = Paused
+	d.setStatus(Paused)
+}
+
+func (d *Download) setStatus(status Status) {
+	d.mu.Lock()
+	d.Status = status
+	d.mu.Unlock()
 }
 
 func (d *Download) GetQueueName() string {
