@@ -2,6 +2,7 @@ package internal
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -107,10 +108,13 @@ func (d *Download) downloadParts() error {
 		if i == d.numberOfParts-1 {
 			p.endIndex = d.totalSize - 1
 		}
-		p.rangeOfDownload = strconv.Itoa(int(p.startIndex)) + "-" + strconv.Itoa(int(p.endIndex))
-		p.path = d.Destination + "/" + d.OutputFileName + p.rangeOfDownload + ".part"
+		p.rangeOfDownload = strconv.Itoa(int(p.startIndex + p.downloadedBytes)) + "-" + strconv.Itoa(int(p.endIndex))
+		if p.path == "" {
+			p.path = d.Destination + "/" + d.OutputFileName + p.rangeOfDownload + ".part"
+		}
 
 		d.parts[i] = &p
+		fmt.Println("starting part", i)
 		go d.parts[i].start(d.channel)
 	}
 
@@ -153,7 +157,7 @@ func (d *Download) mergeParts() error {
 	return nil
 }
 
-func (d *Download) Start() error {
+func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 	err := d.setHttpResponse()
 	if err != nil {
 		return err

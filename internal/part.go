@@ -20,8 +20,8 @@ type Part struct {
 	Status
 }
 
-func (p *Part) start(channel chan error) { 
-	// TODO: rangeOfDownload should be updated.
+func (p *Part) start(channel chan error) {
+	fmt.Println("part", p.partIndex, "started")
 	p.req.Header.Set("Range", "bytes="+p.rangeOfDownload)
 
 	// TODO: Ask if it's better to save this client as a field in Download struct
@@ -35,11 +35,14 @@ func (p *Part) start(channel chan error) {
 	}
 	defer resp.Body.Close()
 
-	file, err := os.Create(p.path)
+	if p.Status == Completed {
+		return
+	}
+
+	file, err := os.OpenFile(p.path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
-		p.Status = Failed
 		log.Fatal(err)
-		channel <- err
+		fmt.Printf("Error opening temp file for part %d: %v\n", p.partIndex, err)
 		return
 	}
 	defer file.Close()
