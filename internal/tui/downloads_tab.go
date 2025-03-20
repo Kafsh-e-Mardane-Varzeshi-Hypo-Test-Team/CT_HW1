@@ -11,10 +11,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-var baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.NormalBorder()).
-	BorderForeground(lipgloss.Color("240"))
-
 // Key Bindings
 type downloadsKeyMap struct {
 	Navigation key.Binding
@@ -160,7 +156,6 @@ func (m DownloadsTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m DownloadsTab) View() string {
-	m.footerString = fmt.Sprint(m.table.Cursor())
 	if len(m.table.Rows()) != 0 {
 		row := m.table.Cursor()
 		status := m.downloads[row].Status

@@ -14,23 +14,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// Styles
-var (
-	focusedStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	blurredStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
-	itemStyle         = lipgloss.NewStyle().PaddingLeft(4)
-	cursorStyle       = focusedStyle
-	noStyle           = lipgloss.NewStyle()
-	helpStyle         = blurredStyle.Margin(1, 0, 0, 0)
-
-	blurredButton  = lipgloss.NewStyle().Foreground(lipgloss.Color("194"))
-	focusedConfirm = focusedStyle.Render("[ Confirm ]")
-	blurredConfirm = blurredButton.Render("[ Confirm ]")
-	focusedCancel  = focusedStyle.Render("[ Cancel ]")
-	blurredCancel  = blurredButton.Render("[ Cancel ]")
-)
-
 // Key Bindings
 type addDownloadKeyMap struct {
 	Next       key.Binding
@@ -330,7 +313,7 @@ func (m AddDownloadTab) View() string {
 		if m.focusIndex == 2 {
 			queueDisplay = focusedStyle.Render(m.choices[m.selectedQueue])
 		} else {
-			queueDisplay = blurredStyle.Render(m.choices[m.selectedQueue])
+			queueDisplay = noStyle.Render(m.choices[m.selectedQueue])
 		}
 		footerHelpText = m.help.View(m.keys)
 	}
@@ -347,17 +330,17 @@ func (m AddDownloadTab) View() string {
 		lipgloss.Left,
 		lipgloss.JoinHorizontal(
 			lipgloss.Top,
-			"URL: ",
+			noStyle.Render("URL: "),
 			m.urlInput.View(),
 		),
 		lipgloss.JoinHorizontal(
 			lipgloss.Top,
-			"Filename: ",
+			noStyle.Render("Filename: "),
 			m.filenameInput.View(),
 		),
 		lipgloss.JoinHorizontal(
 			lipgloss.Top,
-			"Destination Queue: ",
+			noStyle.Render("Destination Queue: "),
 			queueDisplay,
 		),
 		lipgloss.JoinHorizontal(

@@ -16,23 +16,6 @@ const (
 	queues
 )
 
-var (
-	tabBorder        = lipgloss.RoundedBorder()
-	docStyle         = lipgloss.NewStyle().Padding(1, 2, 1, 2)
-	highlightColor   = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
-	inactiveTabStyle = lipgloss.NewStyle().
-				Border(tabBorder, true).
-				BorderForeground(highlightColor).
-				Padding(0, 2).
-				AlignHorizontal(lipgloss.Center)
-	activeTabStyle = inactiveTabStyle.
-			Foreground(highlightColor).
-			Padding(0, 2).
-			AlignHorizontal(lipgloss.Center)
-	// Background(highlightColor).
-	// BorderBackground(highlightColor).
-)
-
 type MainView struct {
 	currentTab     tab
 	manager        *models.Manager
