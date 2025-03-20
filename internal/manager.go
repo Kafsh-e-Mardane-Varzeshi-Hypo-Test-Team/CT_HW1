@@ -73,6 +73,40 @@ func (m *Manager) RemoveDownload(id int) error {
 	return nil
 }
 
+func (m *Manager) PauseDownload(id int) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	var d *Download
+	for i, dl := range m.Downloads {
+		if dl.ID == id {
+			d = dl
+			break
+		}
+	}
+
+	d.Stop() // TODO: error handling, paused
+
+	log.Printf("paused download %q\n", d.URL)
+	return nil
+}
+
+func (m *Manager) ResumeDownload(id int) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	var d *Download
+	for _, dl := range m.Downloads {
+		if dl.ID == id {
+			d = dl
+			break
+		}
+	}
+
+	log.Printf("removed download %q from queue %q\n", d.URL, d.GetQueueName())
+	return nil
+}
+
 func (m *Manager) GetDownloadList() []*DownloadInfo {
 	m.mu.Lock()
 	defer m.mu.Unlock()
