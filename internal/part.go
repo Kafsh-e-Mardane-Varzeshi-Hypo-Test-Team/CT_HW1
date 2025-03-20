@@ -23,6 +23,7 @@ type Part struct {
 }
 
 func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
+	p.setStatus(InProgress)
 	if p.Status == Completed {
 		return
 	}
