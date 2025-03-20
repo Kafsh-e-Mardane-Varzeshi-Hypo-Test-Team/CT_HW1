@@ -21,6 +21,9 @@ type Part struct {
 }
 
 func (p *Part) start(channel chan error) {
+	if p.Status == Completed {
+		return
+	}
 	fmt.Println("part", p.partIndex, "started")
 	p.req.Header.Set("Range", "bytes="+p.rangeOfDownload)
 
@@ -28,21 +31,18 @@ func (p *Part) start(channel chan error) {
 	client := &http.Client{}
 	resp, err := client.Do(p.req)
 	if err != nil {
+		log.Printf("Error performing http request for partId = %d: %v\n", p.partIndex, err)
 		p.Status = Failed
-		log.Fatal(err)
 		channel <- err
 		return
 	}
 	defer resp.Body.Close()
 
-	if p.Status == Completed {
-		return
-	}
-
 	file, err := os.OpenFile(p.path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
-		log.Fatal(err)
-		fmt.Printf("Error opening temp file for part %d: %v\n", p.partIndex, err)
+		log.Printf("Error opening part file with partId = %d: %v\n", p.partIndex, err)
+		p.Status = Failed
+		channel <- err
 		return
 	}
 	defer file.Close()
@@ -62,6 +62,7 @@ func (p *Part) start(channel chan error) {
 			_, err := file.Write(buffer[:n])
 			if err != nil {
 				p.Status = Failed
+				log.Printf("Error writing buffer to part file for partId = %d: %v\n", p.partIndex, err)
 				log.Fatal(err)
 				channel <- err
 				return
@@ -69,13 +70,12 @@ func (p *Part) start(channel chan error) {
 
 			p.downloadedBytes += int64(n)
 		}
-
 		if err != nil {
 			if err == io.EOF {
 				break
 			}
 			p.Status = Failed
-			log.Fatal(err)
+			log.Printf("Error reading body of http request for partId = %d: %v\n", p.partIndex, err)
 			channel <- err
 			return
 		}

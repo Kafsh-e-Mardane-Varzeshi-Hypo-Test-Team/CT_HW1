@@ -55,20 +55,20 @@ func NewDownload(id int, url, destination, outputFileName, queueName string) *Do
 func (d *Download) setHttpResponse() error {
 	req, err := http.NewRequest("HEAD", d.URL, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error in getting HEAD of http request for downloadID = %d %v\n", d.ID, err)
 		return err
 	}
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error performing http request for downloadID = %d: %v\n", d.ID, err)
 		return err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		log.Fatal("Failed to get response from server")
+		log.Printf("Error getting response from server for downloadID = %d: %v\n", d.ID, err)
 		return errors.New("response status code is not OK")
 	}
 
@@ -82,7 +82,7 @@ func (d *Download) setTotalSize() {
 
 func (d *Download) supportsPartialDownload() bool {
 	if d.headResp.Header.Get("Accept-Ranges") == "" || d.headResp.Header.Get("Accept-Ranges") == "none" {
-		log.Fatal("Server does not support partial download")
+		log.Printf("downloadID = %d does not support partial downloading\n", d.ID)
 		return false
 	}
 
@@ -94,7 +94,7 @@ func (d *Download) downloadParts() error {
 	for i := range d.numberOfParts {
 		req, err := http.NewRequest("GET", d.URL, nil)
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("Error in GET http request for downloadID = %d: %v\n", d.ID, err)
 			return err
 		}
 
@@ -132,7 +132,7 @@ func (d *Download) downloadParts() error {
 func (d *Download) mergeParts() error {
 	file, err := os.Create(d.Destination + "/" + d.OutputFileName)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error creating merged file for downloadID = %d: %v\n", d.ID, err)
 		return err
 	}
 	defer file.Close()
@@ -140,18 +140,18 @@ func (d *Download) mergeParts() error {
 	for _, part := range d.parts {
 		resp, err := os.Open(part.path)
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("Error opening part file while merging for partId = %d: %v\n", part.partIndex, err)
 			return err
 		}
 
 		_, err = io.Copy(file, resp)
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("Error copying content from partId = %d to merged file in downloadID = %d: %v\n", part.partIndex, d.ID, err)
 			return err
 		}
 		err = os.Remove(part.path)
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("Error deleting .part file of partId = %d after merging in downloadID = %d: %v\n", part.partIndex, d.ID, err)
 			return err
 		}
 	}
@@ -167,12 +167,12 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 
 	if d.totalSize == 0 {
 		d.Status = Failed
-		log.Fatal("Content length is invalid")
+		log.Printf("Content length in downloadID = %d is invalid\n", d.ID)
 		return errors.New("content length is invalid")
 	}
 
 	d.Status = InProgress
-	log.Println("Content length is", d.totalSize)
+	log.Printf("Content length in downloadID = %d is %d\n", d.ID, d.totalSize)
 	if d.supportsPartialDownload() {
 		d.numberOfParts = NUMBER_OF_PARTS
 	} else {
@@ -183,12 +183,12 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 
 	err = d.downloadParts()
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error in downloadParts() function for downloadID = %d : %v\n", d.ID, err)
 		return err
 	}
 	err = d.mergeParts()
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error in mergeParts() function for downloadID = %d : %v\n", d.ID, err)
 		return err
 	}
 
