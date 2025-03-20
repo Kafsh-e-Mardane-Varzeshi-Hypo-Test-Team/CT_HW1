@@ -38,6 +38,15 @@ type Download struct {
 	// TODO: Don't forget to update download status
 }
 
+func NewDownload(url, destination, outputFileName, queueName string) *Download {
+	return &Download{
+		URL:            url,
+		Destination:    destination,
+		OutputFileName: outputFileName,
+		queueName:      queueName,
+	}
+}
+
 func (d *Download) setHttpResponse() error {
 	req, err := http.NewRequest("HEAD", d.URL, nil)
 	if err != nil {
@@ -103,7 +112,7 @@ func (d *Download) downloadParts() error {
 	}
 
 	for range d.numberOfParts {
-		err := <-d.channel;
+		err := <-d.channel
 		if err != nil {
 			d.Status = Failed
 			return err
