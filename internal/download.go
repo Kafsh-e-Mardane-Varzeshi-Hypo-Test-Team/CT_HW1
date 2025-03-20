@@ -200,6 +200,7 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 		log.Printf("Error in downloadParts() function for downloadID = %d : %v\n", d.ID, err)
 		return err
 	}
+	log.Printf("All parts downloaded successfully")
 	err = d.mergeParts()
 	if err != nil {
 		log.Printf("Error in mergeParts() function for downloadID = %d : %v\n", d.ID, err)
@@ -210,6 +211,7 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 	return nil
 }
 
+// TODO: check status of parts in part methods
 func (d *Download) Pause() error {
 	d.setStatus(Paused)
 	for _, part := range d.parts {

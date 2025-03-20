@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"sync"
-	"time"
 )
 
 type Part struct {
@@ -51,14 +50,10 @@ func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
 
 	buffer := make([]byte, 32*1024)
 	for {
-		if p.Status == Paused || p.Status == Pending {
-			time.Sleep(500 * time.Millisecond)
-			continue
-		} else if p.Status == Failed || p.Status == Cancelled {
+		if p.Status != InProgress {
 			return
 		}
 
-		p.setStatus(InProgress)
 		bandwidthLimiter.WaitForToken()
 		n, err := resp.Body.Read(buffer)
 		if n > 0 {
