@@ -54,18 +54,20 @@ func (m *Manager) AddDownload(url, outputFileName, queueName string) error {
 	return nil
 }
 
-func (m *Manager) removeDownload(d *Download) error {
+func (m *Manager) RemoveDownload(id int) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	d.Stop() // TODO: error handling
-
-	for i, download := range m.Downloads {
-		if download == d {
+	var d *Download
+	for i, dl := range m.Downloads {
+		if dl.ID == id {
+			d = dl
 			m.Downloads = slices.Delete(m.Downloads, i, i+1)
 			break
 		}
 	}
+
+	d.Stop() // TODO: error handling, cancell
 
 	log.Printf("removed download %q from queue %q\n", d.URL, d.GetQueueName())
 	return nil
