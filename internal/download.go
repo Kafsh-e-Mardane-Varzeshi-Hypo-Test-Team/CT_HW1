@@ -214,11 +214,20 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 // TODO: error
 func (d *Download) Pause() {
 	d.setStatus(Paused)
+	d.stopDownload()
+}
+
+// TODO: error
+func (d *Download) Pend() {
+	d.setStatus(Pending)
+	d.stopDownload()
+}
+
+func (d *Download) stopDownload() {
 	for _, part := range d.parts {
 		part.stop()
 	}
 }
-
 func (d *Download) Cancel() error {
 	d.setStatus(Cancelled)
 	for _, part := range d.parts {
