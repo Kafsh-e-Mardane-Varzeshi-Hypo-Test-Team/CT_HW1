@@ -328,26 +328,35 @@ func (m AddDownloadTab) View() string {
 
 	form := lipgloss.JoinVertical(
 		lipgloss.Left,
-		lipgloss.JoinHorizontal(
-			lipgloss.Top,
-			noStyle.Render("URL: "),
-			m.urlInput.View(),
+		borderedStyle.Render(
+			lipgloss.JoinVertical(
+				lipgloss.Center,
+				lipgloss.JoinVertical(
+					lipgloss.Left,
+					lipgloss.JoinHorizontal(
+						lipgloss.Top,
+						noStyle.Render("URL: "),
+						m.urlInput.View(),
+					),
+					lipgloss.JoinHorizontal(
+						lipgloss.Top,
+						noStyle.Render("Filename: "),
+						m.filenameInput.View(),
+					),
+					lipgloss.JoinHorizontal(
+						lipgloss.Top,
+						noStyle.Render("Destination Queue: "),
+						queueDisplay,
+					),
+				),
+				lipgloss.JoinHorizontal(
+					lipgloss.Top,
+					buttonConfirm,
+					buttonCancel,
+				),
+			),
 		),
-		lipgloss.JoinHorizontal(
-			lipgloss.Top,
-			noStyle.Render("Filename: "),
-			m.filenameInput.View(),
-		),
-		lipgloss.JoinHorizontal(
-			lipgloss.Top,
-			noStyle.Render("Destination Queue: "),
-			queueDisplay,
-		),
-		lipgloss.JoinHorizontal(
-			lipgloss.Top,
-			buttonConfirm,
-			buttonCancel,
-		),
+
 		noStyle.Render(m.footerMessage),
 		helpStyle.Render(footerHelpText),
 	)

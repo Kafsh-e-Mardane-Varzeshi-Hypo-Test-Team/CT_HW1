@@ -144,7 +144,7 @@ func (m QueuesTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m QueuesTab) View() string {
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
-		baseStyle.Render(m.table.View()),
+		borderedStyle.Render(m.table.View()),
 		noStyle.Render(m.footerString),
 		helpStyle.Render(m.help.View(m.keys)),
 	)

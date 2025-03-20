@@ -2,10 +2,16 @@ package tui
 
 import "github.com/charmbracelet/lipgloss"
 
+// General styles
+var (
+	borderedStyle = lipgloss.NewStyle().
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color("240"))
+	noStyle = lipgloss.NewStyle()
+)
+
 // Form styles
 var (
-	noStyle = lipgloss.NewStyle()
-
 	focusedStyle = noStyle.Foreground(lipgloss.Color("205"))
 	blurredStyle = noStyle.Foreground(lipgloss.Color("240"))
 
@@ -15,14 +21,14 @@ var (
 
 	helpStyle = blurredStyle.Margin(1, 0, 0, 0)
 
-	blurredButton  = noStyle.Foreground(lipgloss.Color("194"))
+	blurredButton  = noStyle.Foreground(lipgloss.Color("231"))
 	focusedConfirm = focusedStyle.Render("[ Confirm ]")
 	blurredConfirm = blurredButton.Render("[ Confirm ]")
 	focusedCancel  = focusedStyle.Render("[ Cancel ]")
 	blurredCancel  = blurredButton.Render("[ Cancel ]")
 )
 
-// Tab styles
+// Tab item styles
 var (
 	tabBorder        = lipgloss.RoundedBorder()
 	docStyle         = lipgloss.NewStyle().Padding(1, 2, 1, 2)
@@ -39,8 +45,3 @@ var (
 	// Background(highlightColor).
 	// BorderBackground(highlightColor).
 )
-
-// Table styles
-var baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.NormalBorder()).
-	BorderForeground(lipgloss.Color("240"))
