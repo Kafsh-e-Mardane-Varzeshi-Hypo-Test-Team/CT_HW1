@@ -32,13 +32,14 @@ func (k queuesKeyMap) FullHelp() [][]key.Binding {
 }
 
 type QueuesTab struct {
-	Queues []models.Queue
-	table  table.Model
-	help   help.Model
+	manager      *models.Manager
+	Queues       []models.Queue
+	table        table.Model
+	help         help.Model
 	keys   queuesKeyMap
 }
 
-func NewQueuesTab() QueuesTab {
+func NewQueuesTab(manager *models.Manager) QueuesTab {
 	Queues := models.GetQueues()
 	columns := []table.Column{
 		{Title: "Name", Width: 20},
@@ -84,9 +85,10 @@ func NewQueuesTab() QueuesTab {
 	help.FullSeparator = " \t "
 
 	return QueuesTab{
-		Queues: Queues,
-		table:  t,
-		help:   help,
+		manager: manager,
+		Queues:  Queues,
+		table:   t,
+		help:    help,
 		keys: queuesKeyMap{
 			Navigation: key.NewBinding(
 				key.WithKeys("up", "down", "left", "right"),

@@ -3,6 +3,7 @@ package tui
 import (
 	"strings"
 
+	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal/models"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -36,17 +37,19 @@ var (
 
 type MainView struct {
 	currentTab     tab
+	manager        *models.Manager
 	downloadTab    tea.Model
 	queueTab       tea.Model
 	addDownloadTab tea.Model
 }
 
-func NewMainView() MainView {
+func NewMainView(manager *models.Manager) MainView {
 	return MainView{
 		currentTab:     downloads,
-		downloadTab:    NewDownloadsTab(),
-		queueTab:       NewQueuesTab(),
-		addDownloadTab: NewAddDownloadTab(),
+		manager:        manager,
+		downloadTab:    NewDownloadsTab(manager),
+		queueTab:       NewQueuesTab(manager),
+		addDownloadTab: NewAddDownloadTab(manager),
 	}
 }
 

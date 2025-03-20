@@ -92,6 +92,7 @@ const (
 
 // AddDownloadTab Model
 type AddDownloadTab struct {
+	manager       *models.Manager
 	focusIndex    AddDownloadTabField
 	urlInput      textinput.Model
 	filenameInput textinput.Model
@@ -103,7 +104,7 @@ type AddDownloadTab struct {
 	keys          addDownloadKeyMap
 }
 
-func NewAddDownloadTab() AddDownloadTab {
+func NewAddDownloadTab(manager *models.Manager) AddDownloadTab {
 	urlInput := textinput.New()
 	urlInput.Placeholder = "Enter file URL"
 	urlInput.Focus()
@@ -138,6 +139,7 @@ func NewAddDownloadTab() AddDownloadTab {
 	help.FullSeparator = " \t "
 
 	return AddDownloadTab{
+		manager:       manager,
 		urlInput:      urlInput,
 		filenameInput: filenameInput,
 		queues:        queueList,

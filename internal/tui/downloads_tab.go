@@ -36,13 +36,14 @@ func (k downloadsKeyMap) FullHelp() [][]key.Binding {
 }
 
 type DownloadsTab struct {
-	downloads []models.Download
-	table     table.Model
-	help      help.Model
+	manager      *models.Manager
+	downloads    []models.Download
+	table        table.Model
+	help         help.Model
 	keys      downloadsKeyMap
 }
 
-func NewDownloadsTab() DownloadsTab {
+func NewDownloadsTab(manager *models.Manager) DownloadsTab {
 	Downloads := models.GetDownloads()
 	columns := []table.Column{
 		{Title: "URL", Width: 30},
@@ -86,6 +87,7 @@ func NewDownloadsTab() DownloadsTab {
 	help.FullSeparator = " \t "
 
 	return DownloadsTab{
+		manager:   manager,
 		downloads: Downloads,
 		table:     t,
 		help:      help,
