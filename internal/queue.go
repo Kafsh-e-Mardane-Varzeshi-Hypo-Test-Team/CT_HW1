@@ -56,7 +56,7 @@ func (q *Queue) AddDownload(d *Download) error {
 
 	select {
 	case q.downloadChan <- d:
-		log.Printf("download %T added to queue %T\n", d, q)
+		log.Printf("download %q added to queue %q\n", d.URL, q.Name)
 	default:
 		log.Printf("failed to add downlaod %T to queue %T, too many downloads has beed added", d, q)
 		return errors.New("failed to add to queue")
@@ -104,18 +104,18 @@ func (q *Queue) downloader(bl *BandwidthLimiter) {
 		select {
 		case d, ok := <-q.downloadChan:
 			if !ok {
-				return
+				break
 			}
 			if d.GetQueueName() == q.Name && d.GetStatus() == Pending {
-				for i := 0; i < q.NumRetries; i++ {
+				for i := 0; i < q.NumRetries+1; i++ {
 					err := d.Start(bl)
 					if err == nil {
-						return
+						break
 					}
 					log.Println(err)
 
 					if d.GetStatus() != Failed {
-						return
+						break
 					}
 				}
 			}
