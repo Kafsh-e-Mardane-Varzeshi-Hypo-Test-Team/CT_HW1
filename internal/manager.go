@@ -11,6 +11,7 @@ import (
 
 type Manager struct {
 	mu        sync.Mutex
+	LastID    int
 	Downloads []*Download
 	Queues    map[string]*Queue
 }
@@ -38,7 +39,8 @@ func (m *Manager) AddDownload(url, outputFileName, queueName string) error {
 		return errors.New("queue does not exist")
 	}
 
-	d := NewDownload(url, q.GetSavePath(), outputFileName, queueName)
+	d := NewDownload(m.LastID, url, q.GetSavePath(), outputFileName, queueName)
+	m.LastID++
 
 	if q.IsActive() {
 		err := q.AddDownload(d)
@@ -68,6 +70,8 @@ func (m *Manager) removeDownload(d *Download) error {
 	log.Printf("removed download %q from queue %q\n", d.URL, d.GetQueueName())
 	return nil
 }
+
+func (m *Manager) GetDownloadList() []DownloadInfo
 
 func (m *Manager) addQueue(q *Queue) error {
 	m.mu.Lock()
@@ -134,4 +138,13 @@ func (m *Manager) monitorActiveHours() {
 			m.mu.Unlock()
 		}
 	}
+}
+
+type DownloadInfo struct {
+	ID           int
+	URL          string
+	QueueName    string
+	TransferRate int64
+	Progress     float32
+	Status
 }
