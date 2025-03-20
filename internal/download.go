@@ -44,9 +44,6 @@ type Download struct {
 	parts              []*Part
 	mu                 sync.Mutex
 	Status
-	// TODO: Add array of size 'numberOfParts' for storing number of downloaded bytes from this part
-	// TODO: Calculate download percentage using this array
-	// TODO: Don't forget to update download status
 }
 
 func NewDownload(id int, url, destination, outputFileName, queueName string) *Download {

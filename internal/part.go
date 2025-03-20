@@ -29,7 +29,6 @@ func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
 	fmt.Println("part", p.partIndex, "started")
 	p.req.Header.Set("Range", "bytes="+p.rangeOfDownload)
 
-	// TODO: Ask if it's better to save this client as a field in Download struct
 	client := &http.Client{}
 	resp, err := client.Do(p.req)
 	if err != nil {
