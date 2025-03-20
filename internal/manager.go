@@ -159,3 +159,12 @@ type DownloadInfo struct {
 	Progress     float32
 	Status
 }
+
+type QueueInfo struct {
+	Name            string
+	TargetDirectory string
+	MaxParallel     int
+	SpeedLimit      int
+	StartTime       time.Time
+	EndTime         time.Time
+}
