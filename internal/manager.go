@@ -210,6 +210,27 @@ func checkQueueInfo(qInfo QueueInfo) error {
 	return nil
 }
 
+func (m *Manager) GetQueueList() []*QueueInfo {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	var list []*QueueInfo
+
+	for q := range maps.Values(m.Queues) {
+		list = append(list, &QueueInfo{
+			Name:            q.Name,
+			TargetDirectory: q.GetSavePath(),
+			MaxParallel:     q.GetNumConcurrent(),
+			SpeedLimit:      q.MaxBandwidth,
+			NumRetries:      q.NumRetries,
+			StartTime:       q.StartTime,
+			EndTime:         q.EndTime,
+		})
+	}
+
+	return list
+}
+
 func (m *Manager) getQueuePendingDownloads(queueName string) []*Download {
 	m.mu.Lock()
 	defer m.mu.Unlock()
