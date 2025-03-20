@@ -142,6 +142,10 @@ func (m *Manager) AddQueue(qInfo QueueInfo) error {
 		return errors.New("queue already exists")
 	}
 
+	if err := checkQueueInfo(qInfo); err != nil {
+		return err
+	}
+
 	q := NewQueue(
 		qInfo.Name,
 		qInfo.TargetDirectory,
@@ -181,6 +185,10 @@ func (m *Manager) UpdateQueue(qInfo QueueInfo) error {
 		return errors.New("queue does not exist")
 	}
 
+	if err := checkQueueInfo(qInfo); err != nil {
+		return err
+	}
+
 	q.UpdateConfig(
 		qInfo.TargetDirectory,
 		qInfo.MaxParallel,
@@ -188,7 +196,17 @@ func (m *Manager) UpdateQueue(qInfo QueueInfo) error {
 		qInfo.StartTime,
 		qInfo.EndTime,
 		qInfo.SpeedLimit,
-	) // error handling
+	)
+	return nil
+}
+
+func checkQueueInfo(qInfo QueueInfo) error {
+	if qInfo.MaxParallel < 1 {
+		return errors.New("parallel count error")
+	}
+	if qInfo.NumRetries < 0 {
+		return errors.New("retry count error")
+	}
 	return nil
 }
 
