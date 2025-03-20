@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -26,7 +25,7 @@ func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
 	if p.Status == Completed {
 		return
 	}
-	fmt.Println("part", p.partIndex, "started")
+	log.Printf("downloading part %d started", p.partIndex)
 	p.req.Header.Set("Range", "bytes="+p.rangeOfDownload)
 
 	client := &http.Client{}
