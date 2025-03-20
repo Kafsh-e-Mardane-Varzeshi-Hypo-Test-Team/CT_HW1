@@ -265,7 +265,7 @@ func (d *Download) setStatus(status Status) {
 }
 
 func (d *Download) monitorProgress() {
-	ticker := time.NewTicker(1 * time.Second)
+	ticker := time.NewTicker(300 * time.Millisecond)
 	defer ticker.Stop()
 
 	isActive := true
@@ -299,6 +299,9 @@ func (d *Download) monitorProgress() {
 
 		percentage := float64(d.downloadedSize) / float64(d.totalSize) * 100
 		d.downloadPercentage = percentage
+
+		log.Printf("monitoring :: %.2f%% (%.2f MB/%.2f MB) - %.2f MB/s\n",
+		percentage, float64(d.downloadedSize)/1024 / 1024, float64(d.totalSize)/1024/1024, d.currentSpeed/1024/1024)
 		d.mu.Unlock()
 	}
 }
