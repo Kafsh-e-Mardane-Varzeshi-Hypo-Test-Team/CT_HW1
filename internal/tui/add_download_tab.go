@@ -16,21 +16,21 @@ import (
 
 // Key Bindings
 type addDownloadKeyMap struct {
-	Next       key.Binding
-	Prev       key.Binding
-	Navigation key.Binding
-	Select     key.Binding
-	Quit       key.Binding
+	next       key.Binding
+	prev       key.Binding
+	navigation key.Binding
+	selectOpt  key.Binding
+	quit       key.Binding
 }
 
 func (k addDownloadKeyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Quit}
+	return []key.Binding{k.quit}
 }
 
 func (k addDownloadKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Next, k.Prev, k.Navigation}, // Navigation keys
-		{k.Select, k.Quit},             // Actions
+		{k.next, k.prev, k.navigation}, // Navigation keys
+		{k.selectOpt, k.quit},          // Actions
 	}
 }
 
@@ -63,20 +63,20 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 }
 
 // fields
-type AddDownloadTabField int
+type addDownloadTabField int
 
 const (
-	urlField AddDownloadTabField = iota
+	urlField addDownloadTabField = iota
 	filenameField
 	queueField
-	confirmField
-	cancelField
+	confirmDownloadField
+	cancelDownloadField
 )
 
 // AddDownloadTab Model
 type AddDownloadTab struct {
 	manager       *models.Manager
-	focusIndex    AddDownloadTabField
+	focusIndex    addDownloadTabField
 	urlInput      textinput.Model
 	filenameInput textinput.Model
 	queues        list.Model
@@ -132,23 +132,23 @@ func NewAddDownloadTab(manager *models.Manager) AddDownloadTab {
 		focusIndex:    0,
 		help:          help,
 		keys: addDownloadKeyMap{
-			Next: key.NewBinding(
+			next: key.NewBinding(
 				key.WithKeys("tab"),
 				key.WithHelp("tab", "next field"),
 			),
-			Prev: key.NewBinding(
+			prev: key.NewBinding(
 				key.WithKeys("shift+tab"),
 				key.WithHelp("shift+tab", "previous field"),
 			),
-			Navigation: key.NewBinding(
+			navigation: key.NewBinding(
 				key.WithKeys("up", "down", "left", "right"),
 				key.WithHelp("↑/↓/←/→", "navigate"),
 			),
-			Select: key.NewBinding(
+			selectOpt: key.NewBinding(
 				key.WithKeys("enter"),
 				key.WithHelp("enter", "select"),
 			),
-			Quit: key.NewBinding(
+			quit: key.NewBinding(
 				key.WithKeys("ctrl+c", "esc"),
 				key.WithHelp("ctrl+c/esc", "quit"),
 			),
@@ -221,7 +221,7 @@ func (m AddDownloadTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		}
-	case confirmField:
+	case confirmDownloadField:
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
@@ -255,7 +255,7 @@ func (m AddDownloadTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 		}
-	case cancelField:
+	case cancelDownloadField:
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {

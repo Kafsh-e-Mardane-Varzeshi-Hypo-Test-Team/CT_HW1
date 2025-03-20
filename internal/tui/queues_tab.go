@@ -32,11 +32,12 @@ func (k queuesKeyMap) FullHelp() [][]key.Binding {
 }
 
 type QueuesTab struct {
-	manager      *models.Manager
-	Queues       []models.Queue
-	table        table.Model
-	help         help.Model
-	keys         queuesKeyMap
+	manager *models.Manager
+	queues  []models.Queue
+	table   table.Model
+	help    help.Model
+	keys    queuesKeyMap
+
 	footerString string
 }
 
@@ -45,7 +46,7 @@ func NewQueuesTab(manager *models.Manager) QueuesTab {
 	columns := []table.Column{
 		{Title: "Name", Width: 20},
 		{Title: "Target Directory", Width: 30},
-		{Title: "Max Parallel Downloads", Width: 20},
+		{Title: "Max Parallel", Width: 15},
 		{Title: "Speed Limit", Width: 15},
 		{Title: "Start Time", Width: 10},
 		{Title: "End Time", Width: 10},
@@ -87,7 +88,7 @@ func NewQueuesTab(manager *models.Manager) QueuesTab {
 
 	return QueuesTab{
 		manager: manager,
-		Queues:  Queues,
+		queues:  Queues,
 		table:   t,
 		help:    help,
 		keys: queuesKeyMap{
