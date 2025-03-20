@@ -22,7 +22,7 @@ type Part struct {
 	Status
 }
 
-func (p *Part) start(channel chan error) {
+func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
 	if p.Status == Completed {
 		return
 	}
@@ -59,6 +59,7 @@ func (p *Part) start(channel chan error) {
 		}
 
 		p.setStatus(InProgress)
+		bandwidthLimiter.WaitForToken()
 		n, err := resp.Body.Read(buffer)
 		if n > 0 {
 			_, err := file.Write(buffer[:n])

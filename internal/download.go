@@ -99,7 +99,7 @@ func (d *Download) supportsPartialDownload() bool {
 	return true
 }
 
-func (d *Download) downloadParts() error {
+func (d *Download) downloadParts(bandwidthLimiter *BandwidthLimiter) error {
 	partSize := d.totalSize / int64(d.numberOfParts)
 	for i := range d.numberOfParts {
 		req, err := http.NewRequest("GET", d.URL, nil)
@@ -126,7 +126,7 @@ func (d *Download) downloadParts() error {
 
 		d.parts[i] = &p
 		fmt.Println("starting part", i)
-		go d.parts[i].start(d.channel)
+		go d.parts[i].start(d.channel, bandwidthLimiter)
 	}
 
 	for range d.numberOfParts {
@@ -194,7 +194,7 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 	d.parts = make([]*Part, d.numberOfParts)
 	d.channel = make(chan error, d.numberOfParts)
 
-	err = d.downloadParts()
+	err = d.downloadParts(bandwidthLimiter)
 	if err != nil {
 		log.Printf("Error in downloadParts() function for downloadID = %d : %v\n", d.ID, err)
 		return err
