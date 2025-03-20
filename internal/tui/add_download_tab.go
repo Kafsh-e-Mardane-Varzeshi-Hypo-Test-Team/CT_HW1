@@ -102,6 +102,7 @@ type AddDownloadTab struct {
 	listExpanded  bool
 	help          help.Model
 	keys          addDownloadKeyMap
+	footerMessage string
 }
 
 func NewAddDownloadTab(manager *models.Manager) AddDownloadTab {
@@ -169,6 +170,7 @@ func NewAddDownloadTab(manager *models.Manager) AddDownloadTab {
 				key.WithHelp("ctrl+c/esc", "quit"),
 			),
 		},
+		footerMessage: "",
 	}
 }
 
@@ -264,7 +266,11 @@ func (m AddDownloadTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter":
-				return NewMainView(), nil
+				// reset fields
+				m.urlInput.SetValue("")
+				m.filenameInput.SetValue("")
+				m.selectedQueue = 0
+				m.focusIndex = 0
 			case "tab", "down":
 			case "shift+tab", "left":
 				m.focusIndex = max(m.focusIndex-1, 0)
@@ -347,6 +353,7 @@ func (m AddDownloadTab) View() string {
 			buttonConfirm,
 			buttonCancel,
 		),
+		noStyle.Render(m.footerMessage),
 		helpStyle.Render(footerHelpText),
 	)
 

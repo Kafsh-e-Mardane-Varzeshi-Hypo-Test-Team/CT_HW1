@@ -40,7 +40,8 @@ type DownloadsTab struct {
 	downloads    []models.Download
 	table        table.Model
 	help         help.Model
-	keys      downloadsKeyMap
+	keys         downloadsKeyMap
+	footerString string
 }
 
 func NewDownloadsTab(manager *models.Manager) DownloadsTab {
@@ -113,6 +114,7 @@ func NewDownloadsTab(manager *models.Manager) DownloadsTab {
 				key.WithHelp("ctrl+c/esc", "quit"),
 			),
 		},
+		footerString: "",
 	}
 }
 
@@ -173,6 +175,7 @@ func (m DownloadsTab) View() string {
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
 		baseStyle.Render(m.table.View()),
+		noStyle.Render(m.footerString),
 		helpStyle.Render(m.help.View(m.keys)),
 	)
 }

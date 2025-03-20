@@ -36,7 +36,8 @@ type QueuesTab struct {
 	Queues       []models.Queue
 	table        table.Model
 	help         help.Model
-	keys   queuesKeyMap
+	keys         queuesKeyMap
+	footerString string
 }
 
 func NewQueuesTab(manager *models.Manager) QueuesTab {
@@ -111,6 +112,7 @@ func NewQueuesTab(manager *models.Manager) QueuesTab {
 				key.WithHelp("ctrl+c/esc", "quit"),
 			),
 		},
+		footerString: "",
 	}
 }
 
@@ -143,6 +145,7 @@ func (m QueuesTab) View() string {
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
 		baseStyle.Render(m.table.View()),
+		noStyle.Render(m.footerString),
 		helpStyle.Render(m.help.View(m.keys)),
 	)
 }
