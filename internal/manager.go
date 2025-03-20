@@ -205,8 +205,8 @@ type DownloadInfo struct {
 	ID           int
 	URL          string
 	QueueName    string
-	TransferRate int64
-	Progress     float32
+	TransferRate float64
+	Progress     float64
 	Status
 }
 
