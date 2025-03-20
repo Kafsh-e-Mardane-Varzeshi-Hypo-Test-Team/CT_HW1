@@ -138,6 +138,12 @@ func (q *Queue) Stop() {
 	log.Printf("queue %T stopped", q)
 }
 
+func (q *Queue) GetSavePath() string {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	return q.SavePath
+}
+
 func (q *Queue) IsActive() bool {
 	q.mu.Lock()
 	defer q.mu.Unlock()
