@@ -134,20 +134,29 @@ func (m *Manager) GetDownloadList() []*DownloadInfo {
 	return list
 }
 
-func (m *Manager) addQueue(q *Queue) error {
+func (m *Manager) AddQueue(qInfo QueueInfo) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	if _, exists := m.Queues[q.Name]; exists {
+	if _, exists := m.Queues[qInfo.Name]; exists {
 		return errors.New("queue already exists")
 	}
 
-	m.Queues[q.Name] = q
-	log.Printf("Manager: Added queue %q\n", q.Name)
+	q := NewQueue(
+		qInfo.Name,
+		qInfo.TargetDirectory,
+		qInfo.MaxParallel,
+		qInfo.NumRetries,
+		qInfo.StartTime,
+		qInfo.EndTime,
+		qInfo.SpeedLimit,
+	)
+	m.Queues[qInfo.Name] = q
+	log.Printf("added queue %q\n", q.Name)
 	return nil
 }
 
-func (m *Manager) removeQueue(queueName string) error {
+func (m *Manager) RemoveQueue(queueName string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -159,7 +168,7 @@ func (m *Manager) removeQueue(queueName string) error {
 	q.Stop() // TODO: error handling
 
 	delete(m.Queues, queueName)
-	log.Printf("Manager: Removed queue %q\n", queueName)
+	log.Printf("removed queue %q\n", queueName)
 	return nil
 }
 
@@ -215,6 +224,7 @@ type QueueInfo struct {
 	TargetDirectory string
 	MaxParallel     int
 	SpeedLimit      int
+	NumRetries      int
 	StartTime       time.Time
 	EndTime         time.Time
 }
