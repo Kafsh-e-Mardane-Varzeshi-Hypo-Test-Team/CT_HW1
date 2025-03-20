@@ -29,7 +29,7 @@ type Download struct {
 	queueName      string
 	headResp       *http.Response
 	numberOfParts  int
-	totalSize int64
+	totalSize      int64
 	downloadedSize int64
 	channel        chan error
 	parts          []*Part
@@ -39,12 +39,14 @@ type Download struct {
 	// TODO: Don't forget to update download status
 }
 
-func NewDownload(url, destination, outputFileName, queueName string) *Download {
+func NewDownload(id int, url, destination, outputFileName, queueName string) *Download {
 	return &Download{
+		ID:             id,
 		URL:            url,
 		Destination:    destination,
 		OutputFileName: outputFileName,
 		queueName:      queueName,
+		Status:         Pending,
 	}
 }
 
@@ -97,7 +99,7 @@ func (d *Download) downloadParts() error {
 		p := Part{
 			partIndex:       i,
 			startIndex:      int64(i) * partSize,
-			endIndex:        int64(i + 1) * partSize,
+			endIndex:        int64(i+1) * partSize,
 			downloadedBytes: 0,
 			Status:          Pending,
 			req:             req,
