@@ -24,10 +24,11 @@ var (
 	noStyle           = lipgloss.NewStyle()
 	helpStyle         = blurredStyle.Margin(1, 0, 0, 0)
 
+	blurredButton  = lipgloss.NewStyle().Foreground(lipgloss.Color("194"))
 	focusedConfirm = focusedStyle.Render("[ Confirm ]")
-	blurredConfirm = blurredStyle.Render("[ Confirm ]")
+	blurredConfirm = blurredButton.Render("[ Confirm ]")
 	focusedCancel  = focusedStyle.Render("[ Cancel ]")
-	blurredCancel  = blurredStyle.Render("[ Cancel ]")
+	blurredCancel  = blurredButton.Render("[ Cancel ]")
 )
 
 // Key Bindings
@@ -299,14 +300,19 @@ func (m *AddDownloadTab) updateFocus() {
 
 func (m AddDownloadTab) View() string {
 	var queueDisplay string
+
+	var footerHelpText string
+
 	if m.listExpanded {
 		queueDisplay = m.queues.View()
+		footerHelpText = ""
 	} else {
 		if m.focusIndex == 2 {
 			queueDisplay = focusedStyle.Render(m.choices[m.selectedQueue])
 		} else {
 			queueDisplay = blurredStyle.Render(m.choices[m.selectedQueue])
 		}
+		footerHelpText = m.help.View(m.keys)
 	}
 
 	buttonConfirm := blurredConfirm
@@ -339,7 +345,7 @@ func (m AddDownloadTab) View() string {
 			buttonConfirm,
 			buttonCancel,
 		),
-		helpStyle.Render(m.help.View(m.keys)),
+		helpStyle.Render(footerHelpText),
 	)
 
 	return docStyle.Render(form)
