@@ -30,6 +30,7 @@ type Download struct {
 	URL                string
 	Destination        string
 	OutputFileName     string
+	path               string
 	queueName          string
 	headResp           *http.Response
 	numberOfParts      int
@@ -54,6 +55,7 @@ func NewDownload(id int, url, destination, outputFileName, queueName string) *Do
 		URL:                url,
 		Destination:        destination,
 		OutputFileName:     outputFileName,
+		path:               destination + "/" + outputFileName,
 		queueName:          queueName,
 		Status:             Pending,
 		lastDownloadedSize: 0,
@@ -140,7 +142,7 @@ func (d *Download) downloadParts(bandwidthLimiter *BandwidthLimiter) error {
 }
 
 func (d *Download) mergeParts() error {
-	file, err := os.Create(d.Destination + "/" + d.OutputFileName)
+	file, err := os.Create(d.path)
 	if err != nil {
 		log.Printf("Error creating merged file for downloadID = %d: %v\n", d.ID, err)
 		return err
@@ -209,11 +211,24 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 	return nil
 }
 
+// TODO: error
 func (d *Download) Stop() {
+	d.setStatus(Paused)
 	for _, part := range d.parts {
 		part.stop()
 	}
-	d.setStatus(Paused)
+}
+
+func (d *Download) Cancel() error {
+	d.setStatus(Cancelled)
+	for _, part := range d.parts {
+		err := os.Remove(part.path)
+		if err != nil {
+			log.Printf("Error deleting .part file of partId = %d after canceling downloadID = %d: %v\n", part.partIndex, d.ID, err)
+			return err
+		}
+	}
+	return nil
 }
 
 func (d *Download) setStatus(status Status) {
@@ -242,7 +257,7 @@ func (d *Download) monitorProgress() {
 		for _, part := range d.parts {
 			d.downloadedSize += part.downloadedBytes
 		}
-		
+
 		now := time.Now()
 		elapsed := now.Sub(d.lastUpdateTime).Seconds()
 		bytesDownloaded := d.downloadedSize - d.lastDownloadedSize
