@@ -54,7 +54,7 @@ func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
 			return
 		}
 
-		bandwidthLimiter.WaitForToken()
+		// bandwidthLimiter.WaitForToken()
 		n, err := resp.Body.Read(buffer)
 		if n > 0 {
 			_, err := file.Write(buffer[:n])
@@ -84,19 +84,19 @@ func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
 }
 
 func (p *Part) pause() error {
-	log.Printf("Pausing download of part %v : %v bytes downloaded", p.partIndex, p.downloadedBytes)
+	log.Printf("Pausing download of part %d : %d bytes downloaded", p.partIndex, p.downloadedBytes)
 	p.setStatus(Paused)
 	return nil
 }
 
 func (p *Part) pend() error {
-	log.Printf("Pending download of part %v : %v bytes downloaded", p.partIndex, p.downloadedBytes)
+	log.Printf("Pending download of part %d : %d bytes downloaded", p.partIndex, p.downloadedBytes)
 	p.setStatus(Pending)
 	return nil
 }
 
 func (p *Part) cancel() error {
-	log.Printf("Canceling download of part %v : %v bytes downloaded", p.partIndex, p.downloadedBytes)
+	log.Printf("Canceling download of part %d : %d bytes downloaded", p.partIndex, p.downloadedBytes)
 	p.setStatus(Cancelled)
 	return nil
 }

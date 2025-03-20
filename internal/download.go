@@ -243,7 +243,12 @@ func (d *Download) Cancel() error {
 			log.Printf("Error canceling partId = %d while canceling downloadID = %d: %v\n", part.partIndex, d.ID, err)
 			return err
 		}
-		
+
+		if _, err := os.Stat(part.path); errors.Is(err, os.ErrNotExist) {
+			log.Printf(".part file of partId = %d does not exists in downloadID = %d\n", part.partIndex, d.ID)
+			continue
+		}
+
 		err = os.Remove(part.path)
 		if err != nil {
 			log.Printf("Error deleting .part file of partId = %d after canceling downloadID = %d: %v\n", part.partIndex, d.ID, err)
