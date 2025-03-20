@@ -46,7 +46,10 @@ func (q *Queue) UpdateConfig(savePath string, numConcurrent, numRetries int, sta
 }
 
 func (q *Queue) AddDownload(d *Download) error {
-	if !q.IsActive() {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
+	if !q.isActive {
 		log.Printf("download %T did NOT add to queue %T downloadChan\n", d, q)
 		return nil // TODO: error handling
 	}
@@ -99,7 +102,10 @@ func (q *Queue) downloader(bl *BandwidthLimiter) {
 
 	for {
 		select {
-		case d := <-q.downloadChan:
+		case d, ok := <-q.downloadChan:
+			if !ok {
+				return
+			}
 			if d.GetQueueName() == q.Name && d.GetStatus() == Pending {
 				for i := 0; i < q.NumRetries; i++ {
 					err := d.Start(bl)
