@@ -144,6 +144,30 @@ func (q *Queue) GetSavePath() string {
 	return q.SavePath
 }
 
+func (q *Queue) GetNumConcurrent() string {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	return q.SavePath
+}
+
+func (q *Queue) GetMaxBandwidth() int {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	return q.MaxBandwidth
+}
+
+func (q *Queue) GetStartTime() time.Time {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	return q.StartTime
+}
+
+func (q *Queue) GetEndTime() time.Time {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	return q.EndTime
+}
+
 func (q *Queue) IsActive() bool {
 	q.mu.Lock()
 	defer q.mu.Unlock()
