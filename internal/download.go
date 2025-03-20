@@ -24,6 +24,7 @@ const (
 )
 
 type Download struct {
+	ID             int
 	URL            string
 	Destination    string
 	OutputFileName string
@@ -108,7 +109,7 @@ func (d *Download) downloadParts() error {
 		if i == d.numberOfParts-1 {
 			p.endIndex = d.totalSize - 1
 		}
-		p.rangeOfDownload = strconv.Itoa(int(p.startIndex + p.downloadedBytes)) + "-" + strconv.Itoa(int(p.endIndex))
+		p.rangeOfDownload = strconv.Itoa(int(p.startIndex+p.downloadedBytes)) + "-" + strconv.Itoa(int(p.endIndex))
 		if p.path == "" {
 			p.path = d.Destination + "/" + d.OutputFileName + p.rangeOfDownload + ".part"
 		}
