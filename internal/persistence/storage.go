@@ -5,21 +5,21 @@ import (
 	"errors"
 	"os"
 
-	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal"
+	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal/models"
 )
 
-func Load(filename string) (*internal.Manager, error) {
+func Load(filename string) (*models.Manager, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return internal.NewManager(), nil
+			return models.NewManager(), nil
 		}
 		return nil, err
 	}
 	defer file.Close()
 
 	decoder := json.NewDecoder(file)
-	m := &internal.Manager{}
+	m := &models.Manager{}
 	if err := decoder.Decode(m); err != nil {
 		return nil, err
 	}

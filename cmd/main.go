@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal"
+	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal/models"
 	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal/persistence"
 )
 
@@ -20,7 +20,7 @@ func main() {
 	go autoSave(manager)
 }
 
-func autoSave(manager *internal.Manager) error {
+func autoSave(manager *models.Manager) error {
 	ticker := time.NewTicker(time.Duration(30 * time.Second))
 	defer ticker.Stop()
 
