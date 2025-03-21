@@ -12,7 +12,7 @@ import (
 	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal/tui"
 )
 
-const filename string = "data.json"
+const filename string = "internal/persistence/data.json"
 
 func main() {
 	go logger.StartLoggingToFile()
@@ -20,27 +20,33 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	saveState(manager)
 	manager.Start()
 
-	go autoSave(manager)
+	autoSave := func() {
+		ticker := time.NewTicker(time.Duration(30 * time.Second))
+		defer ticker.Stop()
+
+		for range ticker.C {
+			saveState(manager)
+		}
+	}
+	go autoSave()
 
 	p := tea.NewProgram(tui.NewMainView(manager))
 	if _, err := p.Run(); err != nil {
 		panic(err)
 	}
+
+	saveState(manager)
 }
 
-func autoSave(manager *models.Manager) error {
-	ticker := time.NewTicker(time.Duration(30 * time.Second))
-	defer ticker.Stop()
-
-	for range ticker.C {
-		jsonData, err := manager.GetJson()
-		if err != nil {
-			return err
-		}
-
-		persistence.Save(filename, jsonData)
+func saveState(manager *models.Manager) error {
+	jsonData, err := manager.GetJson()
+	if err != nil {
+		log.Println(err)
 	}
+
+	persistence.Save(filename, jsonData)
 	return nil
 }
