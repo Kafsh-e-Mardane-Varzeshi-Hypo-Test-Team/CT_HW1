@@ -4,8 +4,11 @@ import (
 	"log"
 	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal/models"
 	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal/persistence"
+	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal/tui"
 )
 
 const filename string = "data.json"
@@ -18,6 +21,11 @@ func main() {
 	manager.Start()
 
 	go autoSave(manager)
+
+	p := tea.NewProgram(tui.NewMainView(manager))
+	if _, err := p.Run(); err != nil {
+		panic(err)
+	}
 }
 
 func autoSave(manager *models.Manager) error {
