@@ -159,7 +159,7 @@ func (d *Download) initializeParts() error {
 			EndIndex:        int64(i+1) * partSize,
 			DownloadedBytes: 0,
 			Status:          Pending,
-			channel:         make(chan Status),
+			channel:         make(chan Status, 1),
 		}
 
 		if i == d.NumberOfParts-1 {
