@@ -24,9 +24,9 @@ type Part struct {
 	Status
 }
 
-func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
+func (p *Part) start(commonChannelOfParts chan error, bandwidthLimiter *BandwidthLimiter) {
 	if p.getStatus() == Completed {
-		channel <- nil
+		commonChannelOfParts <- nil
 		return
 	}
 	p.setStatus(InProgress)
@@ -39,7 +39,7 @@ func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
 	if err != nil {
 		log.Printf("Error performing http request for partId = %d: %v\n", p.partIndex, err)
 		p.setStatus(Failed)
-		channel <- err
+		commonChannelOfParts <- err
 		return
 	}
 	defer resp.Body.Close()
@@ -48,7 +48,7 @@ func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
 	if err != nil {
 		log.Printf("Error opening part file with partId = %d: %v\n", p.partIndex, err)
 		p.setStatus(Failed)
-		channel <- err
+		commonChannelOfParts <- err
 		return
 	}
 	defer file.Close()
@@ -58,7 +58,7 @@ func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
 		select {
 		case status := <-p.channel:
 			log.Printf("Stop downloading partIndex = %d due to it's status = %d", p.partIndex, status)
-			channel <- errors.New("part " + strconv.Itoa(p.partIndex) + " has status = " + strconv.Itoa(int(status)))
+			commonChannelOfParts <- errors.New("part " + strconv.Itoa(p.partIndex) + " has status = " + strconv.Itoa(int(status)))
 			return
 		default:
 			bandwidthLimiter.WaitForToken()
@@ -69,7 +69,7 @@ func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
 				if err != nil {
 					log.Printf("Error writing buffer to part file for partId = %d: %v\n", p.partIndex, err)
 					p.fail()
-					channel <- err
+					commonChannelOfParts <- err
 					return
 				}
 
@@ -78,13 +78,13 @@ func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
 			if err == io.EOF {
 				log.Printf("%d Downloaded partIndex = %d (bytes %d - %d)", runtime.NumGoroutine(), p.partIndex, p.startIndex, p.endIndex)
 				p.setStatus(Completed)
-				channel <- nil
+				commonChannelOfParts <- nil
 				return
 			}
 			if err != nil {
 				log.Printf("Error reading body of http request for partId = %d: %v\n", p.partIndex, err)
 				p.fail()
-				channel <- err
+				commonChannelOfParts <- err
 				return
 			}
 		}
