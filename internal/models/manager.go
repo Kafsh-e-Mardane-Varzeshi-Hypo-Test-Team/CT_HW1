@@ -3,7 +3,6 @@ package models
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"maps"
 	"slices"
@@ -90,8 +89,6 @@ func (m *Manager) PauseDownload(id int) error {
 			break
 		}
 	}
-
-	fmt.Println("download found")
 
 	err := d.Pause()
 	if err != nil {
