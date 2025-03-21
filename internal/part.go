@@ -2,7 +2,6 @@ package internal
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -21,11 +20,12 @@ type Part struct {
 	path            string
 	req             *http.Request
 	mu              sync.Mutex
+	channel         chan Status
 	Status
 }
 
 func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
-	if p.Status == Completed {
+	if p.getStatus() == Completed {
 		channel <- nil
 		return
 	}
@@ -54,62 +54,68 @@ func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
 	defer file.Close()
 
 	buffer := make([]byte, 32*1024)
-	fmt.Println(runtime.NumGoroutine(), "before for of partIndex", p.partIndex)
 	for {
-		if p.getStatus() == Completed {
+		select {
+		case status := <-p.channel:
+			log.Printf("Stop downloading partIndex = %d due to it's status = %d", p.partIndex, status)
+			channel <- errors.New("part " + strconv.Itoa(p.partIndex) + " has status = " + strconv.Itoa(int(status)))
 			return
-		}
-		if p.getStatus() != InProgress {
-			log.Printf("%d partIndex = %d ~ p.status != InProgress", runtime.NumGoroutine(), p.partIndex)
-			channel <- errors.New("part " + strconv.Itoa(p.partIndex) + " status is not InProgress (it is " + strconv.Itoa(int(p.Status)) + ")")
-			return
-		}
+		default:
+			bandwidthLimiter.WaitForToken()
+			n, err := resp.Body.Read(buffer)
+			// log.Printf("downloading partId = %d with n = %d and downloadedBytes = %d/%d", p.partIndex, n, p.downloadedBytes, p.endIndex - p.startIndex)
+			if n > 0 {
+				_, err := file.Write(buffer[:n])
+				if err != nil {
+					log.Printf("Error writing buffer to part file for partId = %d: %v\n", p.partIndex, err)
+					p.fail()
+					channel <- err
+					return
+				}
 
-		bandwidthLimiter.WaitForToken()
-		n, err := resp.Body.Read(buffer)
-		// log.Printf("downloading partId = %d with n = %d and downloadedBytes = %d/%d", p.partIndex, n, p.downloadedBytes, p.endIndex - p.startIndex)
-		n = min(n, int(p.endIndex - p.startIndex - p.downloadedBytes))
-		if n > 0 {
-			_, err := file.Write(buffer[:n])
+				p.addToDownloadedBytes(n)
+			}
+			if err == io.EOF {
+				log.Printf("%d Downloaded partIndex = %d (bytes %d - %d)", runtime.NumGoroutine(), p.partIndex, p.startIndex, p.endIndex)
+				p.setStatus(Completed)
+				channel <- nil
+				return
+			}
 			if err != nil {
-				log.Printf("Error writing buffer to part file for partId = %d: %v\n", p.partIndex, err)
-				p.setStatus(Failed)
+				log.Printf("Error reading body of http request for partId = %d: %v\n", p.partIndex, err)
+				p.fail()
 				channel <- err
 				return
 			}
-
-			p.addToDownloadedBytes(n)
-		}
-		if err == io.EOF {
-			log.Printf("%d Downloaded partIndex = %d (bytes %d - %d)", runtime.NumGoroutine(), p.partIndex, p.startIndex, p.endIndex)
-			p.setStatus(Completed)
-			channel <- nil
-			return
-		}
-		if err != nil {
-			log.Printf("Error reading body of http request for partId = %d: %v\n", p.partIndex, err)
-			p.setStatus(Failed)
-			channel <- err
-			return
 		}
 	}
 }
 
 func (p *Part) pause() error {
-	log.Printf("Pausing download of part %d : %d bytes downloaded", p.partIndex, p.downloadedBytes)
+	p.channel <- Paused
 	p.setStatus(Paused)
+	log.Printf("Pausing download of part %d : %d bytes downloaded", p.partIndex, p.downloadedBytes)
 	return nil
 }
 
 func (p *Part) pend() error {
-	log.Printf("Pending download of part %d : %d bytes downloaded", p.partIndex, p.downloadedBytes)
+	p.channel <- Pending
 	p.setStatus(Pending)
+	log.Printf("Pending download of part %d : %d bytes downloaded", p.partIndex, p.downloadedBytes)
 	return nil
 }
 
 func (p *Part) cancel() error {
-	log.Printf("Canceling download of part %d : %d bytes downloaded", p.partIndex, p.downloadedBytes)
+	p.channel <- Cancelled
 	p.setStatus(Cancelled)
+	log.Printf("Canceling download of part %d : %d bytes downloaded", p.partIndex, p.downloadedBytes)
+	return nil
+}
+
+func (p *Part) fail() error {
+	p.channel <- Failed
+	p.setStatus(Failed)
+	log.Printf("Failing download of part %d : %d bytes downloaded", p.partIndex, p.downloadedBytes)
 	return nil
 }
 

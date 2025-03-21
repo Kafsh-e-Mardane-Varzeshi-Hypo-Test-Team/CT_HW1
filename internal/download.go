@@ -2,7 +2,6 @@ package internal
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -104,9 +103,8 @@ func (d *Download) downloadParts(bandwidthLimiter *BandwidthLimiter) error {
 		go d.parts[i].start(d.channel, bandwidthLimiter)
 	}
 
-	for i := range d.numberOfParts {		
+	for range d.numberOfParts {
 		err := <-d.channel
-		fmt.Println(i, err)
 		if err != nil {
 			d.setStatus(Failed)
 			return err
@@ -161,6 +159,7 @@ func (d *Download) initializeParts() error {
 			downloadedBytes: 0,
 			Status:          Pending,
 			req:             req,
+			channel:         make(chan Status),
 		}
 
 		if i == d.numberOfParts-1 {
@@ -195,7 +194,6 @@ func (d *Download) initializeDownload() error {
 		d.numberOfParts = 1
 	}
 	d.parts = make([]Part, d.numberOfParts)
-	d.channel = make(chan error, d.numberOfParts)
 
 	err = d.initializeParts()
 	if err != nil {
@@ -213,7 +211,7 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 			return err
 		}
 	}
-
+	d.channel = make(chan error, d.numberOfParts)
 	d.setStatus(InProgress)
 	log.Printf("Content length in downloadID = %d is %d\n", d.ID, d.totalSize)
 
@@ -331,8 +329,8 @@ func (d *Download) monitorProgress() {
 		percentage := float64(d.downloadedSize) / float64(d.totalSize) * 100
 		d.downloadPercentage = percentage
 
-		log.Printf("monitoring :: %.2f%% (%.2f MB/%.2f MB) - %.2f MB/s\n",
-			percentage, float64(d.downloadedSize)/1024/1024, float64(d.totalSize)/1024/1024, d.currentSpeed/1024/1024)
+		//log.Printf("monitoring :: %.2f%% (%.2f MB/%.2f MB) - %.2f MB/s\n",
+		//	percentage, float64(d.downloadedSize)/1024/1024, float64(d.totalSize)/1024/1024, d.currentSpeed/1024/1024)
 		d.mu.Unlock()
 	}
 }
