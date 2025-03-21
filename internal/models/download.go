@@ -184,7 +184,6 @@ func (d *Download) initializeRequestOfParts() error {
 	return nil
 }
 func (d *Download) initializeDownload() error {
-	d.IsInitialized = true
 	d.Path = d.Destination + "/" + d.OutputFileName
 
 	err := d.setHttpResponse()
@@ -222,6 +221,8 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 			log.Printf("Error while initializing downloadID = %d:%v", d.ID, err)
 			d.setStatus(Failed)
 			return err
+		} else {
+			d.IsInitialized = true
 		}
 	}
 
