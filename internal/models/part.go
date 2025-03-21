@@ -91,28 +91,36 @@ func (p *Part) start(commonChannelOfParts chan error, bandwidthLimiter *Bandwidt
 }
 
 func (p *Part) pause() error {
-	p.channel <- Paused
+	if p.getStatus() == InProgress {
+		p.channel <- Paused
+	}
 	p.setStatus(Paused)
 	log.Printf("Pausing download of part %d : %d bytes downloaded", p.PartIndex, p.DownloadedBytes)
 	return nil
 }
 
 func (p *Part) pend() error {
-	p.channel <- Pending
+	if p.getStatus() == InProgress {
+		p.channel <- Pending
+	}
 	p.setStatus(Pending)
 	log.Printf("Pending download of part %d : %d bytes downloaded", p.PartIndex, p.DownloadedBytes)
 	return nil
 }
 
 func (p *Part) cancel() error {
-	p.channel <- Cancelled
+	if p.getStatus() == InProgress {
+		p.channel <- Cancelled
+	}
 	p.setStatus(Cancelled)
 	log.Printf("Canceling download of part %d : %d bytes downloaded", p.PartIndex, p.DownloadedBytes)
 	return nil
 }
 
 func (p *Part) fail() error {
-	p.channel <- Failed
+	if p.getStatus() == InProgress {
+		p.channel <- Failed
+	}
 	p.setStatus(Failed)
 	log.Printf("Failing download of part %d : %d bytes downloaded", p.PartIndex, p.DownloadedBytes)
 	return nil
