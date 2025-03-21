@@ -77,7 +77,7 @@ func (p *Part) start(commonChannelOfParts chan connectionWithPart, bandwidthLimi
 			if err == io.EOF {
 				log.Printf("Downloaded partIndex = %d (bytes %d - %d)", p.PartIndex, p.StartIndex, p.EndIndex)
 				p.setStatus(Completed)
-				commonChannelOfParts <- connectionWithPart{err, Failed}
+				commonChannelOfParts <- connectionWithPart{nil, Completed}
 				return
 			}
 			if err != nil {
