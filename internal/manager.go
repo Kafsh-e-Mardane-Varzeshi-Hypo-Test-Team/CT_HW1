@@ -3,10 +3,8 @@ package internal
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"maps"
-	"os"
 	"slices"
 	"sync"
 	"time"
@@ -25,7 +23,7 @@ func NewManager() *Manager {
 	}
 }
 
-func (m *Manager) Start(save chan struct{}) {
+func (m *Manager) Start(filename string) {
 	go m.monitorActiveHours()
 }
 
@@ -302,20 +300,15 @@ func (m *Manager) pauseQueueDownloads(qName string) {
 	}
 }
 
-func (m *Manager) Save(filename string) error {
+func (m *Manager) GetJson() ([]byte, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	jsonData, err := json.MarshalIndent(m, "", "  ")
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	err = os.WriteFile(filename, jsonData, 0644) // 0644 is the file permission (read/write for owner, read for others)
-	if err != nil {
-		return fmt.Errorf("failed to write JSON to file: %w", err)
-	}
-	return nil
+	return jsonData, nil
 }
 
 type DownloadInfo struct {
