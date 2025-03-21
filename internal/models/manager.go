@@ -30,7 +30,13 @@ func (m *Manager) Start() {
 }
 
 func (m *Manager) Stop() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 
+	for _, q := range m.Queues {
+		m.pauseQueueDownloads(q.Name)
+		q.Stop()
+	}
 }
 
 func (m *Manager) AddDownload(url, outputFileName, queueName string) error {
