@@ -197,11 +197,17 @@ func (m *QueuesTab) updateRows() {
 	m.queues = m.manager.GetQueueList()
 	rows := []table.Row{}
 	for _, queue := range m.queues {
+		var sp string
+		if queue.SpeedLimit == 0 {
+			sp = "∞"
+		} else {
+			sp = speedString(float64(queue.SpeedLimit))
+		}
 		rows = append(rows, []string{
 			queue.Name,
 			queue.TargetDirectory,
 			fmt.Sprintf("%d", queue.MaxParallel),
-			speedString(float64(queue.SpeedLimit)),
+			sp,
 			queue.StartTime.Format("15:04"),
 			queue.EndTime.Format("15:04"),
 		})
