@@ -129,6 +129,10 @@ func (q *Queue) Stop() {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
+	if !q.active {
+		return
+	}
+
 	q.active = false
 
 	close(q.downloadChan)

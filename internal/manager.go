@@ -169,6 +169,14 @@ func (m *Manager) RemoveQueue(queueName string) error {
 		return errors.New("queue does not exist")
 	}
 
+	for _, d := range m.Downloads {
+		if d.GetQueueName() == queueName {
+			d.Cancel()
+		}
+	}
+	m.Downloads = slices.DeleteFunc(m.Downloads, func(d *Download) bool {
+		return d.GetQueueName() == queueName
+	})
 	q.Stop() // TODO: error handling
 
 	delete(m.Queues, queueName)
@@ -242,7 +250,7 @@ func (m *Manager) getQueuePendingDownloads(queueName string) []*Download {
 }
 
 func (m *Manager) monitorActiveHours() {
-	ticker := time.NewTicker(time.Minute)
+	ticker := time.NewTicker(4 * time.Second)
 	defer ticker.Stop()
 
 	for {
@@ -254,6 +262,18 @@ func (m *Manager) monitorActiveHours() {
 				isActive := q.IsActive()
 				checkTime := q.CheckActiveTime(now)
 				if isActive && !checkTime {
+					for _, d := range m.Downloads {
+						if d.GetQueueName() == q.Name {
+							switch d.GetStatus() {
+							case Pending, InProgress:
+								d.Pend()
+							case Paused:
+								d.Pause()
+							case Cancelled:
+								d.Cancel()
+							}
+						}
+					}
 					q.Stop()
 				}
 				if !isActive && checkTime {
