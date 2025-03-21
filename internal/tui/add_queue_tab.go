@@ -240,7 +240,7 @@ func (m AddQueueTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.footerMessage = err.Error()
 					return m, nil
 				}
-				m.footerMessage = "Queue added successfully."
+				m.resetForm()
 				return m, func() tea.Msg { return CloseChildMsg{} }
 			case "up", "shift+tab":
 				m.focusIndex = max(m.focusIndex-1, 0)
