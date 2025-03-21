@@ -181,9 +181,17 @@ func (q *Queue) IsActive() bool {
 func (q *Queue) CheckActiveTime(now time.Time) bool {
 	q.mu.Lock()
 	defer q.mu.Unlock()
+	endAfterStart := (q.EndTime.Hour() > q.StartTime.Hour()) || (q.EndTime.Hour() == q.StartTime.Hour() && q.EndTime.Minute() >= q.StartTime.Minute())
 	afterStart := (now.Hour() > q.StartTime.Hour()) || (now.Hour() == q.StartTime.Hour() && now.Minute() >= q.StartTime.Minute())
 	beforeEnd := (now.Hour() < q.EndTime.Hour()) || (now.Hour() == q.EndTime.Hour() && now.Minute() < q.EndTime.Minute())
-	return afterStart && beforeEnd
+	log.Println(afterStart)
+	log.Println(beforeEnd)
+	if endAfterStart {
+		log.Println("endAfterStart")
+		return afterStart && beforeEnd
+	} else {
+		return afterStart || beforeEnd
+	}
 }
 
 type BandwidthLimiter struct {
