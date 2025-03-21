@@ -243,7 +243,6 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 	err = d.downloadParts(bandwidthLimiter)
 	if err != nil {
 		log.Printf("Error in downloadParts() function for downloadID = %d : %v\n", d.ID, err)
-		d.setStatus(Failed)
 		return err
 	}
 	log.Printf("All parts downloaded successfully")
