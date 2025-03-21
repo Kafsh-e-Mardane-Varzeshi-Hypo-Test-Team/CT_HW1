@@ -253,40 +253,47 @@ func (m *Manager) getQueuePendingDownloads(queueName string) []*Download {
 }
 
 func (m *Manager) monitorActiveHours() {
-	ticker := time.NewTicker(4 * time.Second)
+	ticker := time.NewTicker(time.Minute)
 	defer ticker.Stop()
+
+	m.checkTimeAndActivate()
 
 	for {
 		select {
 		case <-ticker.C:
-			now := time.Now()
-			m.mu.Lock()
-			for q := range maps.Values(m.Queues) {
-				isActive := q.IsActive()
-				checkTime := q.CheckActiveTime(now)
-				if isActive && !checkTime {
-					for _, d := range m.Downloads {
-						if d.GetQueueName() == q.Name {
-							switch d.GetStatus() {
-							case Pending, InProgress:
-								d.Pend()
-							case Paused:
-								d.Pause()
-							case Cancelled:
-								d.Cancel()
-							}
-						}
-					}
-					q.Stop()
-				}
-				if !isActive && checkTime {
-					queuedDownloads := m.getQueuePendingDownloads(q.Name)
-					q.Start(queuedDownloads)
-				}
-			}
-			m.mu.Unlock()
+			m.checkTimeAndActivate()
+			// case <-m.done:
 		}
 	}
+}
+
+func (m *Manager) checkTimeAndActivate() {
+	now := time.Now()
+	m.mu.Lock()
+	for q := range maps.Values(m.Queues) {
+		isActive := q.IsActive()
+		checkTime := q.CheckActiveTime(now)
+		if isActive && !checkTime {
+			for _, d := range m.Downloads {
+				if d.GetQueueName() == q.Name {
+					switch d.GetStatus() {
+					case Pending, InProgress:
+						d.Pend()
+					case Paused:
+						d.Pause()
+					case Cancelled:
+						d.Cancel()
+					}
+				}
+			}
+			q.Stop()
+		}
+		if !isActive && checkTime {
+			queuedDownloads := m.getQueuePendingDownloads(q.Name)
+			q.Start(queuedDownloads)
+		}
+	}
+	m.mu.Unlock()
 }
 
 func (m *Manager) Save(filename string) error {
