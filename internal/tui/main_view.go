@@ -44,6 +44,11 @@ func (m MainView) Init() tea.Cmd {
 func (m MainView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
+	if msg, ok := msg.(updateMsg); ok {
+		m.downloadTab, cmd = m.downloadTab.Update(msg)
+		return m, cmd
+	}
+
 	// Send keypress to the active tab first
 	switch m.currentTab {
 	case downloads:
@@ -72,7 +77,7 @@ func (m MainView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch msg.String() {
 			case "left":
 				m.currentTab = downloads
-				m.downloadTab, cmd = m.downloadTab.Update(updateMsg{})
+				m.downloadTab, cmd = m.downloadTab.Update(nil)
 			case "right":
 			case "esc", "ctrl+c":
 				return m, tea.Quit
@@ -88,7 +93,7 @@ func (m MainView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "left":
 			case "right":
 				m.currentTab = downloads
-				m.downloadTab, cmd = m.downloadTab.Update(updateMsg{})
+				m.downloadTab, cmd = m.downloadTab.Update(nil)
 			case "esc", "ctrl+c":
 				return m, tea.Quit
 			}
