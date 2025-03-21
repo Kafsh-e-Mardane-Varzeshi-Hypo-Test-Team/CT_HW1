@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal/models"
 	"github.com/charmbracelet/bubbles/help"
@@ -109,7 +110,9 @@ func NewDownloadsTab(manager *models.Manager) DownloadsTab {
 	return downloadsTab
 }
 
-func (m DownloadsTab) Init() tea.Cmd { return nil }
+func (m DownloadsTab) Init() tea.Cmd {
+	return tickUpdate()
+}
 
 func (m DownloadsTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
@@ -117,7 +120,9 @@ func (m DownloadsTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.updateRows()
 
 	switch msg := msg.(type) {
-
+	case updateMsg:
+		m.footerString = fmt.Sprint(m.footerString, "1")
+		return m, tickUpdate()
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keys.Navigation):
@@ -187,6 +192,7 @@ func (m DownloadsTab) View() string {
 }
 
 func (m *DownloadsTab) updateRows() {
+	m.footerString = fmt.Sprint(m.footerString, ".")
 	m.downloads = m.manager.GetDownloadList()
 	rows := []table.Row{}
 	for _, download := range m.downloads {
@@ -224,4 +230,13 @@ func speedString(speed int64) string {
 	} else {
 		return fmt.Sprintf("%d MB/s", speed/1024/1024)
 	}
+}
+
+// update loop
+type updateMsg struct{}
+
+func tickUpdate() tea.Cmd {
+	return tea.Tick(time.Second, func(time.Time) tea.Msg {
+		return updateMsg{}
+	})
 }

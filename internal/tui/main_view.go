@@ -35,6 +35,9 @@ func NewMainView(manager *models.Manager) MainView {
 }
 
 func (m MainView) Init() tea.Cmd {
+	if m.currentTab == downloads {
+		return tickUpdate()
+	}
 	return nil
 }
 
@@ -69,7 +72,7 @@ func (m MainView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch msg.String() {
 			case "left":
 				m.currentTab = downloads
-				m.downloadTab, cmd = m.downloadTab.Update(nil)
+				m.downloadTab, cmd = m.downloadTab.Update(updateMsg{})
 			case "right":
 			case "esc", "ctrl+c":
 				return m, tea.Quit
@@ -85,7 +88,7 @@ func (m MainView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "left":
 			case "right":
 				m.currentTab = downloads
-				m.downloadTab, cmd = m.downloadTab.Update(nil)
+				m.downloadTab, cmd = m.downloadTab.Update(updateMsg{})
 			case "esc", "ctrl+c":
 				return m, tea.Quit
 			}

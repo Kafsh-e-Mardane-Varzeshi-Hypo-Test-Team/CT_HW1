@@ -179,7 +179,6 @@ func (m QueuesTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m QueuesTab) View() string {
-	m.footerString = fmt.Sprint(len(m.queues), " queues")
 	if m.editingQueue {
 		return m.editQueueTab.View()
 	} else if m.addingQueue {
