@@ -94,7 +94,9 @@ func (p *Part) start(commonChannelOfParts chan connectionWithPart, bandwidthLimi
 
 func (p *Part) pause() error {
 	if p.getStatus() == InProgress {
+		log.Printf("--------entering channel pause partId = %d", p.PartIndex)
 		p.channel <- Paused
+		log.Printf("--------read from channel pause partId = %d", p.PartIndex)
 	}
 	p.setStatus(Paused)
 	log.Printf("Pausing download of part %d : %d bytes downloaded", p.PartIndex, p.DownloadedBytes)

@@ -159,7 +159,6 @@ func (d *Download) initializeParts() error {
 			EndIndex:        int64(i+1) * partSize - 1,
 			DownloadedBytes: 0,
 			Status:          Pending,
-			channel:         make(chan Status, 1),
 		}
 
 		if i == d.NumberOfParts-1 {
@@ -234,6 +233,9 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 	}
 
 	d.channel = make(chan connectionWithPart, d.NumberOfParts)
+	for i := range d.NumberOfParts {
+		d.Parts[i].channel = make(chan Status, 1)
+	}
 	d.setStatus(InProgress)
 	log.Printf("Content length in downloadID = %d is %d\n", d.ID, d.TotalSize)
 
