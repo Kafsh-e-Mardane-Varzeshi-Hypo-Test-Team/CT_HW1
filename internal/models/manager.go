@@ -6,6 +6,7 @@ import (
 	"log"
 	"maps"
 	"slices"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -249,6 +250,9 @@ func (m *Manager) GetQueueList() []*QueueInfo {
 		})
 	}
 
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].Name < list[j].Name
+	})
 	return list
 }
 
