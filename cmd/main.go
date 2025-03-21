@@ -1,38 +1,36 @@
 package main
 
 import (
-	"encoding/json"
-	"errors"
 	"log"
-	"os"
+	"time"
 
 	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal"
+	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal/persistence"
 )
 
+const filename string = "data.json"
+
 func main() {
-	manager, err := LoadManager("hello.txt")
+	manager, err := persistence.Load(filename)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	manager.Start(make(chan struct{}))
+	manager.Start()
 
+	go autoSave(manager)
 }
 
-func LoadManager(filename string) (*internal.Manager, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return internal.NewManager(), nil
+func autoSave(manager *internal.Manager) error {
+	ticker := time.NewTicker(time.Duration(30 * time.Second))
+	defer ticker.Stop()
+
+	for range ticker.C {
+		jsonData, err := manager.GetJson()
+		if err != nil {
+			return err
 		}
-		return nil, err
-	}
-	defer file.Close()
 
-	decoder := json.NewDecoder(file)
-	m := &internal.Manager{}
-	if err := decoder.Decode(m); err != nil {
-		return nil, err
+		persistence.Save(filename, jsonData)
 	}
-
-	return m, nil
+	return nil
 }

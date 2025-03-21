@@ -23,7 +23,7 @@ func NewManager() *Manager {
 	}
 }
 
-func (m *Manager) Start(filename string) {
+func (m *Manager) Start() {
 	go m.monitorActiveHours()
 }
 
