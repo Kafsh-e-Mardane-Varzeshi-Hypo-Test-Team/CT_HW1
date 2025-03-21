@@ -8,7 +8,7 @@ The whole project was dissected into three parts: handling downloading, handling
 
 
 ![GoDownloadManager](https://github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/blob/main/DownloadsTab.png)
-![GoDownloadManager](https://github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/blob/main/AppWork.mp4)
+![GoDownloadManager](https://github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/blob/main/downloadManager.gif)
 
 ## Features
 
