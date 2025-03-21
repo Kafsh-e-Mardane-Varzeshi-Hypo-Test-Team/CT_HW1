@@ -29,7 +29,9 @@ func (p *Part) start(commonChannelOfParts chan connectionWithPart, bandwidthLimi
 		return
 	}
 	p.setStatus(InProgress)
-	p.RangeOfDownload = strconv.Itoa(int(p.StartIndex+p.DownloadedBytes)) + "-" + strconv.Itoa(int(p.EndIndex))
+
+	startByte := p.StartIndex + p.DownloadedBytes
+    p.RangeOfDownload = strconv.FormatInt(startByte, 10) + "-" + strconv.FormatInt(p.EndIndex, 10)
 	p.req.Header.Set("Range", "bytes="+p.RangeOfDownload)
 	log.Printf("downloading part %d started (bytes %d - %d)", p.PartIndex, p.StartIndex+p.DownloadedBytes, p.EndIndex)
 

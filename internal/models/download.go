@@ -156,7 +156,7 @@ func (d *Download) initializeParts() error {
 		d.Parts[i] = Part{
 			PartIndex:       i,
 			StartIndex:      int64(i) * partSize,
-			EndIndex:        int64(i+1) * partSize,
+			EndIndex:        int64(i+1) * partSize - 1,
 			DownloadedBytes: 0,
 			Status:          Pending,
 			channel:         make(chan Status, 1),
