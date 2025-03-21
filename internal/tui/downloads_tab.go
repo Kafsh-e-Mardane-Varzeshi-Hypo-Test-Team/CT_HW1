@@ -210,13 +210,24 @@ func (m *DownloadsTab) updateRows() {
 			statusString = "Failed"
 		}
 
-		rows = append(rows, []string{
-			download.URL,
-			download.QueueName,
-			statusString,
-			speedString(download.TransferRate),
-			fmt.Sprintf("%#6.2f%%", download.Progress*100),
-		})
+		if status == models.Completed {
+			rows = append(rows, []string{
+				download.URL,
+				download.QueueName,
+				statusString,
+				"",
+				"100%",
+			})
+		} else {
+			rows = append(rows, []string{
+				download.URL,
+				download.QueueName,
+				statusString,
+				speedString(download.TransferRate),
+				fmt.Sprintf("%#6.2f%%", download.Progress),
+			})
+
+		}
 	}
 
 	m.table.SetRows(rows)
