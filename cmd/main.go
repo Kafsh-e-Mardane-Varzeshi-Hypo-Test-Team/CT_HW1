@@ -38,6 +38,7 @@ func main() {
 		panic(err)
 	}
 
+	manager.Stop()
 	saveState(manager)
 }
 
