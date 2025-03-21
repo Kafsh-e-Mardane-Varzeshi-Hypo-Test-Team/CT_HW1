@@ -329,8 +329,8 @@ func (d *Download) monitorProgress() {
 		percentage := float64(d.DownloadedSize) / float64(d.TotalSize) * 100
 		d.DownloadPercentage = percentage
 
-		//log.Printf("monitoring :: %.2f%% (%.2f MB/%.2f MB) - %.2f MB/s\n",
-		//	percentage, float64(d.downloadedSize)/1024/1024, float64(d.totalSize)/1024/1024, d.currentSpeed/1024/1024)
+		log.Printf("monitoring :: %.2f%% (%.2f MB/%.2f MB) - %.2f MB/s\n",
+			percentage, float64(d.DownloadedSize)/1000/1000, float64(d.TotalSize)/1000/1000, d.currentSpeed/1000/1000)
 		d.mu.Unlock()
 	}
 }
