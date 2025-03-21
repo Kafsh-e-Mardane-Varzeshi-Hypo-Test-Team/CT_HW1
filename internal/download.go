@@ -170,9 +170,6 @@ func (d *Download) mergeParts() error {
 func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 	d.path = d.Destination + "/" + d.OutputFileName
 
-	d.lastUpdateTime = time.Now()
-	go d.monitorProgress()
-
 	err := d.setHttpResponse()
 	if err != nil {
 		return err
@@ -187,6 +184,10 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 
 	d.setStatus(InProgress)
 	log.Printf("Content length in downloadID = %d is %d\n", d.ID, d.totalSize)
+
+	d.lastUpdateTime = time.Now()
+	go d.monitorProgress()
+
 	if d.supportsPartialDownload() {
 		d.numberOfParts = NUMBER_OF_PARTS
 	} else {
@@ -301,7 +302,7 @@ func (d *Download) monitorProgress() {
 		d.downloadPercentage = percentage
 
 		log.Printf("monitoring :: %.2f%% (%.2f MB/%.2f MB) - %.2f MB/s\n",
-		percentage, float64(d.downloadedSize)/1024 / 1024, float64(d.totalSize)/1024/1024, d.currentSpeed/1024/1024)
+		percentage, float64(d.downloadedSize)/1024/1024, float64(d.totalSize)/1024/1024, d.currentSpeed/1024/1024)
 		d.mu.Unlock()
 	}
 }
