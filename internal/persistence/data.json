@@ -1,0 +1,565 @@
+{
+  "LastID": 9,
+  "Downloads": [
+    {
+      "ID": 0,
+      "URL": "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3",
+      "Destination": "/Users/mammedbrk/Downloads/tmp",
+      "OutputFileName": "asldkfj.mp3",
+      "Path": "/Users/mammedbrk/Downloads/tmp/asldkfj.mp3",
+      "QueueName": "a",
+      "NumberOfParts": 5,
+      "TotalSize": 3133274,
+      "DownloadedSize": 3133278,
+      "DownloadPercentage": 100.00012766199188,
+      "Parts": [
+        {
+          "PartIndex": 0,
+          "StartIndex": 0,
+          "EndIndex": 626654,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "0-626654",
+          "Path": "/Users/mammedbrk/Downloads/tmp/asldkfj.mp30-626654.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 1,
+          "StartIndex": 626654,
+          "EndIndex": 1253308,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "626654-1253308",
+          "Path": "/Users/mammedbrk/Downloads/tmp/asldkfj.mp3626654-1253308.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 2,
+          "StartIndex": 1253308,
+          "EndIndex": 1879962,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "1253308-1879962",
+          "Path": "/Users/mammedbrk/Downloads/tmp/asldkfj.mp31253308-1879962.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 3,
+          "StartIndex": 1879962,
+          "EndIndex": 2506616,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "1879962-2506616",
+          "Path": "/Users/mammedbrk/Downloads/tmp/asldkfj.mp31879962-2506616.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 4,
+          "StartIndex": 2506616,
+          "EndIndex": 3133273,
+          "DownloadedBytes": 626658,
+          "RangeOfDownload": "2506616-3133273",
+          "Path": "/Users/mammedbrk/Downloads/tmp/asldkfj.mp32506616-3133273.part",
+          "Status": 5
+        }
+      ],
+      "IsInitialized": true,
+      "Status": 5
+    },
+    {
+      "ID": 1,
+      "URL": "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3",
+      "Destination": "/Users/mammedbrk/Downloads/tmp",
+      "OutputFileName": "weioru.mp3",
+      "Path": "/Users/mammedbrk/Downloads/tmp/weioru.mp3",
+      "QueueName": "a",
+      "NumberOfParts": 5,
+      "TotalSize": 3133274,
+      "DownloadedSize": 3133278,
+      "DownloadPercentage": 100.00012766199188,
+      "Parts": [
+        {
+          "PartIndex": 0,
+          "StartIndex": 0,
+          "EndIndex": 626654,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "0-626654",
+          "Path": "/Users/mammedbrk/Downloads/tmp/weioru.mp30-626654.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 1,
+          "StartIndex": 626654,
+          "EndIndex": 1253308,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "626654-1253308",
+          "Path": "/Users/mammedbrk/Downloads/tmp/weioru.mp3626654-1253308.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 2,
+          "StartIndex": 1253308,
+          "EndIndex": 1879962,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "1253308-1879962",
+          "Path": "/Users/mammedbrk/Downloads/tmp/weioru.mp31253308-1879962.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 3,
+          "StartIndex": 1879962,
+          "EndIndex": 2506616,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "1879962-2506616",
+          "Path": "/Users/mammedbrk/Downloads/tmp/weioru.mp31879962-2506616.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 4,
+          "StartIndex": 2506616,
+          "EndIndex": 3133273,
+          "DownloadedBytes": 626658,
+          "RangeOfDownload": "2506616-3133273",
+          "Path": "/Users/mammedbrk/Downloads/tmp/weioru.mp32506616-3133273.part",
+          "Status": 5
+        }
+      ],
+      "IsInitialized": true,
+      "Status": 5
+    },
+    {
+      "ID": 2,
+      "URL": "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3",
+      "Destination": "/Users/mammedbrk/Downloads/tmp",
+      "OutputFileName": "wre",
+      "Path": "/Users/mammedbrk/Downloads/tmp/wre",
+      "QueueName": "a",
+      "NumberOfParts": 5,
+      "TotalSize": 3133274,
+      "DownloadedSize": 3133278,
+      "DownloadPercentage": 100.00012766199188,
+      "Parts": [
+        {
+          "PartIndex": 0,
+          "StartIndex": 0,
+          "EndIndex": 626654,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "0-626654",
+          "Path": "/Users/mammedbrk/Downloads/tmp/wre0-626654.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 1,
+          "StartIndex": 626654,
+          "EndIndex": 1253308,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "626654-1253308",
+          "Path": "/Users/mammedbrk/Downloads/tmp/wre626654-1253308.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 2,
+          "StartIndex": 1253308,
+          "EndIndex": 1879962,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "1253308-1879962",
+          "Path": "/Users/mammedbrk/Downloads/tmp/wre1253308-1879962.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 3,
+          "StartIndex": 1879962,
+          "EndIndex": 2506616,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "1879962-2506616",
+          "Path": "/Users/mammedbrk/Downloads/tmp/wre1879962-2506616.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 4,
+          "StartIndex": 2506616,
+          "EndIndex": 3133273,
+          "DownloadedBytes": 626658,
+          "RangeOfDownload": "2506616-3133273",
+          "Path": "/Users/mammedbrk/Downloads/tmp/wre2506616-3133273.part",
+          "Status": 5
+        }
+      ],
+      "IsInitialized": true,
+      "Status": 5
+    },
+    {
+      "ID": 3,
+      "URL": "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3",
+      "Destination": "/Users/mammedbrk/Downloads/tmp",
+      "OutputFileName": "ddf",
+      "Path": "/Users/mammedbrk/Downloads/tmp/ddf",
+      "QueueName": "a",
+      "NumberOfParts": 5,
+      "TotalSize": 3133274,
+      "DownloadedSize": 3133278,
+      "DownloadPercentage": 100.00012766199188,
+      "Parts": [
+        {
+          "PartIndex": 0,
+          "StartIndex": 0,
+          "EndIndex": 626654,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "0-626654",
+          "Path": "/Users/mammedbrk/Downloads/tmp/ddf0-626654.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 1,
+          "StartIndex": 626654,
+          "EndIndex": 1253308,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "626654-1253308",
+          "Path": "/Users/mammedbrk/Downloads/tmp/ddf626654-1253308.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 2,
+          "StartIndex": 1253308,
+          "EndIndex": 1879962,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "1253308-1879962",
+          "Path": "/Users/mammedbrk/Downloads/tmp/ddf1253308-1879962.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 3,
+          "StartIndex": 1879962,
+          "EndIndex": 2506616,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "1879962-2506616",
+          "Path": "/Users/mammedbrk/Downloads/tmp/ddf1879962-2506616.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 4,
+          "StartIndex": 2506616,
+          "EndIndex": 3133273,
+          "DownloadedBytes": 626658,
+          "RangeOfDownload": "2506616-3133273",
+          "Path": "/Users/mammedbrk/Downloads/tmp/ddf2506616-3133273.part",
+          "Status": 5
+        }
+      ],
+      "IsInitialized": true,
+      "Status": 5
+    },
+    {
+      "ID": 4,
+      "URL": "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3",
+      "Destination": "/Users/mammedbrk/Downloads/tmp",
+      "OutputFileName": "l",
+      "Path": "/Users/mammedbrk/Downloads/tmp/l",
+      "QueueName": "a",
+      "NumberOfParts": 5,
+      "TotalSize": 3133274,
+      "DownloadedSize": 3133278,
+      "DownloadPercentage": 100.00012766199188,
+      "Parts": [
+        {
+          "PartIndex": 0,
+          "StartIndex": 0,
+          "EndIndex": 626654,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "0-626654",
+          "Path": "/Users/mammedbrk/Downloads/tmp/l0-626654.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 1,
+          "StartIndex": 626654,
+          "EndIndex": 1253308,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "626654-1253308",
+          "Path": "/Users/mammedbrk/Downloads/tmp/l626654-1253308.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 2,
+          "StartIndex": 1253308,
+          "EndIndex": 1879962,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "1253308-1879962",
+          "Path": "/Users/mammedbrk/Downloads/tmp/l1253308-1879962.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 3,
+          "StartIndex": 1879962,
+          "EndIndex": 2506616,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "1879962-2506616",
+          "Path": "/Users/mammedbrk/Downloads/tmp/l1879962-2506616.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 4,
+          "StartIndex": 2506616,
+          "EndIndex": 3133273,
+          "DownloadedBytes": 626658,
+          "RangeOfDownload": "2506616-3133273",
+          "Path": "/Users/mammedbrk/Downloads/tmp/l2506616-3133273.part",
+          "Status": 5
+        }
+      ],
+      "IsInitialized": true,
+      "Status": 5
+    },
+    {
+      "ID": 5,
+      "URL": "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3",
+      "Destination": "/Users/mammedbrk/Downloads/tmp",
+      "OutputFileName": "ew",
+      "Path": "/Users/mammedbrk/Downloads/tmp/ew",
+      "QueueName": "a",
+      "NumberOfParts": 5,
+      "TotalSize": 3133274,
+      "DownloadedSize": 3133278,
+      "DownloadPercentage": 100.00012766199188,
+      "Parts": [
+        {
+          "PartIndex": 0,
+          "StartIndex": 0,
+          "EndIndex": 626654,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "0-626654",
+          "Path": "/Users/mammedbrk/Downloads/tmp/ew0-626654.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 1,
+          "StartIndex": 626654,
+          "EndIndex": 1253308,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "626654-1253308",
+          "Path": "/Users/mammedbrk/Downloads/tmp/ew626654-1253308.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 2,
+          "StartIndex": 1253308,
+          "EndIndex": 1879962,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "1253308-1879962",
+          "Path": "/Users/mammedbrk/Downloads/tmp/ew1253308-1879962.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 3,
+          "StartIndex": 1879962,
+          "EndIndex": 2506616,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "1879962-2506616",
+          "Path": "/Users/mammedbrk/Downloads/tmp/ew1879962-2506616.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 4,
+          "StartIndex": 2506616,
+          "EndIndex": 3133273,
+          "DownloadedBytes": 626658,
+          "RangeOfDownload": "2506616-3133273",
+          "Path": "/Users/mammedbrk/Downloads/tmp/ew2506616-3133273.part",
+          "Status": 5
+        }
+      ],
+      "IsInitialized": true,
+      "Status": 5
+    },
+    {
+      "ID": 6,
+      "URL": "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3",
+      "Destination": "/Users/mammedbrk/Downloads/tmp",
+      "OutputFileName": "qwefdsf",
+      "Path": "/Users/mammedbrk/Downloads/tmp/qwefdsf",
+      "QueueName": "a",
+      "NumberOfParts": 5,
+      "TotalSize": 3133274,
+      "DownloadedSize": 3133278,
+      "DownloadPercentage": 100.00012766199188,
+      "Parts": [
+        {
+          "PartIndex": 0,
+          "StartIndex": 0,
+          "EndIndex": 626654,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "0-626654",
+          "Path": "/Users/mammedbrk/Downloads/tmp/qwefdsf0-626654.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 1,
+          "StartIndex": 626654,
+          "EndIndex": 1253308,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "626654-1253308",
+          "Path": "/Users/mammedbrk/Downloads/tmp/qwefdsf626654-1253308.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 2,
+          "StartIndex": 1253308,
+          "EndIndex": 1879962,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "1253308-1879962",
+          "Path": "/Users/mammedbrk/Downloads/tmp/qwefdsf1253308-1879962.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 3,
+          "StartIndex": 1879962,
+          "EndIndex": 2506616,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "1879962-2506616",
+          "Path": "/Users/mammedbrk/Downloads/tmp/qwefdsf1879962-2506616.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 4,
+          "StartIndex": 2506616,
+          "EndIndex": 3133273,
+          "DownloadedBytes": 626658,
+          "RangeOfDownload": "2506616-3133273",
+          "Path": "/Users/mammedbrk/Downloads/tmp/qwefdsf2506616-3133273.part",
+          "Status": 5
+        }
+      ],
+      "IsInitialized": true,
+      "Status": 5
+    },
+    {
+      "ID": 7,
+      "URL": "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3",
+      "Destination": "/Users/mammedbrk/Downloads/tmp",
+      "OutputFileName": "oeiut",
+      "Path": "/Users/mammedbrk/Downloads/tmp/oeiut",
+      "QueueName": "a",
+      "NumberOfParts": 5,
+      "TotalSize": 3133274,
+      "DownloadedSize": 3133278,
+      "DownloadPercentage": 100.00012766199188,
+      "Parts": [
+        {
+          "PartIndex": 0,
+          "StartIndex": 0,
+          "EndIndex": 626654,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "0-626654",
+          "Path": "/Users/mammedbrk/Downloads/tmp/oeiut0-626654.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 1,
+          "StartIndex": 626654,
+          "EndIndex": 1253308,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "626654-1253308",
+          "Path": "/Users/mammedbrk/Downloads/tmp/oeiut626654-1253308.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 2,
+          "StartIndex": 1253308,
+          "EndIndex": 1879962,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "1253308-1879962",
+          "Path": "/Users/mammedbrk/Downloads/tmp/oeiut1253308-1879962.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 3,
+          "StartIndex": 1879962,
+          "EndIndex": 2506616,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "1879962-2506616",
+          "Path": "/Users/mammedbrk/Downloads/tmp/oeiut1879962-2506616.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 4,
+          "StartIndex": 2506616,
+          "EndIndex": 3133273,
+          "DownloadedBytes": 626658,
+          "RangeOfDownload": "2506616-3133273",
+          "Path": "/Users/mammedbrk/Downloads/tmp/oeiut2506616-3133273.part",
+          "Status": 5
+        }
+      ],
+      "IsInitialized": true,
+      "Status": 5
+    },
+    {
+      "ID": 8,
+      "URL": "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3",
+      "Destination": "/Users/mammedbrk/Downloads/tmp",
+      "OutputFileName": "erw",
+      "Path": "/Users/mammedbrk/Downloads/tmp/erw",
+      "QueueName": "a",
+      "NumberOfParts": 5,
+      "TotalSize": 3133274,
+      "DownloadedSize": 3133278,
+      "DownloadPercentage": 100.00012766199188,
+      "Parts": [
+        {
+          "PartIndex": 0,
+          "StartIndex": 0,
+          "EndIndex": 626654,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "0-626654",
+          "Path": "/Users/mammedbrk/Downloads/tmp/erw0-626654.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 1,
+          "StartIndex": 626654,
+          "EndIndex": 1253308,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "626654-1253308",
+          "Path": "/Users/mammedbrk/Downloads/tmp/erw626654-1253308.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 2,
+          "StartIndex": 1253308,
+          "EndIndex": 1879962,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "1253308-1879962",
+          "Path": "/Users/mammedbrk/Downloads/tmp/erw1253308-1879962.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 3,
+          "StartIndex": 1879962,
+          "EndIndex": 2506616,
+          "DownloadedBytes": 626655,
+          "RangeOfDownload": "1879962-2506616",
+          "Path": "/Users/mammedbrk/Downloads/tmp/erw1879962-2506616.part",
+          "Status": 5
+        },
+        {
+          "PartIndex": 4,
+          "StartIndex": 2506616,
+          "EndIndex": 3133273,
+          "DownloadedBytes": 626658,
+          "RangeOfDownload": "2506616-3133273",
+          "Path": "/Users/mammedbrk/Downloads/tmp/erw2506616-3133273.part",
+          "Status": 5
+        }
+      ],
+      "IsInitialized": true,
+      "Status": 5
+    }
+  ],
+  "Queues": {
+    "a": {
+      "Name": "a",
+      "SavePath": "/Users/mammedbrk/Downloads/tmp",
+      "NumConcurrent": 2,
+      "NumRetries": 0,
+      "StartTime": "0000-01-01T00:00:00Z",
+      "EndTime": "0000-01-01T23:59:00Z",
+      "MaxBandwidth": 20400
+    }
+  }
+}

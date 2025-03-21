@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"maps"
 	"slices"
@@ -69,7 +70,10 @@ func (m *Manager) RemoveDownload(id int) error {
 		}
 	}
 
-	d.Cancel() // TODO: error handling, cancell
+	err := d.Cancel()
+	if err != nil {
+		return err
+	}
 
 	log.Printf("removed download %q from queue %q\n", d.URL, d.GetQueueName())
 	return nil
@@ -87,7 +91,12 @@ func (m *Manager) PauseDownload(id int) error {
 		}
 	}
 
-	d.Pause() // TODO: error handling, paused
+	fmt.Println("download found")
+
+	err := d.Pause()
+	if err != nil {
+		return err
+	}
 
 	log.Printf("paused download %q\n", d.URL)
 	return nil

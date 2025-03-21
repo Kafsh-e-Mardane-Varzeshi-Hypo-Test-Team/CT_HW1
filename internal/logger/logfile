@@ -1,0 +1,286 @@
+2025/03/21 20:07:25 Pending downloadID = 7
+2025/03/21 20:07:25 download "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3" added to queue "a"
+2025/03/21 20:07:25 added download "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3" to queue "a"
+2025/03/21 20:07:26 Content length in downloadID = 7 is 3133274
+2025/03/21 20:07:26 downloading part 4 started (bytes 2506616 - 3133273)
+2025/03/21 20:07:26 downloading part 0 started (bytes 0 - 626654)
+2025/03/21 20:07:26 downloading part 2 started (bytes 1253308 - 1879962)
+2025/03/21 20:07:26 downloading part 1 started (bytes 626654 - 1253308)
+2025/03/21 20:07:26 downloading part 3 started (bytes 1879962 - 2506616)
+2025/03/21 20:07:26 monitoring :: 15.43% (0.48 MB/3.13 MB) - 0.81 MB/s
+2025/03/21 20:07:27 monitoring :: 35.82% (1.12 MB/3.13 MB) - 1.06 MB/s
+2025/03/21 20:07:27 monitoring :: 56.74% (1.78 MB/3.13 MB) - 1.09 MB/s
+2025/03/21 20:07:28 monitoring :: 75.04% (2.35 MB/3.13 MB) - 0.96 MB/s
+2025/03/21 20:07:28 Downloaded partIndex = 0 (bytes 0 - 626654)
+2025/03/21 20:07:28 Downloaded partIndex = 4 (bytes 2506616 - 3133273)
+2025/03/21 20:07:29 monitoring :: 93.34% (2.92 MB/3.13 MB) - 0.96 MB/s
+2025/03/21 20:07:29 Downloaded partIndex = 3 (bytes 1879962 - 2506616)
+2025/03/21 20:07:29 Downloaded partIndex = 2 (bytes 1253308 - 1879962)
+2025/03/21 20:07:29 Downloaded partIndex = 1 (bytes 626654 - 1253308)
+2025/03/21 20:07:29 All parts downloaded successfully
+2025/03/21 20:07:29 monitoring :: 100.00% (3.13 MB/3.13 MB) - 0.35 MB/s
+2025/03/21 20:09:30 Pending downloadID = 8
+2025/03/21 20:09:30 download "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3" added to queue "a"
+2025/03/21 20:09:30 added download "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3" to queue "a"
+2025/03/21 20:09:30 Content length in downloadID = 8 is 3133274
+2025/03/21 20:09:30 downloading part 1 started (bytes 626654 - 1253308)
+2025/03/21 20:09:30 downloading part 4 started (bytes 2506616 - 3133273)
+2025/03/21 20:09:30 downloading part 2 started (bytes 1253308 - 1879962)
+2025/03/21 20:09:30 downloading part 0 started (bytes 0 - 626654)
+2025/03/21 20:09:30 downloading part 3 started (bytes 1879962 - 2506616)
+2025/03/21 20:09:30 monitoring :: 16.99% (0.53 MB/3.13 MB) - 0.89 MB/s
+2025/03/21 20:09:31 monitoring :: 40.00% (1.25 MB/3.13 MB) - 1.20 MB/s
+2025/03/21 20:09:32 monitoring :: 60.40% (1.89 MB/3.13 MB) - 1.06 MB/s
+2025/03/21 20:09:32 monitoring :: 86.02% (2.70 MB/3.13 MB) - 1.34 MB/s
+2025/03/21 20:09:32 Downloaded partIndex = 1 (bytes 626654 - 1253308)
+2025/03/21 20:09:32 Downloaded partIndex = 2 (bytes 1253308 - 1879962)
+2025/03/21 20:09:32 Downloaded partIndex = 0 (bytes 0 - 626654)
+2025/03/21 20:09:33 Downloaded partIndex = 4 (bytes 2506616 - 3133273)
+2025/03/21 20:09:33 Downloaded partIndex = 3 (bytes 1879962 - 2506616)
+2025/03/21 20:09:33 All parts downloaded successfully
+2025/03/21 20:09:33 monitoring :: 100.00% (3.13 MB/3.13 MB) - 0.73 MB/s
+2025/03/21 20:11:22 Pending downloadID = 9
+2025/03/21 20:11:22 download "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3" added to queue "a"
+2025/03/21 20:11:22 added download "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3" to queue "a"
+2025/03/21 20:11:23 Content length in downloadID = 9 is 3133274
+2025/03/21 20:11:23 downloading part 0 started (bytes 0 - 626654)
+2025/03/21 20:11:23 downloading part 4 started (bytes 2506616 - 3133273)
+2025/03/21 20:11:23 downloading part 1 started (bytes 626654 - 1253308)
+2025/03/21 20:11:23 downloading part 2 started (bytes 1253308 - 1879962)
+2025/03/21 20:11:23 downloading part 3 started (bytes 1879962 - 2506616)
+2025/03/21 20:11:23 monitoring :: 14.38% (0.45 MB/3.13 MB) - 0.75 MB/s
+2025/03/21 20:11:24 monitoring :: 32.68% (1.02 MB/3.13 MB) - 0.96 MB/s
+2025/03/21 20:11:25 monitoring :: 49.94% (1.56 MB/3.13 MB) - 0.90 MB/s
+2025/03/21 20:11:25 monitoring :: 68.24% (2.14 MB/3.13 MB) - 0.96 MB/s
+2025/03/21 20:11:26 monitoring :: 85.49% (2.68 MB/3.13 MB) - 0.90 MB/s
+2025/03/21 20:11:26 Downloaded partIndex = 0 (bytes 0 - 626654)
+2025/03/21 20:11:26 Downloaded partIndex = 2 (bytes 1253308 - 1879962)
+2025/03/21 20:11:26 Downloaded partIndex = 3 (bytes 1879962 - 2506616)
+2025/03/21 20:11:26 Downloaded partIndex = 4 (bytes 2506616 - 3133273)
+2025/03/21 20:11:26 Downloaded partIndex = 1 (bytes 626654 - 1253308)
+2025/03/21 20:11:26 All parts downloaded successfully
+2025/03/21 20:11:26 monitoring :: 100.00% (3.13 MB/3.13 MB) - 0.76 MB/s
+2025/03/21 20:11:33 Canceling download of part 0 : 626655 bytes downloaded
+2025/03/21 20:11:33 .part file of partId = 0 does not exists in downloadID = 0
+2025/03/21 20:11:33 Canceling download of part 1 : 626655 bytes downloaded
+2025/03/21 20:11:33 .part file of partId = 1 does not exists in downloadID = 0
+2025/03/21 20:11:33 Canceling download of part 2 : 626655 bytes downloaded
+2025/03/21 20:11:33 .part file of partId = 2 does not exists in downloadID = 0
+2025/03/21 20:11:33 Canceling download of part 3 : 626655 bytes downloaded
+2025/03/21 20:11:33 .part file of partId = 3 does not exists in downloadID = 0
+2025/03/21 20:11:33 Canceling download of part 4 : 626658 bytes downloaded
+2025/03/21 20:11:33 .part file of partId = 4 does not exists in downloadID = 0
+2025/03/21 20:11:33 removed download "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3" from queue "a"
+2025/03/21 20:11:34 Canceling download of part 0 : 626655 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 0 does not exists in downloadID = 5
+2025/03/21 20:11:34 Canceling download of part 1 : 626655 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 1 does not exists in downloadID = 5
+2025/03/21 20:11:34 Canceling download of part 2 : 626655 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 2 does not exists in downloadID = 5
+2025/03/21 20:11:34 Canceling download of part 3 : 626655 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 3 does not exists in downloadID = 5
+2025/03/21 20:11:34 Canceling download of part 4 : 626658 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 4 does not exists in downloadID = 5
+2025/03/21 20:11:34 removed download "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3" from queue "a"
+2025/03/21 20:11:34 Canceling download of part 0 : 626655 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 0 does not exists in downloadID = 9
+2025/03/21 20:11:34 Canceling download of part 1 : 626655 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 1 does not exists in downloadID = 9
+2025/03/21 20:11:34 Canceling download of part 2 : 626655 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 2 does not exists in downloadID = 9
+2025/03/21 20:11:34 Canceling download of part 3 : 626655 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 3 does not exists in downloadID = 9
+2025/03/21 20:11:34 Canceling download of part 4 : 626658 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 4 does not exists in downloadID = 9
+2025/03/21 20:11:34 removed download "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3" from queue "a"
+2025/03/21 20:11:34 Canceling download of part 0 : 626655 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 0 does not exists in downloadID = 8
+2025/03/21 20:11:34 Canceling download of part 1 : 626655 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 1 does not exists in downloadID = 8
+2025/03/21 20:11:34 Canceling download of part 2 : 626655 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 2 does not exists in downloadID = 8
+2025/03/21 20:11:34 Canceling download of part 3 : 626655 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 3 does not exists in downloadID = 8
+2025/03/21 20:11:34 Canceling download of part 4 : 626658 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 4 does not exists in downloadID = 8
+2025/03/21 20:11:34 removed download "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3" from queue "a"
+2025/03/21 20:11:34 Canceling download of part 0 : 626655 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 0 does not exists in downloadID = 7
+2025/03/21 20:11:34 Canceling download of part 1 : 626655 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 1 does not exists in downloadID = 7
+2025/03/21 20:11:34 Canceling download of part 2 : 626655 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 2 does not exists in downloadID = 7
+2025/03/21 20:11:34 Canceling download of part 3 : 626655 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 3 does not exists in downloadID = 7
+2025/03/21 20:11:34 Canceling download of part 4 : 626658 bytes downloaded
+2025/03/21 20:11:34 .part file of partId = 4 does not exists in downloadID = 7
+2025/03/21 20:11:34 removed download "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3" from queue "a"
+2025/03/21 20:11:35 Canceling download of part 0 : 626655 bytes downloaded
+2025/03/21 20:11:35 .part file of partId = 0 does not exists in downloadID = 6
+2025/03/21 20:11:35 Canceling download of part 1 : 626655 bytes downloaded
+2025/03/21 20:11:35 .part file of partId = 1 does not exists in downloadID = 6
+2025/03/21 20:11:35 Canceling download of part 2 : 626655 bytes downloaded
+2025/03/21 20:11:35 .part file of partId = 2 does not exists in downloadID = 6
+2025/03/21 20:11:35 Canceling download of part 3 : 626655 bytes downloaded
+2025/03/21 20:11:35 .part file of partId = 3 does not exists in downloadID = 6
+2025/03/21 20:11:35 Canceling download of part 4 : 626658 bytes downloaded
+2025/03/21 20:11:35 .part file of partId = 4 does not exists in downloadID = 6
+2025/03/21 20:11:35 removed download "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3" from queue "a"
+2025/03/21 20:11:35 Canceling download of part 0 : 626655 bytes downloaded
+2025/03/21 20:11:35 .part file of partId = 0 does not exists in downloadID = 4
+2025/03/21 20:11:35 Canceling download of part 1 : 626655 bytes downloaded
+2025/03/21 20:11:35 .part file of partId = 1 does not exists in downloadID = 4
+2025/03/21 20:11:35 Canceling download of part 2 : 626655 bytes downloaded
+2025/03/21 20:11:35 .part file of partId = 2 does not exists in downloadID = 4
+2025/03/21 20:11:35 Canceling download of part 3 : 626655 bytes downloaded
+2025/03/21 20:11:35 .part file of partId = 3 does not exists in downloadID = 4
+2025/03/21 20:11:35 Canceling download of part 4 : 626658 bytes downloaded
+2025/03/21 20:11:35 .part file of partId = 4 does not exists in downloadID = 4
+2025/03/21 20:11:35 removed download "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3" from queue "a"
+2025/03/21 20:11:35 Canceling download of part 0 : 626655 bytes downloaded
+2025/03/21 20:11:35 .part file of partId = 0 does not exists in downloadID = 3
+2025/03/21 20:11:35 Canceling download of part 1 : 626655 bytes downloaded
+2025/03/21 20:11:35 .part file of partId = 1 does not exists in downloadID = 3
+2025/03/21 20:11:35 Canceling download of part 2 : 626655 bytes downloaded
+2025/03/21 20:11:35 .part file of partId = 2 does not exists in downloadID = 3
+2025/03/21 20:11:35 Canceling download of part 3 : 626655 bytes downloaded
+2025/03/21 20:11:35 .part file of partId = 3 does not exists in downloadID = 3
+2025/03/21 20:11:35 Canceling download of part 4 : 626658 bytes downloaded
+2025/03/21 20:11:35 .part file of partId = 4 does not exists in downloadID = 3
+2025/03/21 20:11:35 removed download "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3" from queue "a"
+2025/03/21 20:11:36 Canceling download of part 0 : 626655 bytes downloaded
+2025/03/21 20:11:36 .part file of partId = 0 does not exists in downloadID = 2
+2025/03/21 20:11:36 Canceling download of part 1 : 626655 bytes downloaded
+2025/03/21 20:11:36 .part file of partId = 1 does not exists in downloadID = 2
+2025/03/21 20:11:36 Canceling download of part 2 : 626655 bytes downloaded
+2025/03/21 20:11:36 .part file of partId = 2 does not exists in downloadID = 2
+2025/03/21 20:11:36 Canceling download of part 3 : 626655 bytes downloaded
+2025/03/21 20:11:36 .part file of partId = 3 does not exists in downloadID = 2
+2025/03/21 20:11:36 Canceling download of part 4 : 626658 bytes downloaded
+2025/03/21 20:11:36 .part file of partId = 4 does not exists in downloadID = 2
+2025/03/21 20:11:36 removed download "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3" from queue "a"
+2025/03/21 20:11:37 Canceling download of part 0 : 626655 bytes downloaded
+2025/03/21 20:11:37 .part file of partId = 0 does not exists in downloadID = 1
+2025/03/21 20:11:37 Canceling download of part 1 : 626655 bytes downloaded
+2025/03/21 20:11:37 .part file of partId = 1 does not exists in downloadID = 1
+2025/03/21 20:11:37 Canceling download of part 2 : 626655 bytes downloaded
+2025/03/21 20:11:37 .part file of partId = 2 does not exists in downloadID = 1
+2025/03/21 20:11:37 Canceling download of part 3 : 626655 bytes downloaded
+2025/03/21 20:11:37 .part file of partId = 3 does not exists in downloadID = 1
+2025/03/21 20:11:37 Canceling download of part 4 : 626658 bytes downloaded
+2025/03/21 20:11:37 .part file of partId = 4 does not exists in downloadID = 1
+2025/03/21 20:11:37 removed download "https://sv.ahoramusics.ir/up/1403/09/kamyar-danse-2-128.mp3" from queue "a"
+2025/03/21 20:12:48 Pending downloadID = 10
+2025/03/21 20:12:48 download "https://files.testfile.org/PDF/10MB-TESTFILE.ORG.pdf" added to queue "a"
+2025/03/21 20:12:48 added download "https://files.testfile.org/PDF/10MB-TESTFILE.ORG.pdf" to queue "a"
+2025/03/21 20:12:51 Content length in downloadID = 10 is 10705702
+2025/03/21 20:12:51 downloading part 4 started (bytes 8564560 - 10705701)
+2025/03/21 20:12:51 downloading part 0 started (bytes 0 - 2141140)
+2025/03/21 20:12:51 downloading part 2 started (bytes 4282280 - 6423420)
+2025/03/21 20:12:51 downloading part 3 started (bytes 6423420 - 8564560)
+2025/03/21 20:12:51 downloading part 1 started (bytes 2141140 - 4282280)
+2025/03/21 20:12:52 monitoring :: 3.21% (0.34 MB/10.71 MB) - 0.57 MB/s
+2025/03/21 20:12:53 monitoring :: 4.77% (0.51 MB/10.71 MB) - 0.28 MB/s
+2025/03/21 20:12:53 monitoring :: 6.22% (0.67 MB/10.71 MB) - 0.26 MB/s
+2025/03/21 20:12:53 Pausing downloadID = 10
+2025/03/21 20:12:53 Stop downloading partIndex = 0 due to it's status = 2
+2025/03/21 20:12:53 Pausing download of part 0 : 22214 bytes downloaded
+2025/03/21 20:12:53 Error in downloadParts() function for downloadID = 10 : part 0 has status = 2
+2025/03/21 20:12:53 part 0 has status = 2
+2025/03/21 20:12:53 Stop downloading partIndex = 1 due to it's status = 2
+2025/03/21 20:12:53 Pausing download of part 1 : 24952 bytes downloaded
+2025/03/21 20:12:53 Pausing download of part 2 : 653810 bytes downloaded
+2025/03/21 20:12:53 Stop downloading partIndex = 2 due to it's status = 2
+2025/03/21 20:12:53 Stop downloading partIndex = 3 due to it's status = 2
+2025/03/21 20:12:53 Pausing download of part 3 : 24952 bytes downloaded
+2025/03/21 20:12:53 Stop downloading partIndex = 4 due to it's status = 2
+2025/03/21 20:12:53 Pausing download of part 4 : 24949 bytes downloaded
+2025/03/21 20:12:53 paused download "https://files.testfile.org/PDF/10MB-TESTFILE.ORG.pdf"
+2025/03/21 20:12:54 monitoring :: 7.01% (0.75 MB/10.71 MB) - 0.14 MB/s
+2025/03/21 20:13:21 Pending downloadID = 11
+2025/03/21 20:13:21 download "https://files.testfile.org/PDF/10MB-TESTFILE.ORG.pdf" added to queue "a"
+2025/03/21 20:13:21 added download "https://files.testfile.org/PDF/10MB-TESTFILE.ORG.pdf" to queue "a"
+2025/03/21 20:13:22 Content length in downloadID = 11 is 10705702
+2025/03/21 20:13:22 downloading part 4 started (bytes 8564560 - 10705701)
+2025/03/21 20:13:22 downloading part 1 started (bytes 2141140 - 4282280)
+2025/03/21 20:13:22 downloading part 2 started (bytes 4282280 - 6423420)
+2025/03/21 20:13:22 downloading part 3 started (bytes 6423420 - 8564560)
+2025/03/21 20:13:22 downloading part 0 started (bytes 0 - 2141140)
+2025/03/21 20:13:22 monitoring :: 3.36% (0.36 MB/10.71 MB) - 0.60 MB/s
+2025/03/21 20:13:23 monitoring :: 5.19% (0.56 MB/10.71 MB) - 0.33 MB/s
+2025/03/21 20:13:23 monitoring :: 6.80% (0.73 MB/10.71 MB) - 0.29 MB/s
+2025/03/21 20:13:24 monitoring :: 8.27% (0.89 MB/10.71 MB) - 0.26 MB/s
+2025/03/21 20:13:25 monitoring :: 9.83% (1.05 MB/10.71 MB) - 0.28 MB/s
+2025/03/21 20:13:25 Pausing downloadID = 11
+2025/03/21 20:13:25 Stop downloading partIndex = 0 due to it's status = 2
+2025/03/21 20:13:25 Pausing download of part 0 : 40060 bytes downloaded
+2025/03/21 20:13:25 Error in downloadParts() function for downloadID = 11 : part 0 has status = 2
+2025/03/21 20:13:25 part 0 has status = 2
+2025/03/21 20:13:25 Stop downloading partIndex = 1 due to it's status = 2
+2025/03/21 20:13:25 Pausing download of part 1 : 40058 bytes downloaded
+2025/03/21 20:13:25 Stop downloading partIndex = 2 due to it's status = 2
+2025/03/21 20:13:25 Pausing download of part 2 : 42796 bytes downloaded
+2025/03/21 20:13:25 Stop downloading partIndex = 3 due to it's status = 2
+2025/03/21 20:13:25 Pausing download of part 3 : 42796 bytes downloaded
+2025/03/21 20:13:25 Stop downloading partIndex = 4 due to it's status = 2
+2025/03/21 20:13:25 Pausing download of part 4 : 965723 bytes downloaded
+2025/03/21 20:13:25 paused download "https://files.testfile.org/PDF/10MB-TESTFILE.ORG.pdf"
+2025/03/21 20:13:25 monitoring :: 10.57% (1.13 MB/10.71 MB) - 0.13 MB/s
+2025/03/21 20:14:11 Pending downloadID = 12
+2025/03/21 20:14:11 download "https://files.testfile.org/PDF/10MB-TESTFILE.ORG.pdf" added to queue "a"
+2025/03/21 20:14:11 added download "https://files.testfile.org/PDF/10MB-TESTFILE.ORG.pdf" to queue "a"
+2025/03/21 20:14:11 Content length in downloadID = 12 is 10705702
+2025/03/21 20:14:11 downloading part 4 started (bytes 8564560 - 10705701)
+2025/03/21 20:14:11 downloading part 1 started (bytes 2141140 - 4282280)
+2025/03/21 20:14:11 downloading part 2 started (bytes 4282280 - 6423420)
+2025/03/21 20:14:11 downloading part 3 started (bytes 6423420 - 8564560)
+2025/03/21 20:14:11 downloading part 0 started (bytes 0 - 2141140)
+2025/03/21 20:14:12 monitoring :: 3.05% (0.33 MB/10.71 MB) - 0.54 MB/s
+2025/03/21 20:14:13 monitoring :: 6.01% (0.64 MB/10.71 MB) - 0.53 MB/s
+2025/03/21 20:14:13 monitoring :: 7.62% (0.82 MB/10.71 MB) - 0.29 MB/s
+2025/03/21 20:14:14 monitoring :: 9.23% (0.99 MB/10.71 MB) - 0.29 MB/s
+2025/03/21 20:14:14 monitoring :: 10.64% (1.14 MB/10.71 MB) - 0.25 MB/s
+2025/03/21 20:14:15 monitoring :: 12.25% (1.31 MB/10.71 MB) - 0.29 MB/s
+2025/03/21 20:14:15 Pausing downloadID = 12
+2025/03/21 20:14:15 Stop downloading partIndex = 0 due to it's status = 2
+2025/03/21 20:14:15 Pausing download of part 0 : 51010 bytes downloaded
+2025/03/21 20:14:15 Error in downloadParts() function for downloadID = 12 : part 0 has status = 2
+2025/03/21 20:14:15 part 0 has status = 2
+2025/03/21 20:14:15 Stop downloading partIndex = 1 due to it's status = 2
+2025/03/21 20:14:15 Pausing download of part 1 : 49633 bytes downloaded
+2025/03/21 20:14:15 Stop downloading partIndex = 2 due to it's status = 2
+2025/03/21 20:14:15 Pausing download of part 2 : 53746 bytes downloaded
+2025/03/21 20:14:15 Stop downloading partIndex = 3 due to it's status = 2
+2025/03/21 20:14:15 Pausing download of part 3 : 52379 bytes downloaded
+2025/03/21 20:14:15 Stop downloading partIndex = 4 due to it's status = 2
+2025/03/21 20:14:15 Pausing download of part 4 : 1227871 bytes downloaded
+2025/03/21 20:14:15 paused download "https://files.testfile.org/PDF/10MB-TESTFILE.ORG.pdf"
+2025/03/21 20:14:16 monitoring :: 13.40% (1.43 MB/10.71 MB) - 0.20 MB/s
+2025/03/21 20:16:44 Pending downloadID = 13
+2025/03/21 20:16:44 download "https://files.testfile.org/PDF/10MB-TESTFILE.ORG.pdf" added to queue "a"
+2025/03/21 20:16:44 added download "https://files.testfile.org/PDF/10MB-TESTFILE.ORG.pdf" to queue "a"
+2025/03/21 20:16:44 Content length in downloadID = 13 is 10705702
+2025/03/21 20:16:44 downloading part 4 started (bytes 8564560 - 10705701)
+2025/03/21 20:16:44 downloading part 1 started (bytes 2141140 - 4282280)
+2025/03/21 20:16:44 downloading part 2 started (bytes 4282280 - 6423420)
+2025/03/21 20:16:44 downloading part 3 started (bytes 6423420 - 8564560)
+2025/03/21 20:16:44 downloading part 0 started (bytes 0 - 2141140)
+2025/03/21 20:16:45 monitoring :: 3.51% (0.38 MB/10.71 MB) - 0.62 MB/s
+2025/03/21 20:16:45 monitoring :: 5.08% (0.54 MB/10.71 MB) - 0.28 MB/s
+2025/03/21 20:16:46 monitoring :: 6.67% (0.71 MB/10.71 MB) - 0.28 MB/s
+2025/03/21 20:16:47 monitoring :: 8.14% (0.87 MB/10.71 MB) - 0.26 MB/s
+2025/03/21 20:16:47 Pausing downloadID = 13
+2025/03/21 20:16:47 Stop downloading partIndex = 0 due to it's status = 2
+2025/03/21 20:16:47 Pausing download of part 0 : 35954 bytes downloaded
+2025/03/21 20:16:47 Error in downloadParts() function for downloadID = 13 : part 0 has status = 2
+2025/03/21 20:16:47 part 0 has status = 2
+2025/03/21 20:16:47 Stop downloading partIndex = 1 due to it's status = 2
+2025/03/21 20:16:47 Pausing download of part 1 : 37307 bytes downloaded
+2025/03/21 20:16:47 Stop downloading partIndex = 2 due to it's status = 2
+2025/03/21 20:16:47 Pausing download of part 2 : 31841 bytes downloaded
+2025/03/21 20:16:47 Stop downloading partIndex = 3 due to it's status = 2
+2025/03/21 20:16:47 Pausing download of part 3 : 38682 bytes downloaded
+2025/03/21 20:16:47 Stop downloading partIndex = 4 due to it's status = 2
+2025/03/21 20:16:47 Pausing download of part 4 : 867424 bytes downloaded
+2025/03/21 20:16:47 paused download "https://files.testfile.org/PDF/10MB-TESTFILE.ORG.pdf"
+2025/03/21 20:16:47 monitoring :: 9.45% (1.01 MB/10.71 MB) - 0.23 MB/s
