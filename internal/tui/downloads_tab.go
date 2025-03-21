@@ -145,6 +145,7 @@ func (m DownloadsTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.table.Cursor() >= 0 && m.table.Cursor() < len(m.downloads) {
 				dl := m.downloads[m.table.Cursor()]
 				m.manager.RemoveDownload(dl.ID)
+				m.updateRows()
 			}
 		case key.Matches(msg, m.keys.Quit):
 			return m, tea.Quit
