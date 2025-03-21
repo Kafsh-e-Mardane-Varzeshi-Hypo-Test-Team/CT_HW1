@@ -247,6 +247,12 @@ func (m AddDownloadTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter":
 				url := m.urlInput.Value()
 				filename := m.filenameInput.Value()
+
+				if len(m.queues) == 0 {
+					m.footerMessage = "No queues available."
+					return m, nil
+				}
+
 				queue := m.queues[m.selectedQueue]
 
 				var err error

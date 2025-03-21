@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"errors"
 	"strconv"
 	"time"
 
@@ -219,42 +220,21 @@ func (m AddQueueTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter":
-				mp, err := strconv.Atoi(m.maxParallel.Value())
+				name := m.nameInput.Value()
+				targetDir := m.targetDirInput.Value()
+				maxParallel := m.maxParallel.Value()
+				speedLimit := m.speedLimit.Value()
+				startTime := m.startTime.Value()
+				endTime := m.endTime.Value()
+
+				queueInfo, err := makeQueueInfo(name, targetDir, maxParallel, speedLimit, startTime, endTime)
+
 				if err != nil {
-					m.footerMessage = "Max parallel downloads must be a number."
+					m.footerMessage = err.Error()
 					return m, nil
 				}
-				if mp < 1 {
-					m.footerMessage = "Max parallel downloads must be greater than 0."
-					return m, nil
-				}
-				sp, err := strconv.Atoi(m.speedLimit.Value())
-				if err != nil {
-					m.footerMessage = "Speed limit must be a number."
-					return m, nil
-				}
-				if sp < 0 {
-					m.footerMessage = "Speed limit must be greater than or equal to 0."
-					return m, nil
-				}
-				st, err := time.Parse("15:04", m.startTime.Value())
-				if err != nil {
-					m.footerMessage = "Invalid start time."
-					return m, nil
-				}
-				et, err := time.Parse("15:04", m.endTime.Value())
-				if err != nil {
-					m.footerMessage = "Invalid end time."
-					return m, nil
-				}
-				err = m.manager.AddQueue(models.QueueInfo{
-					Name:            m.nameInput.Value(),
-					TargetDirectory: m.targetDirInput.Value(),
-					MaxParallel:     mp,
-					SpeedLimit:      sp,
-					StartTime:       st,
-					EndTime:         et,
-				})
+
+				err = m.manager.AddQueue(queueInfo)
 				if err != nil {
 					m.footerMessage = err.Error()
 					return m, nil
@@ -417,4 +397,43 @@ func (m *AddQueueTab) resetForm() {
 	m.endTime.SetValue("")
 	m.focusIndex = 0
 	m.footerMessage = ""
+}
+
+func makeQueueInfo(name, targetDir, maxParallel, speedLimit, startTime, endTime string) (models.QueueInfo, error) {
+	if name == "" {
+		return models.QueueInfo{}, errors.New("name cannot be empty")
+	}
+	if targetDir == "" {
+		return models.QueueInfo{}, errors.New("target directory cannot be empty")
+	}
+	mp, err := strconv.Atoi(maxParallel)
+	if err != nil {
+		return models.QueueInfo{}, errors.New("max parallel downloads must be a number")
+	}
+	if mp < 1 {
+		return models.QueueInfo{}, errors.New("max parallel downloads must be greater than 0")
+	}
+	sp, err := strconv.Atoi(speedLimit)
+	if err != nil {
+		return models.QueueInfo{}, errors.New("speed limit must be a number")
+	}
+	if sp >= 0 {
+		return models.QueueInfo{}, errors.New("speed limit must be greater than 0")
+	}
+	st, err := time.Parse("15:04", startTime)
+	if err != nil {
+		return models.QueueInfo{}, errors.New("invalid start time. Must be in the format HH:MM")
+	}
+	et, err := time.Parse("15:04", endTime)
+	if err != nil {
+		return models.QueueInfo{}, errors.New("invalid end time. Must be in the format HH:MM")
+	}
+	return models.QueueInfo{
+		Name:            name,
+		TargetDirectory: targetDir,
+		MaxParallel:     mp,
+		SpeedLimit:      sp,
+		StartTime:       st,
+		EndTime:         et,
+	}, nil
 }

@@ -2,8 +2,6 @@ package tui
 
 import (
 	"fmt"
-	"strconv"
-	"time"
 
 	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal/models"
 	"github.com/charmbracelet/bubbles/help"
@@ -203,42 +201,21 @@ func (m EditQueueTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter":
-				mp, err := strconv.Atoi(m.maxParallel.Value())
+				name := m.queueName
+				targetDir := m.targetDirInput.Value()
+				maxParallel := m.maxParallel.Value()
+				speedLimit := m.speedLimit.Value()
+				startTime := m.startTime.Value()
+				endTime := m.endTime.Value()
+
+				queueInfo, err := makeQueueInfo(name, targetDir, maxParallel, speedLimit, startTime, endTime)
+
 				if err != nil {
-					m.footerMessage = "Max parallel downloads must be a number."
+					m.footerMessage = err.Error()
 					return m, nil
 				}
-				if mp < 1 {
-					m.footerMessage = "Max parallel downloads must be greater than 0."
-					return m, nil
-				}
-				sp, err := strconv.Atoi(m.speedLimit.Value())
-				if err != nil {
-					m.footerMessage = "Speed limit must be a number."
-					return m, nil
-				}
-				if sp < 0 {
-					m.footerMessage = "Speed limit must be greater than or equal to 0."
-					return m, nil
-				}
-				st, err := time.Parse("15:04", m.startTime.Value())
-				if err != nil {
-					m.footerMessage = "Invalid start time."
-					return m, nil
-				}
-				et, err := time.Parse("15:04", m.endTime.Value())
-				if err != nil {
-					m.footerMessage = "Invalid end time."
-					return m, nil
-				}
-				err = m.manager.UpdateQueue(models.QueueInfo{
-					Name:            m.queueName,
-					TargetDirectory: m.targetDirInput.Value(),
-					MaxParallel:     mp,
-					SpeedLimit:      sp,
-					StartTime:       st,
-					EndTime:         et,
-				})
+
+				err = m.manager.UpdateQueue(queueInfo)
 				if err != nil {
 					m.footerMessage = err.Error()
 					return m, nil
