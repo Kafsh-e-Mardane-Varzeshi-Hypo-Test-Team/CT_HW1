@@ -153,19 +153,12 @@ func (d *Download) mergeParts() error {
 func (d *Download) initializeParts() error {
 	partSize := d.TotalSize / int64(d.NumberOfParts)
 	for i := range d.NumberOfParts {
-		req, err := http.NewRequest("GET", d.URL, nil)
-		if err != nil {
-			log.Printf("Error in GET http request for downloadID = %d: %v\n", d.ID, err)
-			return err
-		}
-
 		d.Parts[i] = Part{
 			PartIndex:       i,
 			StartIndex:      int64(i) * partSize,
 			EndIndex:        int64(i+1) * partSize,
 			DownloadedBytes: 0,
 			Status:          Pending,
-			req:             req,
 			channel:         make(chan Status),
 		}
 
@@ -175,10 +168,22 @@ func (d *Download) initializeParts() error {
 		d.Parts[i].RangeOfDownload = strconv.Itoa(int(d.Parts[i].StartIndex+d.Parts[i].DownloadedBytes)) + "-" + strconv.Itoa(int(d.Parts[i].EndIndex))
 		d.Parts[i].Path = d.Destination + "/" + d.OutputFileName + d.Parts[i].RangeOfDownload + ".part"
 	}
-
 	return nil
 }
 
+func (d *Download) initializeRequestOfParts() error {
+	req, err := http.NewRequest("GET", d.URL, nil)
+	if err != nil {
+		log.Printf("Error in GET http request for downloadID = %d: %v\n", d.ID, err)
+		return err
+	}
+
+	for i := range d.NumberOfParts {
+		d.Parts[i].req = req
+	}
+
+	return nil
+}
 func (d *Download) initializeDownload() error {
 	d.IsInitialized = true
 	d.Path = d.Destination + "/" + d.OutputFileName
@@ -218,6 +223,13 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 			return err
 		}
 	}
+
+	err := d.initializeRequestOfParts()
+	if err != nil {
+		log.Printf("Error in initializing req field in parts of downloadID = %d: %v\n", d.ID, err)
+		return err
+	}
+
 	d.channel = make(chan connectionWithPart, d.NumberOfParts)
 	d.setStatus(InProgress)
 	log.Printf("Content length in downloadID = %d is %d\n", d.ID, d.TotalSize)
@@ -225,7 +237,7 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 	d.lastUpdateTime = time.Now()
 	go d.monitorProgress()
 
-	err := d.downloadParts(bandwidthLimiter)
+	err = d.downloadParts(bandwidthLimiter)
 	if err != nil {
 		log.Printf("Error in downloadParts() function for downloadID = %d : %v\n", d.ID, err)
 		return err
