@@ -62,7 +62,7 @@ func (p *Part) start(commonChannelOfParts chan connectionWithPart, bandwidthLimi
 		default:
 			bandwidthLimiter.WaitForToken()
 			n, err := resp.Body.Read(buffer)
-			// log.Printf("downloading partId = %d with n = %d and downloadedBytes = %d/%d", p.partIndex, n, p.downloadedBytes, p.endIndex - p.startIndex)
+			// log.Printf("downloading partId = %d with n = %d and downloadedBytes = %d/%d", p.PartIndex, n, p.DownloadedBytes, p.EndIndex - p.StartIndex)
 			if n > 0 {
 				_, err := file.Write(buffer[:n])
 				if err != nil {

@@ -172,13 +172,12 @@ func (d *Download) initializeParts() error {
 }
 
 func (d *Download) initializeRequestOfParts() error {
-	req, err := http.NewRequest("GET", d.URL, nil)
-	if err != nil {
-		log.Printf("Error in GET http request for downloadID = %d: %v\n", d.ID, err)
-		return err
-	}
-
 	for i := range d.NumberOfParts {
+		req, err := http.NewRequest("GET", d.URL, nil)
+		if err != nil {
+			log.Printf("Error in GET http request for downloadID = %d: %v\n", d.ID, err)
+			return err
+		}
 		d.Parts[i].req = req
 	}
 
