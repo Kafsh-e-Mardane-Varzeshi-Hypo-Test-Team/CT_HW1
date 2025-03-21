@@ -417,7 +417,7 @@ func makeQueueInfo(name, targetDir, maxParallel, speedLimit, startTime, endTime 
 	if err != nil {
 		return models.QueueInfo{}, errors.New("speed limit must be a number")
 	}
-	if sp >= 0 {
+	if sp <= 0 {
 		return models.QueueInfo{}, errors.New("speed limit must be greater than 0")
 	}
 	st, err := time.Parse("15:04", startTime)
