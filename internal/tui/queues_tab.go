@@ -74,6 +74,8 @@ func NewQueuesTab(manager *models.Manager) QueuesTab {
 		Bold(false)
 	t.SetStyles(s)
 
+	t.KeyMap.HalfPageDown.SetEnabled(false)
+
 	help := help.New()
 	help.ShowAll = true
 	help.FullSeparator = " \t "

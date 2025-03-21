@@ -71,6 +71,8 @@ func NewDownloadsTab(manager *models.Manager) DownloadsTab {
 		Bold(false)
 	t.SetStyles(s)
 
+	t.KeyMap.HalfPageDown.SetEnabled(false)
+
 	help := help.New()
 	help.ShowAll = true
 	help.FullSeparator = " \t "
