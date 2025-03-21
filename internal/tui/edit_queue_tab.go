@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/internal/models"
 	"github.com/charmbracelet/bubbles/help"
@@ -67,28 +68,28 @@ func NewEditQueueTab(manager *models.Manager, queueInfo *models.QueueInfo) EditQ
 	targetDirInput.Cursor.Style = cursorStyle
 
 	maxParallel := textinput.New()
-	maxParallel.Placeholder = "Enter max parallel downloads"
+	maxParallel.Placeholder = "Enter max parallel downloads (integer)"
 	maxParallel.SetValue(fmt.Sprint(queueInfo.MaxParallel))
 	maxParallel.PromptStyle = noStyle
 	maxParallel.TextStyle = noStyle
 	maxParallel.Cursor.Style = cursorStyle
 
 	speedLimit := textinput.New()
-	speedLimit.Placeholder = "Enter speed limit"
+	speedLimit.Placeholder = "Enter speed limit (Bytes per second) (0 for no limit)"
 	speedLimit.SetValue(fmt.Sprint(queueInfo.SpeedLimit))
 	speedLimit.PromptStyle = noStyle
 	speedLimit.TextStyle = noStyle
 	speedLimit.Cursor.Style = cursorStyle
 
 	startTime := textinput.New()
-	startTime.Placeholder = "Enter start time"
+	startTime.Placeholder = "Enter start time (HH:MM)"
 	startTime.SetValue(queueInfo.StartTime.Format("15:04"))
 	startTime.PromptStyle = noStyle
 	startTime.TextStyle = noStyle
 	startTime.Cursor.Style = cursorStyle
 
 	endTime := textinput.New()
-	endTime.Placeholder = "Enter end time"
+	endTime.Placeholder = "Enter end time (HH:MM)"
 	endTime.SetValue(queueInfo.EndTime.Format("15:04"))
 	endTime.PromptStyle = noStyle
 	endTime.TextStyle = noStyle
@@ -300,13 +301,32 @@ func (m *EditQueueTab) updateFocus() {
 }
 
 func (m EditQueueTab) View() string {
-	blurredConfirm := blurredStyle.Render("[ Save ]")
+	var speedLimit string
+
+	blurredConfirm := blurredStyle.Render("[ Confirm ]")
 	blurredCancel := blurredStyle.Render("[ Cancel ]")
 
 	if m.focusIndex == editConfirmQueueField {
-		blurredConfirm = focusedStyle.Render("[ Save ]")
+		blurredConfirm = focusedStyle.Render("[ Confirm ]")
 	} else if m.focusIndex == editCancelQueueField {
 		blurredCancel = focusedStyle.Render("[ Cancel ]")
+	}
+
+	// speedLimit, if empty or value is 0, add no limit
+	if m.speedLimit.Value() == "0" {
+		speedLimit = m.speedLimit.View() + " (no limit)"
+	} else {
+		speedLimit = m.speedLimit.Value()
+		if speedLimit == "" {
+			speedLimit = m.speedLimit.View()
+		} else {
+			sp, err := strconv.ParseInt(speedLimit, 10, 64)
+			if err != nil {
+				speedLimit = fmt.Sprint(m.speedLimit.View(), " (invalid)")
+			} else {
+				speedLimit = fmt.Sprint(m.speedLimit.View(), "B/s (", speedString(float64(sp)), ")")
+			}
+		}
 	}
 
 	form := lipgloss.JoinVertical(
@@ -334,7 +354,7 @@ func (m EditQueueTab) View() string {
 					lipgloss.JoinHorizontal(
 						lipgloss.Top,
 						noStyle.Render("Speed Limit: "),
-						m.speedLimit.View(),
+						speedLimit,
 					),
 					lipgloss.JoinHorizontal(
 						lipgloss.Top,

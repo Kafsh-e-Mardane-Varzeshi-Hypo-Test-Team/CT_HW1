@@ -201,9 +201,9 @@ func (m *QueuesTab) updateRows() {
 			queue.Name,
 			queue.TargetDirectory,
 			fmt.Sprintf("%d", queue.MaxParallel),
-			fmt.Sprint(queue.SpeedLimit),
-			queue.StartTime.Format("15:04:05"),
-			queue.EndTime.Format("15:04:05"),
+			speedString(float64(queue.SpeedLimit)),
+			queue.StartTime.Format("15:04"),
+			queue.EndTime.Format("15:04"),
 		})
 	}
 

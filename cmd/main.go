@@ -15,6 +15,7 @@ func main() {
 	}
 	manager.Downloads = []*models.Download{
 		{
+			ID:           1,
 			URL:          "https://speed.hetzner.de/100MB.bin",
 			Queue:        "Queue1",
 			Status:       models.InProgress,
@@ -22,6 +23,7 @@ func main() {
 			Progress:     0.234,
 		},
 		{
+			ID:           2,
 			URL:          "https://speed.hetzner.de/100MB.bin",
 			Queue:        "Queue1",
 			Status:       models.InProgress,
@@ -29,6 +31,7 @@ func main() {
 			Progress:     0.134,
 		},
 		{
+			ID:           3,
 			URL:          "https://speed.hetzner.de/100MB.bin",
 			Queue:        "Queue1",
 			Status:       models.InProgress,
@@ -36,6 +39,7 @@ func main() {
 			Progress:     0.334,
 		},
 		{
+			ID:           4,
 			URL:          "https://speed.hetzner.de/100MB.bin",
 			Queue:        "Queue1",
 			Status:       models.InProgress,

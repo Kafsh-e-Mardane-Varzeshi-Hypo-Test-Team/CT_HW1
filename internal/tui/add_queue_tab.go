@@ -2,6 +2,7 @@ package tui
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -76,25 +77,25 @@ func NewAddQueueTab(manager *models.Manager) AddQueueTab {
 	targetDirInput.Cursor.Style = cursorStyle
 
 	maxParallel := textinput.New()
-	maxParallel.Placeholder = "Enter max parallel downloads"
+	maxParallel.Placeholder = "Enter max parallel downloads (integer)"
 	maxParallel.PromptStyle = noStyle
 	maxParallel.TextStyle = noStyle
 	maxParallel.Cursor.Style = cursorStyle
 
 	speedLimit := textinput.New()
-	speedLimit.Placeholder = "Enter speed limit"
+	speedLimit.Placeholder = "Enter speed limit (Bytes per second) (0 for no limit)"
 	speedLimit.PromptStyle = noStyle
 	speedLimit.TextStyle = noStyle
 	speedLimit.Cursor.Style = cursorStyle
 
 	startTime := textinput.New()
-	startTime.Placeholder = "Enter start time"
+	startTime.Placeholder = "Enter start time (HH:MM)"
 	startTime.PromptStyle = noStyle
 	startTime.TextStyle = noStyle
 	startTime.Cursor.Style = cursorStyle
 
 	endTime := textinput.New()
-	endTime.Placeholder = "Enter end time"
+	endTime.Placeholder = "Enter end time (HH:MM)"
 	endTime.PromptStyle = noStyle
 	endTime.TextStyle = noStyle
 	endTime.Cursor.Style = cursorStyle
@@ -326,6 +327,8 @@ func (m *AddQueueTab) updateFocus() {
 }
 
 func (m AddQueueTab) View() string {
+	var speedLimit string
+
 	blurredConfirm := blurredStyle.Render("[ Confirm ]")
 	blurredCancel := blurredStyle.Render("[ Cancel ]")
 
@@ -333,6 +336,23 @@ func (m AddQueueTab) View() string {
 		blurredConfirm = focusedStyle.Render("[ Confirm ]")
 	} else if m.focusIndex == addCancelQueueField {
 		blurredCancel = focusedStyle.Render("[ Cancel ]")
+	}
+
+	// speedLimit, if empty or value is 0, add no limit
+	if m.speedLimit.Value() == "0" {
+		speedLimit = m.speedLimit.View() + " (no limit)"
+	} else {
+		speedLimit = m.speedLimit.Value()
+		if speedLimit == "" {
+			speedLimit = m.speedLimit.View()
+		} else {
+			sp, err := strconv.ParseInt(speedLimit, 10, 64)
+			if err != nil {
+				speedLimit = fmt.Sprint(m.speedLimit.View(), " (invalid)")
+			} else {
+				speedLimit = fmt.Sprint(m.speedLimit.View(), "B/s (", speedString(float64(sp)), ")")
+			}
+		}
 	}
 
 	form := lipgloss.JoinVertical(
@@ -360,7 +380,7 @@ func (m AddQueueTab) View() string {
 					lipgloss.JoinHorizontal(
 						lipgloss.Top,
 						noStyle.Render("Speed Limit: "),
-						m.speedLimit.View(),
+						speedLimit,
 					),
 					lipgloss.JoinHorizontal(
 						lipgloss.Top,
@@ -413,12 +433,12 @@ func makeQueueInfo(name, targetDir, maxParallel, speedLimit, startTime, endTime 
 	if mp < 1 {
 		return models.QueueInfo{}, errors.New("max parallel downloads must be greater than 0")
 	}
-	sp, err := strconv.Atoi(speedLimit)
+	sp, err := strconv.ParseInt(speedLimit, 10, 64)
 	if err != nil {
 		return models.QueueInfo{}, errors.New("speed limit must be a number")
 	}
-	if sp <= 0 {
-		return models.QueueInfo{}, errors.New("speed limit must be greater than 0")
+	if sp < 0 {
+		return models.QueueInfo{}, errors.New("speed limit must be greater or equal to 0")
 	}
 	st, err := time.Parse("15:04", startTime)
 	if err != nil {

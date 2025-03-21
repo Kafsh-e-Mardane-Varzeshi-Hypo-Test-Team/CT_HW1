@@ -222,13 +222,21 @@ func (m *DownloadsTab) updateRows() {
 	m.table.SetRows(rows)
 }
 
-func speedString(speed int64) string {
-	if speed < 1024 {
-		return fmt.Sprintf("%d B/s", speed)
-	} else if speed < 1024*1024 {
-		return fmt.Sprintf("%d KB/s", speed/1024)
+func speedString(speed float64) string {
+	return fmt.Sprintf("%s/s", sizeString(speed))
+}
+
+func sizeString(size float64) string {
+	if size < 1024 {
+		return fmt.Sprintf("%.2f B", size)
+	} else if size < 1024*1024 {
+		return fmt.Sprintf("%.2f KB", size/1024)
+	} else if size < 1024*1024*1024 {
+		return fmt.Sprintf("%.2f MB", size/(1024*1024))
+	} else if size < 1024*1024*1024*1024 {
+		return fmt.Sprintf("%.2f GB", size/(1024*1024*1024))
 	} else {
-		return fmt.Sprintf("%d MB/s", speed/1024/1024)
+		return fmt.Sprintf("%.2f TB", size/(1024*1024*1024*1024))
 	}
 }
 

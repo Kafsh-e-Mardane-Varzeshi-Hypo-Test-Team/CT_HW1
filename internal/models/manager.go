@@ -30,7 +30,7 @@ type DownloadInfo struct {
 	ID           int
 	URL          string
 	QueueName    string
-	TransferRate int64
+	TransferRate float64
 	Progress     float32
 	Status
 }
@@ -39,7 +39,7 @@ type QueueInfo struct {
 	Name            string
 	TargetDirectory string
 	MaxParallel     int
-	SpeedLimit      int
+	SpeedLimit      int64
 	NumRetries      int
 	StartTime       time.Time
 	EndTime         time.Time
@@ -198,7 +198,7 @@ func (m *Manager) UpdateQueue(qInfo QueueInfo) error {
 }
 
 func checkQueueInfo(qInfo QueueInfo) error {
-	if qInfo.MaxParallel < 1 {
+	if qInfo.MaxParallel < 0 {
 		return errors.New("parallel count error")
 	}
 	if qInfo.NumRetries < 0 {
@@ -239,7 +239,7 @@ func (q *Queue) GetNumConcurrent() int {
 	return q.NumConcurrent
 }
 
-func (q *Queue) GetMaxBandwidth() int {
+func (q *Queue) GetMaxBandwidth() int64 {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	return q.MaxBandwidth

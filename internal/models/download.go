@@ -5,6 +5,6 @@ type Download struct {
 	URL          string
 	Queue        string
 	Status       Status
-	TransferRate int64
+	TransferRate float64
 	Progress     float32
 }

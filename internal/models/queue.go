@@ -19,11 +19,11 @@ type Queue struct {
 	NumRetries    int
 	StartTime     time.Time
 	EndTime       time.Time
-	MaxBandwidth  int
+	MaxBandwidth  int64
 	active        bool
 }
 
-func NewQueue(name, savePath string, numConcurrent, numRetries int, startTime, endTime time.Time, maxBandwidth int) *Queue {
+func NewQueue(name, savePath string, numConcurrent, numRetries int, startTime, endTime time.Time, maxBandwidth int64) *Queue {
 	return &Queue{
 		Name:          name,
 		SavePath:      savePath,
@@ -36,7 +36,7 @@ func NewQueue(name, savePath string, numConcurrent, numRetries int, startTime, e
 	}
 }
 
-func (q *Queue) UpdateConfig(savePath string, numConcurrent, numRetries int, startTime, endTime time.Time, maxBandwidth int) {
+func (q *Queue) UpdateConfig(savePath string, numConcurrent, numRetries int, startTime, endTime time.Time, maxBandwidth int64) {
 	q.SavePath = savePath
 	q.NumConcurrent = numConcurrent
 	q.NumRetries = numRetries
