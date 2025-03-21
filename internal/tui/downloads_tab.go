@@ -121,7 +121,6 @@ func (m DownloadsTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case updateMsg:
-		m.footerString = fmt.Sprint(m.footerString, "1")
 		return m, tickUpdate()
 	case tea.KeyMsg:
 		switch {
@@ -192,7 +191,6 @@ func (m DownloadsTab) View() string {
 }
 
 func (m *DownloadsTab) updateRows() {
-	m.footerString = fmt.Sprint(m.footerString, ".")
 	m.downloads = m.manager.GetDownloadList()
 	rows := []table.Row{}
 	for _, download := range m.downloads {
