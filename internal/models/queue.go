@@ -203,7 +203,7 @@ type BandwidthLimiter struct {
 func NewBandwidthLimiter(rate int64, stop chan struct{}) *BandwidthLimiter {
 	bl := &BandwidthLimiter{
 		rate:   rate,
-		tokens: make(chan struct{}, rate/32), // why 32? like fps =)
+		tokens: make(chan struct{}),
 		stop:   stop,
 	}
 
@@ -215,7 +215,7 @@ func NewBandwidthLimiter(rate int64, stop chan struct{}) *BandwidthLimiter {
 }
 
 func (bl *BandwidthLimiter) generateTokens() {
-	ticker := time.NewTicker(time.Second / time.Duration(bl.rate/32)) // why 32? like fps =)
+	ticker := time.NewTicker(1024 * time.Second / time.Duration(bl.rate))
 	defer ticker.Stop()
 
 	for range ticker.C {
@@ -223,7 +223,6 @@ func (bl *BandwidthLimiter) generateTokens() {
 		case <-bl.stop:
 			return
 		case bl.tokens <- struct{}{}:
-		default:
 		}
 	}
 }
