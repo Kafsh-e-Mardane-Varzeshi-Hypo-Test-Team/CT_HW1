@@ -269,23 +269,15 @@ func (m *Manager) monitorActiveHours() {
 
 func (m *Manager) checkTimeAndActivate() {
 	now := time.Now()
+
 	m.mu.Lock()
+	defer m.mu.Unlock()
+
 	for q := range maps.Values(m.Queues) {
 		isActive := q.IsActive()
 		checkTime := q.CheckActiveTime(now)
 		if isActive && !checkTime {
-			for _, d := range m.Downloads {
-				if d.GetQueueName() == q.Name {
-					switch d.GetStatus() {
-					case Pending, InProgress:
-						d.Pend()
-					case Paused:
-						d.Pause()
-					case Cancelled:
-						d.Cancel()
-					}
-				}
-			}
+			m.pauseQueueDownloads(q.Name)
 			q.Stop()
 		}
 		if !isActive && checkTime {
@@ -293,7 +285,21 @@ func (m *Manager) checkTimeAndActivate() {
 			q.Start(queuedDownloads)
 		}
 	}
-	m.mu.Unlock()
+}
+
+func (m *Manager) pauseQueueDownloads(qName string) {
+	for _, d := range m.Downloads {
+		if d.GetQueueName() == qName {
+			switch d.GetStatus() {
+			case Pending, InProgress:
+				d.Pend()
+			case Paused:
+				d.Pause()
+			case Cancelled:
+				d.Cancel()
+			}
+		}
+	}
 }
 
 func (m *Manager) Save(filename string) error {
