@@ -161,11 +161,22 @@ func (m DownloadsTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m DownloadsTab) View() string {
-	row := m.table.Cursor()
-	if row < 0 {
+	if m.table.Cursor() < 0 || m.table.Cursor() >= len(m.downloads) {
 		m.table.SetCursor(0)
-		row = 0
 	}
+
+	if len(m.downloads) == 0 {
+		m.keys.Delete.SetEnabled(false)
+		m.keys.Pause.SetEnabled(false)
+		m.keys.Retry.SetEnabled(false)
+	} else {
+		m.keys.Delete.SetEnabled(true)
+		m.keys.Pause.SetEnabled(true)
+		m.keys.Retry.SetEnabled(true)
+	}
+
+	row := m.table.Cursor()
+
 	if row >= 0 && row < len(m.downloads) {
 		status := m.downloads[row].Status
 		// Update the help view

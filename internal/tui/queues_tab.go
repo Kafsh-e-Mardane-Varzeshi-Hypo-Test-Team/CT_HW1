@@ -184,6 +184,18 @@ func (m QueuesTab) View() string {
 	} else if m.addingQueue {
 		return m.addQueueTab.View()
 	} else {
+		if m.table.Cursor() < 0 || m.table.Cursor() >= len(m.queues) {
+			m.table.SetCursor(0)
+		}
+
+		if len(m.queues) == 0 {
+			m.keys.Delete.SetEnabled(false)
+			m.keys.Edit.SetEnabled(false)
+		} else {
+			m.keys.Delete.SetEnabled(true)
+			m.keys.Edit.SetEnabled(true)
+		}
+
 		return lipgloss.JoinVertical(
 			lipgloss.Left,
 			borderedStyle.Render(m.table.View()),
