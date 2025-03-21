@@ -3,6 +3,7 @@ package tui
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"time"
 
@@ -423,8 +424,8 @@ func makeQueueInfo(name, targetDir, maxParallel, speedLimit, startTime, endTime 
 	if name == "" {
 		return models.QueueInfo{}, errors.New("name cannot be empty")
 	}
-	if targetDir == "" {
-		return models.QueueInfo{}, errors.New("target directory cannot be empty")
+	if !IsValidDirectory(targetDir) {
+		return models.QueueInfo{}, errors.New("target directory is not valid")
 	}
 	mp, err := strconv.Atoi(maxParallel)
 	if err != nil {
@@ -456,4 +457,12 @@ func makeQueueInfo(name, targetDir, maxParallel, speedLimit, startTime, endTime 
 		StartTime:       st,
 		EndTime:         et,
 	}, nil
+}
+
+func IsValidDirectory(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil {
+		return false // Path does not exist or an error occurred
+	}
+	return info.IsDir() // Returns true if it's a directory
 }
