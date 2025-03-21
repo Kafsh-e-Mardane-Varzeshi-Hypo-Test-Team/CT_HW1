@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"runtime"
 	"strconv"
 	"sync"
 )
@@ -32,7 +31,7 @@ func (p *Part) start(commonChannelOfParts chan error, bandwidthLimiter *Bandwidt
 	p.setStatus(InProgress)
 	p.RangeOfDownload = strconv.Itoa(int(p.StartIndex+p.DownloadedBytes)) + "-" + strconv.Itoa(int(p.EndIndex))
 	p.req.Header.Set("Range", "bytes="+p.RangeOfDownload)
-	log.Printf("%d downloading part %d started (bytes %d - %d)", runtime.NumGoroutine(), p.PartIndex, p.StartIndex+p.DownloadedBytes, p.EndIndex)
+	log.Printf("downloading part %d started (bytes %d - %d)", p.PartIndex, p.StartIndex+p.DownloadedBytes, p.EndIndex)
 
 	client := &http.Client{}
 	resp, err := client.Do(p.req)
@@ -76,7 +75,7 @@ func (p *Part) start(commonChannelOfParts chan error, bandwidthLimiter *Bandwidt
 				p.addToDownloadedBytes(n)
 			}
 			if err == io.EOF {
-				log.Printf("%d Downloaded partIndex = %d (bytes %d - %d)", runtime.NumGoroutine(), p.PartIndex, p.StartIndex, p.EndIndex)
+				log.Printf("Downloaded partIndex = %d (bytes %d - %d)", p.PartIndex, p.StartIndex, p.EndIndex)
 				p.setStatus(Completed)
 				commonChannelOfParts <- nil
 				return
