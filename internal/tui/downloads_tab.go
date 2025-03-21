@@ -158,7 +158,10 @@ func (m DownloadsTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	if m.table.Cursor() < 0 || m.table.Cursor() >= len(m.downloads) {
+	if m.table.Cursor() >= len(m.downloads) {
+		m.table.SetCursor(len(m.downloads) - 1)
+	}
+	if m.table.Cursor() < 0 {
 		m.table.SetCursor(0)
 	}
 

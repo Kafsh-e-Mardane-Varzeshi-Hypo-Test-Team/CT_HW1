@@ -176,7 +176,10 @@ func (m QueuesTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		var cmds tea.Cmd
 
-		if m.table.Cursor() < 0 || m.table.Cursor() >= len(m.queues) {
+		if m.table.Cursor() >= len(m.queues) {
+			m.table.SetCursor(len(m.queues) - 1)
+		}
+		if m.table.Cursor() < 0 {
 			m.table.SetCursor(0)
 		}
 
