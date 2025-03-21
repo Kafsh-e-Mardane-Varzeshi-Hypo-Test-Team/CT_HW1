@@ -29,19 +29,19 @@ type Download struct {
 	URL                string
 	Destination        string
 	OutputFileName     string
-	path               string
-	queueName          string
+	Path               string
+	QueueName          string
 	headResp           *http.Response
-	numberOfParts      int
-	totalSize          int64
+	NumberOfParts      int
+	TotalSize          int64
 	lastDownloadedSize int64
-	downloadedSize     int64
-	downloadPercentage float64
+	DownloadedSize     int64
+	DownloadPercentage float64
 	currentSpeed       float64
 	lastUpdateTime     time.Time
 	channel            chan error
-	parts              []Part
-	isInitialized      bool
+	Parts              []Part
+	IsInitialized      bool
 	mu                 sync.Mutex
 	Status
 }
@@ -52,12 +52,12 @@ func NewDownload(id int, url, destination, outputFileName, queueName string) *Do
 		URL:                url,
 		Destination:        destination,
 		OutputFileName:     outputFileName,
-		path:               destination + "/" + outputFileName,
-		queueName:          queueName,
+		Path:               destination + "/" + outputFileName,
+		QueueName:          queueName,
 		Status:             Pending,
 		lastDownloadedSize: 0,
-		downloadedSize:     0,
-		downloadPercentage: 0,
+		DownloadedSize:     0,
+		DownloadPercentage: 0,
 	}
 }
 
@@ -86,7 +86,7 @@ func (d *Download) setHttpResponse() error {
 }
 
 func (d *Download) setTotalSize() {
-	d.totalSize = d.headResp.ContentLength
+	d.TotalSize = d.headResp.ContentLength
 }
 
 func (d *Download) supportsPartialDownload() bool {
@@ -99,11 +99,11 @@ func (d *Download) supportsPartialDownload() bool {
 }
 
 func (d *Download) downloadParts(bandwidthLimiter *BandwidthLimiter) error {
-	for i := range d.parts {
-		go d.parts[i].start(d.channel, bandwidthLimiter)
+	for i := range d.Parts {
+		go d.Parts[i].start(d.channel, bandwidthLimiter)
 	}
 
-	for range d.numberOfParts {
+	for range d.NumberOfParts {
 		err := <-d.channel
 		if err != nil {
 			d.setStatus(Failed)
@@ -114,29 +114,29 @@ func (d *Download) downloadParts(bandwidthLimiter *BandwidthLimiter) error {
 }
 
 func (d *Download) mergeParts() error {
-	file, err := os.Create(d.path)
+	file, err := os.Create(d.Path)
 	if err != nil {
 		log.Printf("Error creating merged file for downloadID = %d: %v\n", d.ID, err)
 		return err
 	}
 	defer file.Close()
 
-	for i := range d.parts {
-		part := &d.parts[i]
-		resp, err := os.Open(part.path)
+	for i := range d.Parts {
+		part := &d.Parts[i]
+		resp, err := os.Open(part.Path)
 		if err != nil {
-			log.Printf("Error opening part file while merging for partId = %d: %v\n", part.partIndex, err)
+			log.Printf("Error opening part file while merging for partId = %d: %v\n", part.PartIndex, err)
 			return err
 		}
 
 		_, err = io.Copy(file, resp)
 		if err != nil {
-			log.Printf("Error copying content from partId = %d to merged file in downloadID = %d: %v\n", part.partIndex, d.ID, err)
+			log.Printf("Error copying content from partId = %d to merged file in downloadID = %d: %v\n", part.PartIndex, d.ID, err)
 			return err
 		}
-		err = os.Remove(part.path)
+		err = os.Remove(part.Path)
 		if err != nil {
-			log.Printf("Error deleting .part file of partId = %d after merging in downloadID = %d: %v\n", part.partIndex, d.ID, err)
+			log.Printf("Error deleting .part file of partId = %d after merging in downloadID = %d: %v\n", part.PartIndex, d.ID, err)
 			return err
 		}
 	}
@@ -144,37 +144,37 @@ func (d *Download) mergeParts() error {
 }
 
 func (d *Download) initializeParts() error {
-	partSize := d.totalSize / int64(d.numberOfParts)
-	for i := range d.numberOfParts {
+	partSize := d.TotalSize / int64(d.NumberOfParts)
+	for i := range d.NumberOfParts {
 		req, err := http.NewRequest("GET", d.URL, nil)
 		if err != nil {
 			log.Printf("Error in GET http request for downloadID = %d: %v\n", d.ID, err)
 			return err
 		}
 
-		d.parts[i] = Part{
-			partIndex:       i,
-			startIndex:      int64(i) * partSize,
-			endIndex:        int64(i+1) * partSize,
-			downloadedBytes: 0,
+		d.Parts[i] = Part{
+			PartIndex:       i,
+			StartIndex:      int64(i) * partSize,
+			EndIndex:        int64(i+1) * partSize,
+			DownloadedBytes: 0,
 			Status:          Pending,
 			req:             req,
 			channel:         make(chan Status),
 		}
 
-		if i == d.numberOfParts-1 {
-			d.parts[i].endIndex = d.totalSize - 1
+		if i == d.NumberOfParts-1 {
+			d.Parts[i].EndIndex = d.TotalSize - 1
 		}
-		d.parts[i].rangeOfDownload = strconv.Itoa(int(d.parts[i].startIndex+d.parts[i].downloadedBytes)) + "-" + strconv.Itoa(int(d.parts[i].endIndex))
-		d.parts[i].path = d.Destination + "/" + d.OutputFileName + d.parts[i].rangeOfDownload + ".part"
+		d.Parts[i].RangeOfDownload = strconv.Itoa(int(d.Parts[i].StartIndex+d.Parts[i].DownloadedBytes)) + "-" + strconv.Itoa(int(d.Parts[i].EndIndex))
+		d.Parts[i].Path = d.Destination + "/" + d.OutputFileName + d.Parts[i].RangeOfDownload + ".part"
 	}
 
 	return nil
 }
 
 func (d *Download) initializeDownload() error {
-	d.isInitialized = true
-	d.path = d.Destination + "/" + d.OutputFileName
+	d.IsInitialized = true
+	d.Path = d.Destination + "/" + d.OutputFileName
 
 	err := d.setHttpResponse()
 	if err != nil {
@@ -182,18 +182,18 @@ func (d *Download) initializeDownload() error {
 	}
 	d.setTotalSize()
 
-	if d.totalSize == 0 {
+	if d.TotalSize == 0 {
 		d.setStatus(Failed)
 		log.Printf("Content length in downloadID = %d is invalid\n", d.ID)
 		return errors.New("content length is invalid")
 	}
 
 	if d.supportsPartialDownload() {
-		d.numberOfParts = NUMBER_OF_PARTS
+		d.NumberOfParts = NUMBER_OF_PARTS
 	} else {
-		d.numberOfParts = 1
+		d.NumberOfParts = 1
 	}
-	d.parts = make([]Part, d.numberOfParts)
+	d.Parts = make([]Part, d.NumberOfParts)
 
 	err = d.initializeParts()
 	if err != nil {
@@ -204,16 +204,16 @@ func (d *Download) initializeDownload() error {
 }
 
 func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
-	if !d.isInitialized {
+	if !d.IsInitialized {
 		err := d.initializeDownload()
 		if err != nil {
 			log.Printf("Error while initializing downloadID = %d:%v", d.ID, err)
 			return err
 		}
 	}
-	d.channel = make(chan error, d.numberOfParts)
+	d.channel = make(chan error, d.NumberOfParts)
 	d.setStatus(InProgress)
-	log.Printf("Content length in downloadID = %d is %d\n", d.ID, d.totalSize)
+	log.Printf("Content length in downloadID = %d is %d\n", d.ID, d.TotalSize)
 
 	d.lastUpdateTime = time.Now()
 	go d.monitorProgress()
@@ -237,11 +237,11 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 func (d *Download) Pause() error {
 	log.Printf("Pausing downloadID = %d", d.ID)
 	d.setStatus(Paused)
-	for i := range d.parts {
-		part := &d.parts[i]
+	for i := range d.Parts {
+		part := &d.Parts[i]
 		err := part.pause()
 		if err != nil {
-			log.Printf("Error while pausing download of partId %v", part.partIndex)
+			log.Printf("Error while pausing download of partId %v", part.PartIndex)
 			return err
 		}
 	}
@@ -251,11 +251,11 @@ func (d *Download) Pause() error {
 func (d *Download) Pend() error {
 	log.Printf("Pending downloadID = %d", d.ID)
 	d.setStatus(Pending)
-	for i := range d.parts {
-		part := &d.parts[i]
+	for i := range d.Parts {
+		part := &d.Parts[i]
 		err := part.pend()
 		if err != nil {
-			log.Printf("Error while pending download of partId %v", part.partIndex)
+			log.Printf("Error while pending download of partId %v", part.PartIndex)
 			return err
 		}
 	}
@@ -264,22 +264,22 @@ func (d *Download) Pend() error {
 
 func (d *Download) Cancel() error {
 	d.setStatus(Cancelled)
-	for i := range d.parts {
-		part := &d.parts[i]
+	for i := range d.Parts {
+		part := &d.Parts[i]
 		err := part.cancel()
 		if err != nil {
-			log.Printf("Error canceling partId = %d while canceling downloadID = %d: %v\n", part.partIndex, d.ID, err)
+			log.Printf("Error canceling partId = %d while canceling downloadID = %d: %v\n", part.PartIndex, d.ID, err)
 			return err
 		}
 
-		if _, err := os.Stat(part.path); errors.Is(err, os.ErrNotExist) {
-			log.Printf(".part file of partId = %d does not exists in downloadID = %d\n", part.partIndex, d.ID)
+		if _, err := os.Stat(part.Path); errors.Is(err, os.ErrNotExist) {
+			log.Printf(".part file of partId = %d does not exists in downloadID = %d\n", part.PartIndex, d.ID)
 			continue
 		}
 
-		err = os.Remove(part.path)
+		err = os.Remove(part.Path)
 		if err != nil {
-			log.Printf("Error deleting .part file of partId = %d after canceling downloadID = %d: %v\n", part.partIndex, d.ID, err)
+			log.Printf("Error deleting .part file of partId = %d after canceling downloadID = %d: %v\n", part.PartIndex, d.ID, err)
 			return err
 		}
 	}
@@ -308,26 +308,26 @@ func (d *Download) monitorProgress() {
 		}
 
 		d.mu.Lock()
-		d.downloadedSize = 0
-		for i := range d.parts {
-			part := &d.parts[i]
-			d.downloadedSize += part.downloadedBytes
+		d.DownloadedSize = 0
+		for i := range d.Parts {
+			part := &d.Parts[i]
+			d.DownloadedSize += part.DownloadedBytes
 		}
 
 		now := time.Now()
 		elapsed := now.Sub(d.lastUpdateTime).Seconds()
-		bytesDownloaded := d.downloadedSize - d.lastDownloadedSize
+		bytesDownloaded := d.DownloadedSize - d.lastDownloadedSize
 
 		if d.Status != Paused && elapsed > 0 {
 			d.currentSpeed = float64(bytesDownloaded) / elapsed
-			d.lastDownloadedSize = d.downloadedSize
+			d.lastDownloadedSize = d.DownloadedSize
 			d.lastUpdateTime = now
 		} else if d.Status == Paused {
 			d.currentSpeed = 0
 		}
 
-		percentage := float64(d.downloadedSize) / float64(d.totalSize) * 100
-		d.downloadPercentage = percentage
+		percentage := float64(d.DownloadedSize) / float64(d.TotalSize) * 100
+		d.DownloadPercentage = percentage
 
 		//log.Printf("monitoring :: %.2f%% (%.2f MB/%.2f MB) - %.2f MB/s\n",
 		//	percentage, float64(d.downloadedSize)/1024/1024, float64(d.totalSize)/1024/1024, d.currentSpeed/1024/1024)
@@ -336,7 +336,7 @@ func (d *Download) monitorProgress() {
 }
 
 func (d *Download) GetQueueName() string {
-	return d.queueName
+	return d.QueueName
 }
 
 func (d *Download) GetStatus() Status {
@@ -348,5 +348,5 @@ func (d *Download) GetTransferRate() float64 {
 }
 
 func (d *Download) GetProgress() float64 {
-	return d.downloadPercentage
+	return d.DownloadPercentage
 }

@@ -105,7 +105,7 @@ func (m *Manager) ResumeDownload(id int) error {
 		}
 	}
 
-	q, exists := m.Queues[d.queueName]
+	q, exists := m.Queues[d.QueueName]
 	if !exists {
 		return errors.New("queue not found")
 	}
