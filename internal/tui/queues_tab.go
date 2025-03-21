@@ -173,6 +173,11 @@ func (m QueuesTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		var cmds tea.Cmd
+
+		if m.table.Cursor() < 0 || m.table.Cursor() >= len(m.queues) {
+			m.table.SetCursor(0)
+		}
+
 		m.table, cmds = m.table.Update(msg)
 		return m, tea.Batch(cmd, cmds)
 	}
@@ -184,10 +189,6 @@ func (m QueuesTab) View() string {
 	} else if m.addingQueue {
 		return m.addQueueTab.View()
 	} else {
-		if m.table.Cursor() < 0 || m.table.Cursor() >= len(m.queues) {
-			m.table.SetCursor(0)
-		}
-
 		if len(m.queues) == 0 {
 			m.keys.Delete.SetEnabled(false)
 			m.keys.Edit.SetEnabled(false)

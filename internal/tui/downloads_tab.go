@@ -156,15 +156,15 @@ func (m DownloadsTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
+	if m.table.Cursor() < 0 || m.table.Cursor() >= len(m.downloads) {
+		m.table.SetCursor(0)
+	}
+
 	m.table, cmd = m.table.Update(msg)
 	return m, cmd
 }
 
 func (m DownloadsTab) View() string {
-	if m.table.Cursor() < 0 || m.table.Cursor() >= len(m.downloads) {
-		m.table.SetCursor(0)
-	}
-
 	if len(m.downloads) == 0 {
 		m.keys.Delete.SetEnabled(false)
 		m.keys.Pause.SetEnabled(false)
