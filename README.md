@@ -7,7 +7,8 @@ A powerful concurrent download manager written in Go that supports multi-part do
 The whole project was dissected into three parts: handling downloading, handling app state, and implementing tui, which were respectively implemented by [Parisa Sadat Mousavi](https://github.com/parisam83), [Mohammad Barekatain](https://github.com/mammedbrk), and [Mehdi Taheri](https://github.com/Mefi22).
 
 
-![GoDownloadManager](https://github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/DownloadsTab.png)
+![GoDownloadManager](https://github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/blob/main/DownloadsTab.png)
+![GoDownloadManager](https://github.com/Kafsh-e-Mardane-Varzeshi-Hypo-Test-Team/CT_HW1/blob/main/AppWork.mp4)
 
 ## Features
 
