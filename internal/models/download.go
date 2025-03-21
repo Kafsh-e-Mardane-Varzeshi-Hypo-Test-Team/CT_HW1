@@ -215,10 +215,12 @@ func (d *Download) initializeDownload() error {
 }
 
 func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
+	d.setStatus(Pending)
 	if !d.IsInitialized {
 		err := d.initializeDownload()
 		if err != nil {
 			log.Printf("Error while initializing downloadID = %d:%v", d.ID, err)
+			d.setStatus(Failed)
 			return err
 		}
 	}
@@ -226,6 +228,7 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 	err := d.initializeRequestOfParts()
 	if err != nil {
 		log.Printf("Error in initializing req field in parts of downloadID = %d: %v\n", d.ID, err)
+		d.setStatus(Failed)
 		return err
 	}
 
@@ -239,12 +242,14 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 	err = d.downloadParts(bandwidthLimiter)
 	if err != nil {
 		log.Printf("Error in downloadParts() function for downloadID = %d : %v\n", d.ID, err)
+		d.setStatus(Failed)
 		return err
 	}
 	log.Printf("All parts downloaded successfully")
 	err = d.mergeParts()
 	if err != nil {
 		log.Printf("Error in mergeParts() function for downloadID = %d : %v\n", d.ID, err)
+		d.setStatus(Failed)
 		return err
 	}
 
