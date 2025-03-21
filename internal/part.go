@@ -67,7 +67,7 @@ func (p *Part) start(channel chan error, bandwidthLimiter *BandwidthLimiter) {
 
 		bandwidthLimiter.WaitForToken()
 		n, err := resp.Body.Read(buffer)
-		log.Printf("downloading partId = %d with n = %d and downloadedBytes = %d/%d", p.partIndex, n, p.downloadedBytes, p.endIndex - p.startIndex)
+		// log.Printf("downloading partId = %d with n = %d and downloadedBytes = %d/%d", p.partIndex, n, p.downloadedBytes, p.endIndex - p.startIndex)
 		n = min(n, int(p.endIndex - p.startIndex - p.downloadedBytes))
 		if n > 0 {
 			_, err := file.Write(buffer[:n])

@@ -2,6 +2,7 @@ package internal
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -103,8 +104,9 @@ func (d *Download) downloadParts(bandwidthLimiter *BandwidthLimiter) error {
 		go d.parts[i].start(d.channel, bandwidthLimiter)
 	}
 
-	for range d.numberOfParts {
+	for i := range d.numberOfParts {		
 		err := <-d.channel
+		fmt.Println(i, err)
 		if err != nil {
 			d.setStatus(Failed)
 			return err
