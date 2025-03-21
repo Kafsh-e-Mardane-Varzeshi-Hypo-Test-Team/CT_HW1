@@ -324,7 +324,7 @@ type QueueInfo struct {
 	Name            string
 	TargetDirectory string
 	MaxParallel     int
-	SpeedLimit      int
+	SpeedLimit      int64
 	NumRetries      int
 	StartTime       time.Time
 	EndTime         time.Time

@@ -19,11 +19,11 @@ type Queue struct {
 	NumRetries    int
 	StartTime     time.Time
 	EndTime       time.Time
-	MaxBandwidth  int
+	MaxBandwidth  int64
 	active        bool
 }
 
-func NewQueue(name, savePath string, numConcurrent, numRetries int, startTime, endTime time.Time, maxBandwidth int) *Queue {
+func NewQueue(name, savePath string, numConcurrent, numRetries int, startTime, endTime time.Time, maxBandwidth int64) *Queue {
 	return &Queue{
 		Name:          name,
 		SavePath:      savePath,
@@ -36,7 +36,7 @@ func NewQueue(name, savePath string, numConcurrent, numRetries int, startTime, e
 	}
 }
 
-func (q *Queue) UpdateConfig(savePath string, numConcurrent, numRetries int, startTime, endTime time.Time, maxBandwidth int) {
+func (q *Queue) UpdateConfig(savePath string, numConcurrent, numRetries int, startTime, endTime time.Time, maxBandwidth int64) {
 	q.SavePath = savePath
 	q.NumConcurrent = numConcurrent
 	q.NumRetries = numRetries
@@ -154,7 +154,7 @@ func (q *Queue) GetNumConcurrent() int {
 	return q.NumConcurrent
 }
 
-func (q *Queue) GetMaxBandwidth() int {
+func (q *Queue) GetMaxBandwidth() int64 {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	return q.MaxBandwidth
@@ -187,12 +187,12 @@ func (q *Queue) CheckActiveTime(now time.Time) bool {
 }
 
 type BandwidthLimiter struct {
-	rate   int
+	rate   int64
 	tokens chan struct{}
 	stop   chan struct{}
 }
 
-func NewBandwidthLimiter(rate int, stop chan struct{}) *BandwidthLimiter {
+func NewBandwidthLimiter(rate int64, stop chan struct{}) *BandwidthLimiter {
 	bl := &BandwidthLimiter{
 		rate:   rate,
 		tokens: make(chan struct{}, rate/32), // why 32? like fps =)
