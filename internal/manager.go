@@ -1,9 +1,12 @@
 package internal
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"maps"
+	"os"
 	"slices"
 	"sync"
 	"time"
@@ -284,6 +287,22 @@ func (m *Manager) monitorActiveHours() {
 			m.mu.Unlock()
 		}
 	}
+}
+
+func (m *Manager) Save(filename string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	jsonData, err := json.MarshalIndent(m, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(filename, jsonData, 0644) // 0644 is the file permission (read/write for owner, read for others)
+	if err != nil {
+		return fmt.Errorf("failed to write JSON to file: %w", err)
+	}
+	return nil
 }
 
 type DownloadInfo struct {
