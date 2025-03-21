@@ -39,10 +39,15 @@ type Download struct {
 	DownloadPercentage float64
 	currentSpeed       float64
 	lastUpdateTime     time.Time
-	channel            chan error
+	channel            chan connectionWithPart
 	Parts              []Part
 	IsInitialized      bool
 	mu                 sync.Mutex
+	Status
+}
+
+type connectionWithPart struct {
+	error
 	Status
 }
 
@@ -104,10 +109,12 @@ func (d *Download) downloadParts(bandwidthLimiter *BandwidthLimiter) error {
 	}
 
 	for range d.NumberOfParts {
-		err := <-d.channel
-		if err != nil {
-			d.setStatus(Failed)
-			return err
+		result := <-d.channel
+		if result.error != nil {
+			if result.Status == Failed {
+				d.setStatus(Failed)
+			}
+			return result.error
 		}
 	}
 	return nil
@@ -211,7 +218,7 @@ func (d *Download) Start(bandwidthLimiter *BandwidthLimiter) error {
 			return err
 		}
 	}
-	d.channel = make(chan error, d.NumberOfParts)
+	d.channel = make(chan connectionWithPart, d.NumberOfParts)
 	d.setStatus(InProgress)
 	log.Printf("Content length in downloadID = %d is %d\n", d.ID, d.TotalSize)
 
