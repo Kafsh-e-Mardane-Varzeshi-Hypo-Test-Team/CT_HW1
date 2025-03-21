@@ -2,7 +2,7 @@ package models
 
 type Download struct {
 	ID           int
-	Url          string
+	URL          string
 	Queue        string
 	Status       Status
 	TransferRate int64

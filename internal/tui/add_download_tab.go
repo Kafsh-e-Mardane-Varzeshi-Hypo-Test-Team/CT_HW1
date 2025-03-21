@@ -34,6 +34,23 @@ func (k addDownloadKeyMap) FullHelp() [][]key.Binding {
 	}
 }
 
+// Key Bindings for list
+type addDownloadqueueListKeyMap struct {
+	navigation key.Binding
+	selectOpt  key.Binding
+	cancel     key.Binding
+}
+
+func (k addDownloadqueueListKeyMap) ShortHelp() []key.Binding {
+	return []key.Binding{k.navigation, k.selectOpt, k.cancel}
+}
+
+func (k addDownloadqueueListKeyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		{k.navigation, k.selectOpt, k.cancel},
+	}
+}
+
 // List Item Delegate
 type item string
 
@@ -79,8 +96,8 @@ type AddDownloadTab struct {
 	focusIndex    addDownloadTabField
 	urlInput      textinput.Model
 	filenameInput textinput.Model
-	queues        list.Model
-	choices       []string
+	queueList     list.Model
+	queues        []string
 	selectedQueue int
 	listExpanded  bool
 	help          help.Model
@@ -102,32 +119,27 @@ func NewAddDownloadTab(manager *models.Manager) AddDownloadTab {
 	filenameInput.TextStyle = noStyle
 	filenameInput.Cursor.Style = cursorStyle
 
-	queues := models.GetQueues()
-	availableQueues := []string{}
-	for _, q := range queues {
-		availableQueues = append(availableQueues, q.Name)
-	}
 	items := []list.Item{}
-	for _, q := range availableQueues {
-		items = append(items, item(q))
-	}
+	queues := []string{}
 
-	queueList := list.New(items, itemDelegate{}, 30, min(3, len(availableQueues)))
+	queueList := list.New(items, itemDelegate{}, 30, min(3, len(items)))
 	queueList.SetShowTitle(false)
 	queueList.SetShowStatusBar(false)
 	queueList.SetFilteringEnabled(false)
 	queueList.SetHeight(8)
-
+	queueList.DisableQuitKeybindings()
+	queueList.SetShowHelp(false)
+	queueList.SelectedItem()
 	help := help.New()
 	help.ShowAll = true
 	help.FullSeparator = " \t "
 
-	return AddDownloadTab{
+	addDownloadTab := AddDownloadTab{
 		manager:       manager,
 		urlInput:      urlInput,
 		filenameInput: filenameInput,
-		queues:        queueList,
-		choices:       availableQueues,
+		queueList:     queueList,
+		queues:        queues,
 		selectedQueue: 0,
 		focusIndex:    0,
 		help:          help,
@@ -155,6 +167,10 @@ func NewAddDownloadTab(manager *models.Manager) AddDownloadTab {
 		},
 		footerMessage: "",
 	}
+
+	addDownloadTab.updateChoices()
+
+	return addDownloadTab
 }
 
 func (m AddDownloadTab) Init() tea.Cmd {
@@ -163,6 +179,8 @@ func (m AddDownloadTab) Init() tea.Cmd {
 
 func (m AddDownloadTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
+	m.updateChoices()
+
 	switch m.focusIndex {
 	case urlField:
 		switch msg := msg.(type) {
@@ -198,13 +216,14 @@ func (m AddDownloadTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.listExpanded {
 				switch msg.String() {
 				case "enter":
-					m.selectedQueue = m.queues.Index()
+					m.selectedQueue = m.queueList.Index()
 					m.listExpanded = false
 					return m, nil
-				case "esc":
+				case "esc", "q":
 					m.listExpanded = false
+					cmd = tea.Cmd(textinput.Blink)
 				default:
-					m.queues, cmd = m.queues.Update(msg)
+					m.queueList, cmd = m.queueList.Update(msg)
 					return m, cmd
 				}
 			} else {
@@ -228,7 +247,7 @@ func (m AddDownloadTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter":
 				url := m.urlInput.Value()
 				filename := m.filenameInput.Value()
-				queue := m.choices[m.selectedQueue]
+				queue := m.queues[m.selectedQueue]
 
 				var err error
 				if url == "" {
@@ -307,14 +326,42 @@ func (m AddDownloadTab) View() string {
 	var footerHelpText string
 
 	if m.listExpanded {
-		queueDisplay = m.queues.View()
+		queueDisplay = m.queueList.View()
+		keys := addDownloadqueueListKeyMap{
+			navigation: key.NewBinding(
+				key.WithKeys("up", "down"),
+				key.WithHelp("↑/↓", "navigate"),
+			),
+			selectOpt: key.NewBinding(
+				key.WithKeys("enter"),
+				key.WithHelp("enter", "select"),
+			),
+			cancel: key.NewBinding(
+				key.WithKeys("esc", "q"),
+				key.WithHelp("esc/q", "cancel"),
+			),
+		}
+
+		queueDisplay = lipgloss.JoinVertical(
+			lipgloss.Left,
+			queueDisplay,
+			m.help.ShortHelpView(keys.ShortHelp()),
+		)
+
 		footerHelpText = ""
 	} else {
-		if m.focusIndex == 2 {
-			queueDisplay = focusedStyle.Render(m.choices[m.selectedQueue])
+		var queueName string
+		if len(m.queues) > 0 {
+			queueName = m.queues[m.selectedQueue]
 		} else {
-			queueDisplay = noStyle.Render(m.choices[m.selectedQueue])
+			queueName = "[No queues available]"
 		}
+		if m.focusIndex == queueField {
+			queueDisplay = focusedStyle.Render(queueName)
+		} else {
+			queueDisplay = noStyle.Render(queueName)
+		}
+
 		footerHelpText = m.help.View(m.keys)
 	}
 
@@ -362,4 +409,15 @@ func (m AddDownloadTab) View() string {
 	)
 
 	return docStyle.Render(form)
+}
+
+func (m *AddDownloadTab) updateChoices() {
+	queues := m.manager.GetQueueList()
+	items := []list.Item{}
+	m.queues = []string{}
+	for _, q := range queues {
+		m.queues = append(m.queues, q.Name)
+		items = append(items, item(q.Name))
+	}
+	m.queueList.SetItems(items)
 }

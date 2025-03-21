@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -12,8 +13,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// Key Bindings
-type addQueueKeyMap struct {
+type editQueueKeyMap struct {
 	Next       key.Binding
 	Prev       key.Binding
 	Navigation key.Binding
@@ -21,79 +21,77 @@ type addQueueKeyMap struct {
 	Cancel     key.Binding
 }
 
-func (k addQueueKeyMap) ShortHelp() []key.Binding {
+func (k editQueueKeyMap) ShortHelp() []key.Binding {
 	return []key.Binding{k.Cancel}
 }
 
-func (k addQueueKeyMap) FullHelp() [][]key.Binding {
+func (k editQueueKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Next, k.Prev, k.Navigation}, // Navigation keys
-		{k.Select, k.Cancel},           // Actions
+		{k.Next, k.Prev, k.Navigation},
+		{k.Select, k.Cancel},
 	}
 }
 
-type AddQueueField int
+type EditQueueField int
 
 const (
-	addNameField AddQueueField = iota
-	addTargetDirectoryField
-	addMaxParallelField
-	addSpeedLimitField
-	addStartTimeField
-	addEndTimeField
-	addConfirmQueueField
-	addCancelQueueField
+	editTargetDirectoryField EditQueueField = iota
+	editMaxParallelField
+	editSpeedLimitField
+	editStartTimeField
+	editEndTimeField
+	editConfirmQueueField
+	editCancelQueueField
 )
 
-// AddQueueTab Model
-type AddQueueTab struct {
+type EditQueueTab struct {
 	manager        *models.Manager
-	focusIndex     AddQueueField
-	nameInput      textinput.Model
+	queueName      string
+	focusIndex     EditQueueField
 	targetDirInput textinput.Model
 	maxParallel    textinput.Model
 	speedLimit     textinput.Model
 	startTime      textinput.Model
 	endTime        textinput.Model
 	help           help.Model
-	keys           addQueueKeyMap
+	keys           editQueueKeyMap
 	footerMessage  string
 }
 
-func NewAddQueueTab(manager *models.Manager) AddQueueTab {
-	nameInput := textinput.New()
-	nameInput.Placeholder = "Enter queue name"
-	nameInput.Focus()
-	nameInput.PromptStyle = focusedStyle
-	nameInput.TextStyle = focusedStyle
-	nameInput.Cursor.Style = cursorStyle
+func NewEditQueueTab(manager *models.Manager, queueInfo *models.QueueInfo) EditQueueTab {
+	name := queueInfo.Name
 
 	targetDirInput := textinput.New()
 	targetDirInput.Placeholder = "Enter target directory"
+	targetDirInput.SetValue(queueInfo.TargetDirectory)
 	targetDirInput.PromptStyle = noStyle
 	targetDirInput.TextStyle = noStyle
 	targetDirInput.Cursor.Style = cursorStyle
 
 	maxParallel := textinput.New()
 	maxParallel.Placeholder = "Enter max parallel downloads"
+	maxParallel.SetValue(fmt.Sprint(queueInfo.MaxParallel))
 	maxParallel.PromptStyle = noStyle
 	maxParallel.TextStyle = noStyle
 	maxParallel.Cursor.Style = cursorStyle
 
 	speedLimit := textinput.New()
 	speedLimit.Placeholder = "Enter speed limit"
+	speedLimit.SetValue(fmt.Sprint(queueInfo.SpeedLimit))
 	speedLimit.PromptStyle = noStyle
 	speedLimit.TextStyle = noStyle
 	speedLimit.Cursor.Style = cursorStyle
 
 	startTime := textinput.New()
 	startTime.Placeholder = "Enter start time"
+	startTime.SetValue(queueInfo.StartTime.Format("15:04"))
 	startTime.PromptStyle = noStyle
 	startTime.TextStyle = noStyle
 	startTime.Cursor.Style = cursorStyle
 
 	endTime := textinput.New()
 	endTime.Placeholder = "Enter end time"
+	endTime.SetValue(queueInfo.EndTime.Format("15:04"))
 	endTime.PromptStyle = noStyle
 	endTime.TextStyle = noStyle
 	endTime.Cursor.Style = cursorStyle
@@ -102,17 +100,17 @@ func NewAddQueueTab(manager *models.Manager) AddQueueTab {
 	help.ShowAll = true
 	help.FullSeparator = " \t "
 
-	return AddQueueTab{
+	return EditQueueTab{
 		manager:        manager,
-		focusIndex:     addNameField,
-		nameInput:      nameInput,
+		focusIndex:     editTargetDirectoryField,
+		queueName:      name,
 		targetDirInput: targetDirInput,
 		maxParallel:    maxParallel,
 		speedLimit:     speedLimit,
 		startTime:      startTime,
 		endTime:        endTime,
 		help:           help,
-		keys: addQueueKeyMap{
+		keys: editQueueKeyMap{
 			Next:       key.NewBinding(key.WithKeys("tab"), key.WithHelp("tab", "next field")),
 			Prev:       key.NewBinding(key.WithKeys("shift+tab"), key.WithHelp("shift+tab", "previous field")),
 			Navigation: key.NewBinding(key.WithKeys("up", "down", "left", "right"), key.WithHelp("↑/↓/←/→", "navigate")),
@@ -123,28 +121,14 @@ func NewAddQueueTab(manager *models.Manager) AddQueueTab {
 	}
 }
 
-func (m AddQueueTab) Init() tea.Cmd {
+func (m EditQueueTab) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m AddQueueTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m EditQueueTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch m.focusIndex {
-	case addNameField:
-		switch msg := msg.(type) {
-		case tea.KeyMsg:
-			switch msg.String() {
-			case "tab", "down":
-				m.focusIndex = min(m.focusIndex+1, 7)
-			case "up", "shift+tab":
-				m.focusIndex = max(m.focusIndex-1, 0)
-			case "ctrl+c", "esc":
-				m.resetForm()
-				return m, func() tea.Msg { return CloseChildMsg{} }
-			}
-		}
-		m.nameInput, cmd = m.nameInput.Update(msg)
-	case addTargetDirectoryField:
+	case editTargetDirectoryField:
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
@@ -158,7 +142,7 @@ func (m AddQueueTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		m.targetDirInput, cmd = m.targetDirInput.Update(msg)
-	case addMaxParallelField:
+	case editMaxParallelField:
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
@@ -172,7 +156,7 @@ func (m AddQueueTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		m.maxParallel, cmd = m.maxParallel.Update(msg)
-	case addSpeedLimitField:
+	case editSpeedLimitField:
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
@@ -186,7 +170,7 @@ func (m AddQueueTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		m.speedLimit, cmd = m.speedLimit.Update(msg)
-	case addStartTimeField:
+	case editStartTimeField:
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
@@ -200,7 +184,7 @@ func (m AddQueueTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		m.startTime, cmd = m.startTime.Update(msg)
-	case addEndTimeField:
+	case editEndTimeField:
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
@@ -214,7 +198,7 @@ func (m AddQueueTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		m.endTime, cmd = m.endTime.Update(msg)
-	case addConfirmQueueField:
+	case editConfirmQueueField:
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
@@ -247,8 +231,8 @@ func (m AddQueueTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.footerMessage = "Invalid end time."
 					return m, nil
 				}
-				err = m.manager.AddQueue(models.QueueInfo{
-					Name:            m.nameInput.Value(),
+				err = m.manager.UpdateQueue(models.QueueInfo{
+					Name:            m.queueName,
 					TargetDirectory: m.targetDirInput.Value(),
 					MaxParallel:     mp,
 					SpeedLimit:      sp,
@@ -259,7 +243,7 @@ func (m AddQueueTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.footerMessage = err.Error()
 					return m, nil
 				}
-				m.footerMessage = "Queue added successfully."
+				m.footerMessage = "Queue updated successfully."
 				return m, func() tea.Msg { return CloseChildMsg{} }
 			case "up", "shift+tab":
 				m.focusIndex = max(m.focusIndex-1, 0)
@@ -267,13 +251,13 @@ func (m AddQueueTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.resetForm()
 				return m, func() tea.Msg { return CloseChildMsg{} }
 			case "down":
-				m.focusIndex = addConfirmQueueField
+				m.focusIndex = editConfirmQueueField
 			case "tab", "right":
-				m.focusIndex = addCancelQueueField
+				m.focusIndex = editCancelQueueField
 				cmd = tea.Cmd(textinput.Blink)
 			}
 		}
-	case addCancelQueueField:
+	case editCancelQueueField:
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
@@ -281,9 +265,9 @@ func (m AddQueueTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.resetForm()
 				return m, func() tea.Msg { return CloseChildMsg{} }
 			case "up":
-				m.focusIndex = addEndTimeField
+				m.focusIndex = editEndTimeField
 			case "left", "shift+tab":
-				m.focusIndex = addConfirmQueueField
+				m.focusIndex = editConfirmQueueField
 				cmd = tea.Cmd(textinput.Blink)
 			case "ctrl+c", "esc":
 				m.resetForm()
@@ -296,16 +280,13 @@ func (m AddQueueTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m *AddQueueTab) updateFocus() {
-	m.nameInput.Blur()
+func (m *EditQueueTab) updateFocus() {
 	m.targetDirInput.Blur()
 	m.maxParallel.Blur()
 	m.speedLimit.Blur()
 	m.startTime.Blur()
 	m.endTime.Blur()
 
-	m.nameInput.PromptStyle = noStyle
-	m.nameInput.TextStyle = noStyle
 	m.targetDirInput.PromptStyle = noStyle
 	m.targetDirInput.TextStyle = noStyle
 	m.maxParallel.PromptStyle = noStyle
@@ -318,40 +299,36 @@ func (m *AddQueueTab) updateFocus() {
 	m.endTime.TextStyle = noStyle
 
 	switch m.focusIndex {
-	case addNameField:
-		m.nameInput.Focus()
-		m.nameInput.PromptStyle = focusedStyle
-		m.nameInput.TextStyle = focusedStyle
-	case addTargetDirectoryField:
+	case editTargetDirectoryField:
 		m.targetDirInput.Focus()
 		m.targetDirInput.PromptStyle = focusedStyle
 		m.targetDirInput.TextStyle = focusedStyle
-	case addMaxParallelField:
+	case editMaxParallelField:
 		m.maxParallel.Focus()
 		m.maxParallel.PromptStyle = focusedStyle
 		m.maxParallel.TextStyle = focusedStyle
-	case addSpeedLimitField:
+	case editSpeedLimitField:
 		m.speedLimit.Focus()
 		m.speedLimit.PromptStyle = focusedStyle
 		m.speedLimit.TextStyle = focusedStyle
-	case addStartTimeField:
+	case editStartTimeField:
 		m.startTime.Focus()
 		m.startTime.PromptStyle = focusedStyle
 		m.startTime.TextStyle = focusedStyle
-	case addEndTimeField:
+	case editEndTimeField:
 		m.endTime.Focus()
 		m.endTime.PromptStyle = focusedStyle
 		m.endTime.TextStyle = focusedStyle
 	}
 }
 
-func (m AddQueueTab) View() string {
-	blurredConfirm := blurredStyle.Render("[ Confirm ]")
+func (m EditQueueTab) View() string {
+	blurredConfirm := blurredStyle.Render("[ Save ]")
 	blurredCancel := blurredStyle.Render("[ Cancel ]")
 
-	if m.focusIndex == addConfirmQueueField {
-		blurredConfirm = focusedStyle.Render("[ Confirm ]")
-	} else if m.focusIndex == addCancelQueueField {
+	if m.focusIndex == editConfirmQueueField {
+		blurredConfirm = focusedStyle.Render("[ Save ]")
+	} else if m.focusIndex == editCancelQueueField {
 		blurredCancel = focusedStyle.Render("[ Cancel ]")
 	}
 
@@ -365,7 +342,7 @@ func (m AddQueueTab) View() string {
 					lipgloss.JoinHorizontal(
 						lipgloss.Top,
 						noStyle.Render("Name: "),
-						m.nameInput.View(),
+						m.queueName,
 					),
 					lipgloss.JoinHorizontal(
 						lipgloss.Top,
@@ -408,8 +385,7 @@ func (m AddQueueTab) View() string {
 	return docStyle.Render(form)
 }
 
-func (m *AddQueueTab) resetForm() {
-	m.nameInput.SetValue("")
+func (m *EditQueueTab) resetForm() {
 	m.targetDirInput.SetValue("")
 	m.maxParallel.SetValue("")
 	m.speedLimit.SetValue("")

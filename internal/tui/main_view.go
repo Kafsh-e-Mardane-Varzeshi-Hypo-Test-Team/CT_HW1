@@ -8,8 +8,6 @@ import (
 
 type tab int
 
-const tabCount = 3
-
 const (
 	addDownload tab = iota
 	downloads
@@ -47,35 +45,54 @@ func (m MainView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.currentTab {
 	case downloads:
 		m.downloadTab, cmd = m.downloadTab.Update(msg)
+		if cmd != nil {
+			return m, cmd
+		}
+		if msg, ok := msg.(tea.KeyMsg); ok {
+			switch msg.String() {
+			case "left":
+				m.currentTab = addDownload
+				m.addDownloadTab, cmd = m.addDownloadTab.Update(nil)
+			case "right":
+				m.currentTab = queues
+				m.queueTab, cmd = m.queueTab.Update(nil)
+			case "esc", "ctrl+c":
+				return m, tea.Quit
+			}
+		}
 	case queues:
 		m.queueTab, cmd = m.queueTab.Update(msg)
+		if cmd != nil {
+			return m, cmd
+		}
+		if msg, ok := msg.(tea.KeyMsg); ok {
+			switch msg.String() {
+			case "left":
+				m.currentTab = downloads
+				m.downloadTab, cmd = m.downloadTab.Update(nil)
+			case "right":
+			case "esc", "ctrl+c":
+				return m, tea.Quit
+			}
+		}
 	case addDownload:
 		m.addDownloadTab, cmd = m.addDownloadTab.Update(msg)
-	}
-
-	if cmd != nil {
-		return m, cmd
-	}
-
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		// TODO: left and right have different meanings in different tabs (e.g. in addDownloadTab, left and right are used to move cursor)
-		case "left":
-			if m.currentTab > 0 {
-				m.currentTab--
+		if cmd != nil {
+			return m, cmd
+		}
+		if msg, ok := msg.(tea.KeyMsg); ok {
+			switch msg.String() {
+			case "left":
+			case "right":
+				m.currentTab = downloads
+				m.downloadTab, cmd = m.downloadTab.Update(nil)
+			case "esc", "ctrl+c":
+				return m, tea.Quit
 			}
-		case "right":
-			if m.currentTab < tabCount-1 {
-				m.currentTab++
-			}
-		// TODO: q means different things in different tabs (e.g. in addDownloadTab, q is a character that can be typed)
-		case "esc", "ctrl+c":
-			return m, tea.Quit
 		}
 	}
 
-	return m, nil
+	return m, cmd
 }
 
 func (m MainView) View() string {
@@ -109,3 +126,5 @@ func (m MainView) View() string {
 		noStyle.Width(100).Render(m.footerString),
 	))
 }
+
+type CloseChildMsg struct{}

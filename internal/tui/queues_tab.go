@@ -33,17 +33,18 @@ func (k queuesKeyMap) FullHelp() [][]key.Binding {
 
 type QueuesTab struct {
 	manager      *models.Manager
-	queues       []models.Queue
+	queues       []*models.QueueInfo
 	table        table.Model
 	help         help.Model
 	keys         queuesKeyMap
 	addQueueTab  tea.Model
+	editQueueTab tea.Model
 	addingQueue  bool
+	editingQueue bool
 	footerString string
 }
 
 func NewQueuesTab(manager *models.Manager) QueuesTab {
-	Queues := models.GetQueues()
 	columns := []table.Column{
 		{Title: "Name", Width: 20},
 		{Title: "Target Directory", Width: 30},
@@ -53,16 +54,6 @@ func NewQueuesTab(manager *models.Manager) QueuesTab {
 		{Title: "End Time", Width: 10},
 	}
 	rows := []table.Row{}
-	for _, queue := range Queues {
-		rows = append(rows, []string{
-			queue.Name,
-			queue.TargetDirectory,
-			fmt.Sprintf("%d", queue.MaxParallelDownloads),
-			queue.SpeedLimit,
-			queue.StartTime.Format("15:04:05"),
-			queue.EndTime.Format("15:04:05"),
-		})
-	}
 
 	t := table.New(
 		table.WithColumns(columns),
@@ -87,13 +78,15 @@ func NewQueuesTab(manager *models.Manager) QueuesTab {
 	help.ShowAll = true
 	help.FullSeparator = " \t "
 
-	return QueuesTab{
-		manager:     manager,
-		queues:      Queues,
-		table:       t,
-		addQueueTab: NewAddQueueTab(manager),
-		addingQueue: false,
-		help:        help,
+	queuesTab := QueuesTab{
+		manager:      manager,
+		queues:       nil,
+		table:        t,
+		addQueueTab:  NewAddQueueTab(manager),
+		addingQueue:  false,
+		editQueueTab: NewEditQueueTab(manager, &models.QueueInfo{}),
+		editingQueue: false,
+		help:         help,
 		keys: queuesKeyMap{
 			Navigation: key.NewBinding(
 				key.WithKeys("up", "down", "left", "right"),
@@ -118,6 +111,10 @@ func NewQueuesTab(manager *models.Manager) QueuesTab {
 		},
 		footerString: "",
 	}
+
+	queuesTab.updateRows()
+
+	return queuesTab
 }
 
 func (m QueuesTab) Init() tea.Cmd { return nil }
@@ -125,11 +122,25 @@ func (m QueuesTab) Init() tea.Cmd { return nil }
 func (m QueuesTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
-	if m.addingQueue {
+	m.updateRows()
+
+	if m.editingQueue {
+		switch msg := msg.(type) {
+		case CloseChildMsg:
+			m.editingQueue = false
+			m.footerString = ""
+			m.updateRows()
+			return m, nil
+		default:
+			m.editQueueTab, cmd = m.editQueueTab.Update(msg)
+			return m, cmd
+		}
+	} else if m.addingQueue {
 		switch msg := msg.(type) {
 		case CloseChildMsg:
 			m.addingQueue = false
 			m.footerString = ""
+			m.updateRows()
 			return m, nil
 		default:
 			m.addQueueTab, cmd = m.addQueueTab.Update(msg)
@@ -143,12 +154,20 @@ func (m QueuesTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch {
 			case key.Matches(msg, m.keys.Navigation):
 			case key.Matches(msg, m.keys.Delete):
-
+				if m.table.Cursor() >= 0 && m.table.Cursor() < len(m.queues) {
+					m.manager.RemoveQueue(m.queues[m.table.Cursor()].Name)
+					m.updateRows()
+				}
 			case key.Matches(msg, m.keys.NewQueue):
 				m.addingQueue = true
 				cmd = m.addQueueTab.Init()
 			case key.Matches(msg, m.keys.Edit):
-
+				if m.table.Cursor() >= 0 && m.table.Cursor() < len(m.queues) {
+					m.editingQueue = true
+					q := m.queues[m.table.Cursor()]
+					m.editQueueTab = NewEditQueueTab(m.manager, q)
+					cmd = m.editQueueTab.Init()
+				}
 			case key.Matches(msg, m.keys.Quit):
 				return m, tea.Quit
 			}
@@ -160,7 +179,10 @@ func (m QueuesTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m QueuesTab) View() string {
-	if m.addingQueue {
+	m.footerString = fmt.Sprint(len(m.queues), " queues")
+	if m.editingQueue {
+		return m.editQueueTab.View()
+	} else if m.addingQueue {
 		return m.addQueueTab.View()
 	} else {
 		return lipgloss.JoinVertical(
@@ -170,4 +192,21 @@ func (m QueuesTab) View() string {
 			helpStyle.Render(m.help.View(m.keys)),
 		)
 	}
+}
+
+func (m *QueuesTab) updateRows() {
+	m.queues = m.manager.GetQueueList()
+	rows := []table.Row{}
+	for _, queue := range m.queues {
+		rows = append(rows, []string{
+			queue.Name,
+			queue.TargetDirectory,
+			fmt.Sprintf("%d", queue.MaxParallel),
+			fmt.Sprint(queue.SpeedLimit),
+			queue.StartTime.Format("15:04:05"),
+			queue.EndTime.Format("15:04:05"),
+		})
+	}
+
+	m.table.SetRows(rows)
 }
