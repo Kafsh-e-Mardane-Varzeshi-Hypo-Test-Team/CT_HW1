@@ -10,6 +10,5 @@ func StartLoggingToFile() {
 	if err != nil {
 		log.Printf("error opening file: %v", err)
 	}
-	defer file.Close()
 	log.SetOutput(file)
 }
