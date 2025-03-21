@@ -168,10 +168,9 @@ func (m DownloadsTab) View() string {
 	}
 	if row >= 0 && row < len(m.downloads) {
 		status := m.downloads[row].Status
-
 		// Update the help view
 		switch status {
-		case models.InProgress:
+		case models.InProgress, models.Pending:
 			m.keys.Retry.SetEnabled(false)
 			m.keys.Pause.SetEnabled(true)
 		case models.Paused:
@@ -210,6 +209,12 @@ func (m *DownloadsTab) updateRows() {
 			statusString = "Completed"
 		case models.Failed:
 			statusString = "Failed"
+		case models.Pending:
+			statusString = "Pending"
+		case models.Cancelled:
+			statusString = "Cancelled"
+		default:
+			statusString = "Unknown"
 		}
 
 		if status == models.Completed {
