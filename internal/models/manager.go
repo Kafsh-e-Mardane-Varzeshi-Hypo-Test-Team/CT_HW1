@@ -6,6 +6,7 @@ import (
 	"log"
 	"maps"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 )
@@ -38,6 +39,11 @@ func (m *Manager) AddDownload(url, outputFileName, queueName string) error {
 	q, exists := m.Queues[queueName]
 	if !exists {
 		return errors.New("queue does not exist")
+	}
+
+	if outputFileName == "" {
+		split := strings.Split(url, "/")
+		outputFileName = split[len(split)-1]
 	}
 
 	d := NewDownload(m.LastID, url, q.GetSavePath(), outputFileName, queueName)
